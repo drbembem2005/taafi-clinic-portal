@@ -15,7 +15,7 @@ interface Slide {
 const slides: Slide[] = [
   {
     id: 1,
-    image: '/placeholder.svg',
+    image: '/lovable-uploads/d6fc17dc-87c4-4be4-b217-48c01b58e6c1.png',
     title: 'مرحباً بك في تعافي التخصصية!',
     description: 'رعاية طبية متكاملة بأحدث التقنيات وبأيدي نخبة من الأطباء المتخصصين',
     buttonText: 'احجز موعداً',
@@ -23,7 +23,7 @@ const slides: Slide[] = [
   },
   {
     id: 2,
-    image: '/placeholder.svg',
+    image: '/lovable-uploads/d803ed52-76e2-41fb-979e-a23a19d6b039.png',
     title: '14 تخصصاً طبياً تحت سقف واحد',
     description: 'فريق متكامل من الاستشاريين والأخصائيين لتقديم أفضل رعاية طبية',
     buttonText: 'تعرف على تخصصاتنا',
@@ -31,7 +31,7 @@ const slides: Slide[] = [
   },
   {
     id: 3,
-    image: '/placeholder.svg',
+    image: '/lovable-uploads/d6fc17dc-87c4-4be4-b217-48c01b58e6c1.png',
     title: 'متابعة دقيقة وأجهزة متطورة',
     description: 'نستخدم أحدث الأجهزة والتقنيات الطبية لتشخيص وعلاج مختلف الحالات',
     buttonText: 'اكتشف خدماتنا',

@@ -31,7 +31,7 @@ const Header = () => {
           <div className="flex items-center">
             <NavLink to="/" className="flex items-center">
               <img
-                src="/placeholder.svg"
+                src="/lovable-uploads/93b2823f-8ba0-45e0-83bd-fd27bb5535d9.png"
                 alt="تعافي التخصصية"
                 className="h-12 w-auto"
               />

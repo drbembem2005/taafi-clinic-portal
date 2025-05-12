@@ -51,7 +51,7 @@ const About = () => {
               className="rounded-lg overflow-hidden shadow-lg"
             >
               <img
-                src="/placeholder.svg"
+                src="/lovable-uploads/d6fc17dc-87c4-4be4-b217-48c01b58e6c1.png"
                 alt="عيادات تعافي التخصصية"
                 className="w-full h-full object-cover"
               />

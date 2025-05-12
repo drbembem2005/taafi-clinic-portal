@@ -85,6 +85,13 @@ const Index = () => {
       <section className="py-16 bg-brand text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
+            <div className="flex justify-center mb-8">
+              <img 
+                src="/lovable-uploads/93b2823f-8ba0-45e0-83bd-fd27bb5535d9.png" 
+                alt="عيادات تعافي التخصصية" 
+                className="h-24 w-auto"
+              />
+            </div>
             <h2 className="text-3xl font-bold mb-4">نحن هنا لتقديم أفضل رعاية طبية لك ولعائلتك</h2>
             <p className="text-xl mb-8 text-white/90">
               احجز موعدك الآن واختر الرعاية المثلى مع نخبة من الأطباء المتخصصين
