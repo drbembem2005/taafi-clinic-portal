@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import DoctorCard from '@/components/shared/DoctorCard';
 import { Input } from '@/components/ui/input';
@@ -15,8 +16,13 @@ import { Doctor, doctors, weekDays, isDoctorAvailableOnDay, getUniqueSpecialties
 import { motion } from 'framer-motion';
 
 const Doctors = () => {
+  const location = useLocation();
+  const specialtyFromLocation = location.state?.specialty;
+  
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string | undefined>(undefined);
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string | undefined>(
+    specialtyFromLocation || undefined
+  );
   const [selectedDay, setSelectedDay] = useState<string | undefined>(undefined);
   const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>(doctors);
 

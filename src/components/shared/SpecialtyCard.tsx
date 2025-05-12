@@ -1,6 +1,7 @@
 
 import { motion } from 'framer-motion';
 import { Specialty } from '@/data/specialties';
+import { Link } from 'react-router-dom';
 
 interface SpecialtyCardProps {
   specialty: Specialty;
@@ -27,9 +28,13 @@ const SpecialtyCard = ({ specialty }: SpecialtyCardProps) => {
         <div className="specialty-details absolute inset-0 bg-brand/95 text-white p-6 flex flex-col justify-center items-center text-center">
           <h3 className="text-xl font-bold mb-4">{specialty.name}</h3>
           <p>{specialty.details}</p>
-          <a href={`/specialties/${specialty.id}`} className="mt-4 inline-block bg-white text-brand px-4 py-2 rounded-md font-medium hover:bg-gray-100 transition-colors">
-            المزيد من التفاصيل
-          </a>
+          <Link 
+            to={`/doctors`} 
+            state={{ specialty: specialty.name }}
+            className="mt-4 inline-block bg-white text-brand px-4 py-2 rounded-md font-medium hover:bg-gray-100 transition-colors"
+          >
+            عرض الأطباء
+          </Link>
         </div>
       </div>
     </motion.div>
