@@ -104,12 +104,12 @@ const Doctors = () => {
               
               <div>
                 <label htmlFor="specialty" className="block text-gray-700 mb-1">التخصص</label>
-                <Select value={selectedSpecialty || ''} onValueChange={(value) => setSelectedSpecialty(value || null)}>
+                <Select value={selectedSpecialty || undefined} onValueChange={(value) => setSelectedSpecialty(value || null)}>
                   <SelectTrigger id="specialty" className="w-full">
                     <SelectValue placeholder="جميع التخصصات" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">جميع التخصصات</SelectItem>
+                    <SelectItem value="all-specialties">جميع التخصصات</SelectItem>
                     {uniqueSpecialties.map((specialty) => (
                       <SelectItem key={specialty} value={specialty}>{specialty}</SelectItem>
                     ))}
@@ -119,12 +119,12 @@ const Doctors = () => {
               
               <div>
                 <label htmlFor="day" className="block text-gray-700 mb-1">اليوم</label>
-                <Select value={selectedDay || ''} onValueChange={(value) => setSelectedDay(value || null)}>
+                <Select value={selectedDay || undefined} onValueChange={(value) => setSelectedDay(value || null)}>
                   <SelectTrigger id="day" className="w-full">
                     <SelectValue placeholder="جميع الأيام" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">جميع الأيام</SelectItem>
+                    <SelectItem value="all-days">جميع الأيام</SelectItem>
                     {weekDays.map((day) => (
                       <SelectItem key={day} value={day}>{day}</SelectItem>
                     ))}
