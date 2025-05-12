@@ -15,7 +15,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
   const availableDays = getAvailableDays(doctor);
 
   // Extract specialty title (remove the professional title)
-  const specialtyTitle = doctor.specialty.replace(/^(استشاري|أخصائي|استشارية)\s+/i, '');
+  const specialtyTitle = doctor.specialty;
 
   // Format fees
   const formatFee = (fee: number | string | null) => {
@@ -103,7 +103,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
         
         <div className="md:col-span-3 p-6">
           <h3 className="text-2xl font-bold text-gray-900 mb-2">{doctor.name}</h3>
-          <p className="text-brand font-medium mb-3">{doctor.specialty}</p>
+          <p className="text-brand font-medium mb-3">{specialtyTitle}</p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
@@ -171,7 +171,7 @@ const DoctorDetails = ({ doctor }: { doctor: Doctor }) => {
       <div className="grid md:grid-cols-2 gap-6">
         <div>
           <div className="bg-gray-50 p-4 rounded-lg mb-4">
-            <h3 className="font-bold text-lg text-gray-800 mb-2">التخصص</h3>
+            <h3 className="font-bold text-lg text-gray-800 mb-2">تفاصيل الطبيب</h3>
             <p className="text-gray-700">{doctor.specialty}</p>
           </div>
           
@@ -241,7 +241,7 @@ const DoctorDetails = ({ doctor }: { doctor: Doctor }) => {
       <div className="mt-6">
         <Button 
           onClick={() => {
-            const message = `مرحباً، أود حجز موعد مع ${doctor.name} (${doctor.specialty.replace(/^(استشاري|أخصائي|استشارية)\s+/i, '')})`;
+            const message = `مرحباً، أود حجز موعد مع ${doctor.name} (${doctor.specialty})`;
             const encodedMessage = encodeURIComponent(message);
             window.open(`https://wa.me/201119007403?text=${encodedMessage}`, '_blank');
           }}

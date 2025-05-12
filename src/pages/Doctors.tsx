@@ -11,14 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Doctor, doctors, weekDays, isDoctorAvailableOnDay } from '@/data/doctors';
-import { specialties } from '@/data/specialties';
+import { Doctor, doctors, weekDays, isDoctorAvailableOnDay, getUniqueSpecialties } from '@/data/doctors';
 import { motion } from 'framer-motion';
 
 const Doctors = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
-  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string | undefined>(undefined);
+  const [selectedDay, setSelectedDay] = useState<string | undefined>(undefined);
   const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>(doctors);
 
   // Function to filter doctors based on search term, specialty and day
@@ -33,14 +32,12 @@ const Doctors = () => {
     }
 
     // Filter by specialty
-    if (selectedSpecialty) {
-      results = results.filter((doctor) =>
-        doctor.specialty.toLowerCase().includes(selectedSpecialty.toLowerCase())
-      );
+    if (selectedSpecialty && selectedSpecialty !== 'all-specialties') {
+      results = results.filter((doctor) => doctor.specialty === selectedSpecialty);
     }
 
     // Filter by day
-    if (selectedDay) {
+    if (selectedDay && selectedDay !== 'all-days') {
       results = results.filter((doctor) => isDoctorAvailableOnDay(doctor, selectedDay));
     }
 
@@ -50,12 +47,12 @@ const Doctors = () => {
   // Reset all filters
   const resetFilters = () => {
     setSearchTerm('');
-    setSelectedSpecialty(null);
-    setSelectedDay(null);
+    setSelectedSpecialty(undefined);
+    setSelectedDay(undefined);
   };
 
   // Get unique specialties from doctors for the filter
-  const uniqueSpecialties = [...new Set(specialties.map(specialty => specialty.name))];
+  const uniqueSpecialties = getUniqueSpecialties();
 
   return (
     <Layout>
@@ -103,8 +100,8 @@ const Doctors = () => {
               </div>
               
               <div>
-                <label htmlFor="specialty" className="block text-gray-700 mb-1">التخصص</label>
-                <Select value={selectedSpecialty || undefined} onValueChange={(value) => setSelectedSpecialty(value || null)}>
+                <label htmlFor="specialty" className="block text-gray-700 mb-1">تفاصيل الطبيب</label>
+                <Select value={selectedSpecialty} onValueChange={(value) => setSelectedSpecialty(value)}>
                   <SelectTrigger id="specialty" className="w-full">
                     <SelectValue placeholder="جميع التخصصات" />
                   </SelectTrigger>
@@ -119,7 +116,7 @@ const Doctors = () => {
               
               <div>
                 <label htmlFor="day" className="block text-gray-700 mb-1">اليوم</label>
-                <Select value={selectedDay || undefined} onValueChange={(value) => setSelectedDay(value || null)}>
+                <Select value={selectedDay} onValueChange={(value) => setSelectedDay(value)}>
                   <SelectTrigger id="day" className="w-full">
                     <SelectValue placeholder="جميع الأيام" />
                   </SelectTrigger>
