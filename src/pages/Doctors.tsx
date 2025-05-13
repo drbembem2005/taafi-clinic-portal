@@ -12,7 +12,7 @@ const Doctors = () => {
   const location = useLocation();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string>('');
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string>("all");
   const [loading, setLoading] = useState(true);
 
   // Handle specialty filter from URL state
@@ -39,7 +39,7 @@ const Doctors = () => {
       
       let fetchedDoctors: Doctor[] = [];
       
-      if (selectedSpecialty) {
+      if (selectedSpecialty && selectedSpecialty !== "all") {
         // Find specialty ID by name
         const specialty = specialties.find(s => s.name === selectedSpecialty);
         if (specialty) {
@@ -74,7 +74,7 @@ const Doctors = () => {
               <SelectValue placeholder="جميع التخصصات" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">جميع التخصصات</SelectItem>
+              <SelectItem value="all">جميع التخصصات</SelectItem>
               {specialties.map((specialty) => (
                 <SelectItem key={specialty.id} value={specialty.name}>
                   {specialty.name}
