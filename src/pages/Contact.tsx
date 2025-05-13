@@ -249,7 +249,7 @@ const Contact = () => {
         <div className="container mx-auto px-4">
           <div className="rounded-lg overflow-hidden shadow-lg">
             <iframe
-              src="El Hosary Square, 2 Boraie Plaza Towers, First 6th of October, Giza Governorate 12573"
+              src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d13824.76275261958!2d31.0113088!3d29.9733345!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjnCsDA1JzQ2LjMiTiAzMcKwMDEnMTUuNCJF!5e0!3m2!1sen!2seg!4v1629458450283!5m2!1sen!2seg"
               width="100%"
               height="450"
               style={{ border: 0 }}
