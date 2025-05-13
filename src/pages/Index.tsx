@@ -18,6 +18,18 @@ const Index = () => {
   const featuredSpecialties = specialties.slice(0, 6);
   const featuredDoctors = doctors.slice(0, 3);
 
+  // Transform doctors data to match DoctorWithSpecialty type
+  const formattedDoctors = featuredDoctors.map((doctor, index) => ({
+    id: index + 1, // Adding a synthetic id for compatibility
+    name: doctor.name,
+    specialty: doctor.specialty,
+    specialty_id: index + 1, // Adding a synthetic specialty_id for compatibility
+    bio: doctor.bio,
+    image: doctor.image,
+    fees: doctor.fees,
+    schedule: doctor.schedule
+  }));
+
   return (
     <Layout>
       {/* Hero Carousel */}
@@ -65,7 +77,7 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            {featuredDoctors.map((doctor) => (
+            {formattedDoctors.map((doctor) => (
               <DoctorCard key={doctor.name} doctor={doctor} />
             ))}
           </div>
