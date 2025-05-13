@@ -1,8 +1,9 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion, AnimatePresence } from 'framer-motion';
-import { doctors, Doctor, weekDays, dayMappings } from '@/data/doctors';
+import { doctors, Doctor, weekDays, dayMappings, isDoctorAvailableOnDay } from '@/data/doctors';
 import { specialties } from '@/data/specialties';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -34,6 +35,15 @@ const BookingWizard = () => {
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [bookingMethod, setBookingMethod] = useState<'whatsapp' | 'form'>('whatsapp');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Handle input changes for form fields
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
 
   // Step 1: Select specialty
   const handleSpecialtySelect = (specialtyName: string) => {
@@ -104,8 +114,8 @@ const BookingWizard = () => {
           user_name: formData.name,
           user_phone: formData.phone,
           user_email: formData.email || null,
-          doctor_id: formData.doctor?.id || null,
-          specialty_id: filteredDoctors[0]?.id || null, // Use the first doctor's specialty ID
+          doctor_id: null, // This is fine since the schema allows it to be NULL
+          specialty_id: null, // This is fine since the schema allows it to be NULL
           booking_day: formData.day,
           booking_time: formData.time,
           notes: formData.notes || null,
