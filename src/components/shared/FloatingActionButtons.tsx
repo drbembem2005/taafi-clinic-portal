@@ -12,7 +12,7 @@ const FloatingActionButtons = () => {
   };
 
   return (
-    <div className="fixed bottom-20 left-4 z-50 flex flex-col gap-3 lg:bottom-8">
+    <div className="fixed bottom-20 right-4 z-50 flex flex-col gap-3 lg:bottom-8">
       <motion.button
         className="flex h-12 w-12 items-center justify-center rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700"
         onClick={openWhatsApp}
