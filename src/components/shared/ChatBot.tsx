@@ -92,7 +92,7 @@ const ChatBot = () => {
   return (
     <>
       {/* Chat Button */}
-      <div className="fixed bottom-1 left-6 z-50">
+      <div className="fixed bottom-20 left-4 z-50 flex flex-col gap-3 lg:bottom-8">
         <Button
           className="w-14 h-14 rounded-full bg-brand hover:bg-brand-dark shadow-lg"
           onClick={() => setIsOpen(!isOpen)}
