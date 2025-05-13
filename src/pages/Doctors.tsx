@@ -7,6 +7,7 @@ import DoctorCard from '@/components/shared/DoctorCard';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from '@/components/ui/use-toast';
 
 const Doctors = () => {
   const location = useLocation();
@@ -25,8 +26,17 @@ const Doctors = () => {
   // Fetch specialties
   useEffect(() => {
     const fetchSpecialties = async () => {
-      const fetchedSpecialties = await getSpecialties();
-      setSpecialties(fetchedSpecialties);
+      try {
+        const fetchedSpecialties = await getSpecialties();
+        setSpecialties(fetchedSpecialties);
+      } catch (error) {
+        console.error("Error fetching specialties:", error);
+        toast({
+          title: "خطأ",
+          description: "حدث خطأ أثناء تحميل التخصصات",
+          variant: "destructive",
+        });
+      }
     };
 
     fetchSpecialties();
@@ -37,20 +47,31 @@ const Doctors = () => {
     const fetchDoctors = async () => {
       setLoading(true);
       
-      let fetchedDoctors: Doctor[] = [];
-      
-      if (selectedSpecialty && selectedSpecialty !== "all") {
-        // Find specialty ID by name
-        const specialty = specialties.find(s => s.name === selectedSpecialty);
-        if (specialty) {
-          fetchedDoctors = await getDoctorsBySpecialty(specialty.id);
+      try {
+        let fetchedDoctors: Doctor[] = [];
+        
+        if (selectedSpecialty && selectedSpecialty !== "all") {
+          // Find specialty ID by name
+          const specialty = specialties.find(s => s.name === selectedSpecialty);
+          if (specialty) {
+            fetchedDoctors = await getDoctorsBySpecialty(specialty.id);
+          }
+        } else {
+          fetchedDoctors = await getDoctors();
         }
-      } else {
-        fetchedDoctors = await getDoctors();
+        
+        setDoctors(fetchedDoctors);
+        console.log("Fetched doctors:", fetchedDoctors);
+      } catch (error) {
+        console.error("Error fetching doctors:", error);
+        toast({
+          title: "خطأ",
+          description: "حدث خطأ أثناء تحميل بيانات الأطباء",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
       }
-      
-      setDoctors(fetchedDoctors);
-      setLoading(false);
     };
 
     if (specialties.length > 0) {
