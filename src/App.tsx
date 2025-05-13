@@ -12,27 +12,17 @@ import { Toaster } from '@/components/ui/toaster';
 import { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import { seedDoctorsData } from '@/services/doctorService';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initApp = async () => {
-      try {
-        // Seed doctors data if needed
-        await seedDoctorsData();
-      } catch (error) {
-        console.error("Error initializing app:", error);
-      } finally {
-        // Simulate loading for 1 second
-        setTimeout(() => {
-          setLoading(false);
-        }, 1000);
-      }
-    };
+    // Simulate loading for 1 second then set loading to false
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000);
     
-    initApp();
+    return () => clearTimeout(timer);
   }, []);
 
   if (loading) {
