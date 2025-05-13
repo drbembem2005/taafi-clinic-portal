@@ -1,10 +1,11 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion, AnimatePresence } from 'framer-motion';
-import { doctors, Doctor, weekDays, isDoctorAvailableOnDay } from '@/data/doctors';
+import { doctors, Doctor, weekDays, dayMappings } from '@/data/doctors';
 import { specialties } from '@/data/specialties';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 interface BookingFormData {
   specialty: string | null;
@@ -13,6 +14,7 @@ interface BookingFormData {
   time: string | null;
   name: string;
   phone: string;
+  email?: string;
   notes: string;
 }
 
@@ -25,11 +27,13 @@ const BookingWizard = () => {
     time: null,
     name: '',
     phone: '',
+    email: '',
     notes: '',
   });
   const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [bookingMethod, setBookingMethod] = useState<'whatsapp' | 'form'>('whatsapp');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Step 1: Select specialty
   const handleSpecialtySelect = (specialtyName: string) => {
@@ -81,15 +85,10 @@ const BookingWizard = () => {
     setStep(4);
   };
 
-  // Step 4: Complete booking
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (bookingMethod === 'whatsapp') {
       // Format message for WhatsApp
       const { specialty, doctor, day, time } = formData;
@@ -97,9 +96,58 @@ const BookingWizard = () => {
       const encodedMessage = encodeURIComponent(message);
       window.open(`https://wa.me/201119007403?text=${encodedMessage}`, '_blank');
     } else {
-      // Handle form submission (could be API call in real app)
-      console.log('Form submitted:', formData);
-      alert('تم إرسال طلب الحجز بنجاح! سنتواصل معك قريباً لتأكيد الموعد.');
+      // Handle form submission to Supabase
+      try {
+        setIsSubmitting(true);
+        
+        const bookingData = {
+          user_name: formData.name,
+          user_phone: formData.phone,
+          user_email: formData.email || null,
+          doctor_id: formData.doctor?.id || null,
+          specialty_id: filteredDoctors[0]?.id || null, // Use the first doctor's specialty ID
+          booking_day: formData.day,
+          booking_time: formData.time,
+          notes: formData.notes || null,
+          booking_method: 'form'
+        };
+        
+        const { error } = await supabase
+          .from('bookings')
+          .insert(bookingData);
+          
+        if (error) throw error;
+        
+        // Show success toast
+        toast({
+          title: "تم إرسال طلب الحجز بنجاح!",
+          description: "سنتواصل معك قريباً لتأكيد الموعد.",
+        });
+        
+        // Reset form
+        setFormData({
+          specialty: null,
+          doctor: null,
+          day: null,
+          time: null,
+          name: '',
+          phone: '',
+          email: '',
+          notes: '',
+        });
+        
+        // Go back to first step
+        setStep(1);
+      } catch (error) {
+        console.error('Error submitting booking:', error);
+        toast({
+          title: "حدث خطأ أثناء إرسال طلب الحجز",
+          description: "يرجى المحاولة مرة أخرى لاحقاً.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -408,6 +456,19 @@ const BookingWizard = () => {
                     </div>
                     
                     <div className="form-group">
+                      <label className="block text-gray-700 mb-1" htmlFor="email">البريد الإلكتروني (اختياري)</label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        className="w-full rounded-md border-gray-300 p-3 bg-white border focus:outline-none focus:ring-2 focus:ring-brand"
+                        placeholder="أدخل بريدك الإلكتروني"
+                      />
+                    </div>
+                    
+                    <div className="form-group">
                       <label className="block text-gray-700 mb-1" htmlFor="notes">ملاحظات إضافية (اختياري)</label>
                       <textarea
                         id="notes"
@@ -424,8 +485,9 @@ const BookingWizard = () => {
                       type="submit" 
                       className="bg-brand hover:bg-brand-dark w-full" 
                       size="lg"
+                      disabled={isSubmitting}
                     >
-                      تأكيد الحجز
+                      {isSubmitting ? 'جاري الإرسال...' : 'تأكيد الحجز'}
                     </Button>
                   </div>
                 </form>

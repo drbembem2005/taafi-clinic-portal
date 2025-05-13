@@ -45,6 +45,69 @@ export type Database = {
         }
         Relationships: []
       }
+      bookings: {
+        Row: {
+          booking_day: string
+          booking_method: string
+          booking_time: string
+          created_at: string
+          doctor_id: number | null
+          id: string
+          notes: string | null
+          specialty_id: number | null
+          status: string
+          updated_at: string
+          user_email: string | null
+          user_name: string
+          user_phone: string
+        }
+        Insert: {
+          booking_day: string
+          booking_method?: string
+          booking_time: string
+          created_at?: string
+          doctor_id?: number | null
+          id?: string
+          notes?: string | null
+          specialty_id?: number | null
+          status?: string
+          updated_at?: string
+          user_email?: string | null
+          user_name: string
+          user_phone: string
+        }
+        Update: {
+          booking_day?: string
+          booking_method?: string
+          booking_time?: string
+          created_at?: string
+          doctor_id?: number | null
+          id?: string
+          notes?: string | null
+          specialty_id?: number | null
+          status?: string
+          updated_at?: string
+          user_email?: string | null
+          user_name?: string
+          user_phone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       doctors: {
         Row: {
           bio: string | null

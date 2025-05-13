@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -40,7 +39,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
   };
 
   const openWhatsApp = () => {
-    const message = `مرحباً، أود حجز موعد مع ${doctor.name} (${doctor.specialty})`;
+    const message = `مرحباً، أود حجز موعد مع الدكتور ${doctor.name} (${doctor.specialty})`;
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/201119007403?text=${encodedMessage}`, '_blank');
   };
@@ -195,7 +194,7 @@ const DoctorDetails = ({ doctor }: { doctor: DoctorWithSpecialty }) => {
   const availableDays = getAvailableDays();
   
   const openWhatsApp = () => {
-    const message = `مرحباً، أود حجز موعد مع ${doctor.name} (${doctor.specialty})`;
+    const message = `مرحباً، أود حجز موعد مع الدكتور ${doctor.name} (${doctor.specialty})`;
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/201119007403?text=${encodedMessage}`, '_blank');
   };
