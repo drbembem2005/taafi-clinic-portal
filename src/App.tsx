@@ -12,8 +12,9 @@ import { Toaster } from '@/components/ui/toaster';
 import { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
+import { seedDoctorsData } from '@/services/doctorService';
 
-// Add Google Font via CSS instead of Next.js font loader
+// Add Google Font via CSS
 const App = () => {
   const [loading, setLoading] = useState(true);
 
@@ -22,6 +23,9 @@ const App = () => {
     setTimeout(() => {
       setLoading(false);
     }, 1000);
+
+    // Seed doctors data if needed
+    seedDoctorsData();
   }, []);
 
   return (
