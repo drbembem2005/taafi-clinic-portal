@@ -1,37 +1,51 @@
+import Index from '@/pages/Index';
+import About from '@/pages/About';
+import Booking from '@/pages/Booking';
+import Contact from '@/pages/Contact';
+import Doctors from '@/pages/Doctors';
+import NotFound from '@/pages/NotFound';
+import Specialties from '@/pages/Specialties';
+import Blog from '@/pages/Blog';
+import BlogPost from '@/pages/BlogPost';
+import { Toaster } from '@/components/ui/toaster';
+import { useEffect, useState } from 'react';
+import { Route, Routes } from 'react-router-dom';
+import { Cairo } from "next/font/google";
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import About from "./pages/About";
-import Specialties from "./pages/Specialties";
-import Doctors from "./pages/Doctors";
-import Booking from "./pages/Booking";
-import Contact from "./pages/Contact";
-import NotFound from "./pages/NotFound";
+const cairoFont = Cairo({
+  subsets: ["arabic"],
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
 
-const queryClient = new QueryClient();
+const App = () => {
+  const [loading, setLoading] = useState(true);
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+  useEffect(() => {
+    // Simulate loading for 1 second
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  }, []);
+
+  return (
+    <div className="App">
+      <div className={cairoFont.className}>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/specialties" element={<Specialties />} />
-          <Route path="/doctors" element={<Doctors />} />
-          <Route path="/booking" element={<Booking />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="*" element={<NotFound />} />
+          <Route path="/" element={<Layout><Index /></Layout>} />
+          <Route path="/specialties" element={<Layout><Specialties /></Layout>} />
+          <Route path="/doctors" element={<Layout><Doctors /></Layout>} />
+          <Route path="/booking" element={<Layout><Booking /></Layout>} />
+          <Route path="/about" element={<Layout><About /></Layout>} />
+          <Route path="/contact" element={<Layout><Contact /></Layout>} />
+          <Route path="/blog" element={<Layout><Blog /></Layout>} />
+          <Route path="/blog/:slug" element={<Layout><BlogPost /></Layout>} />
+          <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+        <Toaster />
+      </div>
+    </div>
+  );
+};
 
 export default App;

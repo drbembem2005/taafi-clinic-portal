@@ -9,7 +9,104 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      blog_posts: {
+        Row: {
+          content: string
+          created_at: string | null
+          excerpt: string
+          id: number
+          image: string | null
+          published_at: string | null
+          slug: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          excerpt: string
+          id?: number
+          image?: string | null
+          published_at?: string | null
+          slug: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          excerpt?: string
+          id?: number
+          image?: string | null
+          published_at?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      doctors: {
+        Row: {
+          bio: string | null
+          fees: Json
+          id: number
+          image: string | null
+          name: string
+          schedule: Json
+          specialty_id: number
+        }
+        Insert: {
+          bio?: string | null
+          fees?: Json
+          id?: number
+          image?: string | null
+          name: string
+          schedule?: Json
+          specialty_id: number
+        }
+        Update: {
+          bio?: string | null
+          fees?: Json
+          id?: number
+          image?: string | null
+          name?: string
+          schedule?: Json
+          specialty_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctors_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      specialties: {
+        Row: {
+          description: string
+          details: string
+          icon: string
+          id: number
+          name: string
+        }
+        Insert: {
+          description: string
+          details: string
+          icon: string
+          id?: number
+          name: string
+        }
+        Update: {
+          description?: string
+          details?: string
+          icon?: string
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

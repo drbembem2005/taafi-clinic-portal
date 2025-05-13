@@ -1,184 +1,110 @@
 
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import Layout from '@/components/layout/Layout';
+import { getDoctors, getDoctorsBySpecialty, Doctor } from '@/services/doctorService';
+import { getSpecialties, Specialty } from '@/services/specialtyService';
 import DoctorCard from '@/components/shared/DoctorCard';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Doctor, doctors, weekDays, isDoctorAvailableOnDay, getUniqueSpecialties } from '@/data/doctors';
-import { motion } from 'framer-motion';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Doctors = () => {
   const location = useLocation();
-  const specialtyFromLocation = location.state?.specialty;
-  
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string | undefined>(
-    specialtyFromLocation || undefined
-  );
-  const [selectedDay, setSelectedDay] = useState<string | undefined>(undefined);
-  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>(doctors);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [specialties, setSpecialties] = useState<Specialty[]>([]);
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string>('');
+  const [loading, setLoading] = useState(true);
 
-  // Function to filter doctors based on search term, specialty and day
+  // Handle specialty filter from URL state
   useEffect(() => {
-    let results = [...doctors];
-
-    // Filter by search term
-    if (searchTerm) {
-      results = results.filter(
-        (doctor) => doctor.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    if (location.state?.specialty) {
+      setSelectedSpecialty(location.state.specialty);
     }
+  }, [location.state]);
 
-    // Filter by specialty
-    if (selectedSpecialty && selectedSpecialty !== 'all-specialties') {
-      results = results.filter((doctor) => doctor.specialty === selectedSpecialty);
+  // Fetch specialties
+  useEffect(() => {
+    const fetchSpecialties = async () => {
+      const fetchedSpecialties = await getSpecialties();
+      setSpecialties(fetchedSpecialties);
+    };
+
+    fetchSpecialties();
+  }, []);
+
+  // Fetch doctors based on selected specialty
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      setLoading(true);
+      
+      let fetchedDoctors: Doctor[] = [];
+      
+      if (selectedSpecialty) {
+        // Find specialty ID by name
+        const specialty = specialties.find(s => s.name === selectedSpecialty);
+        if (specialty) {
+          fetchedDoctors = await getDoctorsBySpecialty(specialty.id);
+        }
+      } else {
+        fetchedDoctors = await getDoctors();
+      }
+      
+      setDoctors(fetchedDoctors);
+      setLoading(false);
+    };
+
+    if (specialties.length > 0) {
+      fetchDoctors();
     }
+  }, [selectedSpecialty, specialties]);
 
-    // Filter by day
-    if (selectedDay && selectedDay !== 'all-days') {
-      results = results.filter((doctor) => isDoctorAvailableOnDay(doctor, selectedDay));
-    }
-
-    setFilteredDoctors(results);
-  }, [searchTerm, selectedSpecialty, selectedDay]);
-
-  // Reset all filters
-  const resetFilters = () => {
-    setSearchTerm('');
-    setSelectedSpecialty(undefined);
-    setSelectedDay(undefined);
+  const handleSpecialtyChange = (value: string) => {
+    setSelectedSpecialty(value);
   };
 
-  // Get unique specialties from doctors for the filter
-  const uniqueSpecialties = getUniqueSpecialties();
-
   return (
-    <Layout>
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-brand-light to-brand-dark text-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <motion.h1 
-              className="text-4xl font-bold mb-4"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              الأطباء المتخصصون
-            </motion.h1>
-            <motion.p 
-              className="text-xl mb-6 opacity-90"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              تعرف على نخبة الأطباء والاستشاريين في عيادات تعافي التخصصية
-            </motion.p>
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-center mb-10">الأطباء</h1>
+      
+      <div className="mb-8 max-w-md mx-auto">
+        <div className="flex flex-col space-y-2">
+          <Label htmlFor="specialty">تصفية حسب التخصص</Label>
+          <Select value={selectedSpecialty} onValueChange={handleSpecialtyChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="جميع التخصصات" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">جميع التخصصات</SelectItem>
+              {specialties.map((specialty) => (
+                <SelectItem key={specialty.id} value={specialty.name}>
+                  {specialty.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </section>
-
-      {/* Filters */}
-      <section className="py-8 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">البحث والتصفية</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <label htmlFor="search" className="block text-gray-700 mb-1">البحث بالاسم</label>
-                <Input
-                  id="search"
-                  type="text"
-                  placeholder="اسم الطبيب..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="specialty" className="block text-gray-700 mb-1">تفاصيل الطبيب</label>
-                <Select value={selectedSpecialty} onValueChange={(value) => setSelectedSpecialty(value)}>
-                  <SelectTrigger id="specialty" className="w-full">
-                    <SelectValue placeholder="جميع التخصصات" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all-specialties">جميع التخصصات</SelectItem>
-                    {uniqueSpecialties.map((specialty) => (
-                      <SelectItem key={specialty} value={specialty}>{specialty}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <label htmlFor="day" className="block text-gray-700 mb-1">اليوم</label>
-                <Select value={selectedDay} onValueChange={(value) => setSelectedDay(value)}>
-                  <SelectTrigger id="day" className="w-full">
-                    <SelectValue placeholder="جميع الأيام" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all-days">جميع الأيام</SelectItem>
-                    {weekDays.map((day) => (
-                      <SelectItem key={day} value={day}>{day}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex items-end">
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={resetFilters}
-                >
-                  إعادة ضبط الفلاتر
-                </Button>
-              </div>
+      </div>
+      
+      {loading ? (
+        <div className="space-y-6">
+          {[...Array(3)].map((_, index) => (
+            <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
+              <Skeleton className="h-48 w-full" />
             </div>
-          </div>
+          ))}
         </div>
-      </section>
-
-      {/* Doctors Grid */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          {filteredDoctors.length > 0 ? (
-            <div className="space-y-12">
-              <div className="grid grid-cols-1 gap-6">
-                {filteredDoctors.map((doctor) => (
-                  <motion.div
-                    key={doctor.name}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <DoctorCard doctor={doctor} />
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <h3 className="text-xl font-bold text-gray-700 mb-2">لا توجد نتائج</h3>
-              <p className="text-gray-600 mb-6">
-                لم يتم العثور على أطباء مطابقين لمعايير البحث الخاصة بك.
-              </p>
-              <Button onClick={resetFilters}>عرض جميع الأطباء</Button>
-            </div>
-          )}
+      ) : doctors.length > 0 ? (
+        <div className="space-y-6">
+          {doctors.map((doctor) => (
+            <DoctorCard key={doctor.id} doctor={doctor} />
+          ))}
         </div>
-      </section>
-    </Layout>
+      ) : (
+        <div className="text-center py-20">
+          <p className="text-xl text-gray-500">لا يوجد أطباء متاحين حالياً للتخصص المحدد</p>
+        </div>
+      )}
+    </div>
   );
 };
 
