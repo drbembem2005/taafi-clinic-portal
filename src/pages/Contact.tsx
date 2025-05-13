@@ -249,7 +249,7 @@ const Contact = () => {
         <div className="container mx-auto px-4">
           <div className="rounded-lg overflow-hidden shadow-lg">
             <iframe
-              src="https://www.google.com/maps/place/Ta'afee+Specialized+Clinics+-+%D8%B9%D9%8A%D8%A7%D8%AF%D8%A7%D8%AA+%D8%AA%D8%B9%D8%A7%D9%81%D9%8A+%D8%A7%D9%84%D8%AA%D8%AE%D8%B5%D8%B5%D9%8A%D8%A9%E2%80%AD/@29.9717548,30.9532117,15z/data=!4m6!3m5!1s0x14585793a6f3033b:0x200d12311ecfa26f!8m2!3d29.9719581!4d30.9430892!16s%2Fg%2F11lh3w6z6g?entry=ttu&g_ep=EgoyMDI1MDUwNy4wIKXMDSoJLDEwMjExNDUzSAFQAw%3D%3D"
+              src="https://maps.app.goo.gl/LRUnij1Z5Xm6CiTC8"
               width="100%"
               height="450"
               style={{ border: 0 }}
