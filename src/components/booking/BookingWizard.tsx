@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -95,6 +94,13 @@ const BookingWizard = () => {
     setStep(4);
   };
 
+  // Find specialty ID by specialty name
+  const findSpecialtyId = (specialtyName: string | null): number | null => {
+    if (!specialtyName) return null;
+    const specialty = specialties.find(s => s.name === specialtyName);
+    return specialty ? specialty.id : null;
+  };
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,17 +116,22 @@ const BookingWizard = () => {
       try {
         setIsSubmitting(true);
         
+        // Find specialty ID
+        const specialtyId = findSpecialtyId(formData.specialty);
+        
         const bookingData = {
           user_name: formData.name,
           user_phone: formData.phone,
           user_email: formData.email || null,
-          doctor_id: null, // This is fine since the schema allows it to be NULL
-          specialty_id: null, // This is fine since the schema allows it to be NULL
+          doctor_id: formData.doctor?.id || null, // Store the doctor's ID
+          specialty_id: specialtyId, // Store the specialty ID
           booking_day: formData.day,
           booking_time: formData.time,
           notes: formData.notes || null,
           booking_method: 'form'
         };
+        
+        console.log('Submitting booking data:', bookingData);
         
         const { error } = await supabase
           .from('bookings')
