@@ -1,8 +1,10 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { motion, AnimatePresence } from 'framer-motion';
-import { doctors, Doctor, weekDays, dayMappings, isDoctorAvailableOnDay } from '@/data/doctors';
+import { weekDays, dayMappings } from '@/data/doctors';
+import { Doctor, getDoctors, getDoctorsBySpecialty } from '@/services/doctorService';
 import { specialties } from '@/data/specialties';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
@@ -45,11 +47,21 @@ const BookingWizard = () => {
   };
 
   // Step 1: Select specialty
-  const handleSpecialtySelect = (specialtyName: string) => {
-    // Filter doctors by specialty
-    const doctorsInSpecialty = doctors.filter((doctor) =>
-      doctor.specialty.toLowerCase().includes(specialtyName.toLowerCase())
-    );
+  const handleSpecialtySelect = async (specialtyName: string) => {
+    // Find the specialty ID
+    const specialty = specialties.find(s => s.name === specialtyName);
+    
+    if (!specialty) {
+      toast({
+        title: "خطأ",
+        description: "لم يتم العثور على التخصص",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Filter doctors by specialty ID
+    const doctorsInSpecialty = await getDoctorsBySpecialty(specialty.id);
 
     setFormData({ ...formData, specialty: specialtyName, doctor: null, day: null, time: null });
     setFilteredDoctors(doctorsInSpecialty);
@@ -80,7 +92,8 @@ const BookingWizard = () => {
     if (!englishDay) return;
 
     // Get available times for the selected doctor and day
-    const times = formData.doctor.schedule[englishDay] || [];
+    const schedule = formData.doctor.schedule;
+    const times = (schedule && schedule[englishDay]) || [];
     
     setFormData({ ...formData, day, time: null });
     setAvailableTimes(times);
@@ -108,7 +121,7 @@ const BookingWizard = () => {
     if (bookingMethod === 'whatsapp') {
       // Format message for WhatsApp
       const { specialty, doctor, day, time } = formData;
-      const message = `مرحباً، أود حجز موعد مع ${doctor?.name} (${doctor?.specialty}) يوم ${day} الساعة ${time}.`;
+      const message = `مرحباً، أود حجز موعد مع ${doctor?.name} (${specialty}) يوم ${day} الساعة ${time}.`;
       const encodedMessage = encodeURIComponent(message);
       window.open(`https://wa.me/201119007403?text=${encodedMessage}`, '_blank');
     } else {
@@ -123,8 +136,8 @@ const BookingWizard = () => {
           user_name: formData.name,
           user_phone: formData.phone,
           user_email: formData.email || null,
-          doctor_id: formData.doctor?.id || null, // Store the doctor's ID
-          specialty_id: specialtyId, // Store the specialty ID
+          doctor_id: formData.doctor?.id || null, // Now correctly using the Doctor type from doctorService
+          specialty_id: specialtyId,
           booking_day: formData.day,
           booking_time: formData.time,
           notes: formData.notes || null,
@@ -170,6 +183,13 @@ const BookingWizard = () => {
         setIsSubmitting(false);
       }
     }
+  };
+
+  // Check if doctor is available on a specific day
+  const isDoctorAvailableOnDay = (doctor: Doctor, arabicDay: string): boolean => {
+    const englishDay = dayMappings[arabicDay as keyof typeof dayMappings];
+    const schedule = doctor.schedule || {};
+    return !!schedule[englishDay]?.length;
   };
 
   // Animation variants
