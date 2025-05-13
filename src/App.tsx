@@ -18,14 +18,33 @@ const App = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading for 1 second
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-
-    // Seed doctors data if needed
-    seedDoctorsData();
+    const initApp = async () => {
+      try {
+        // Seed doctors data if needed
+        await seedDoctorsData();
+      } catch (error) {
+        console.error("Error initializing app:", error);
+      } finally {
+        // Simulate loading for 1 second
+        setTimeout(() => {
+          setLoading(false);
+        }, 1000);
+      }
+    };
+    
+    initApp();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="spinner w-16 h-16 border-4 border-brand rounded-full border-t-transparent animate-spin mx-auto mb-4"></div>
+          <h2 className="text-xl font-medium text-gray-700">جاري تحميل التطبيق...</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="App">

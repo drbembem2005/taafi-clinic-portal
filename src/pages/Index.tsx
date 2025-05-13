@@ -1,5 +1,6 @@
 
-import Layout from '@/components/layout/Layout';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import HeroCarousel from '@/components/shared/HeroCarousel';
 import ClinicFeatures from '@/components/shared/ClinicFeatures';
 import BookingSteps from '@/components/shared/BookingSteps';
@@ -8,30 +9,41 @@ import DoctorCard from '@/components/shared/DoctorCard';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { specialties } from '@/data/specialties';
-import { doctors } from '@/data/doctors';
-import { useNavigate } from 'react-router-dom';
+import { getDoctors } from '@/services/doctorService';
+import type { Doctor } from '@/services/doctorService';
 
 const Index = () => {
   const navigate = useNavigate();
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  // Show only first 6 specialties and 3 doctors
+  // Show only first 6 specialties
   const featuredSpecialties = specialties.slice(0, 6);
-  const featuredDoctors = doctors.slice(0, 3);
+
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const fetchedDoctors = await getDoctors();
+        // Get only 3 doctors for the featured section
+        setDoctors(fetchedDoctors.slice(0, 3));
+      } catch (error) {
+        console.error('Error fetching doctors:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctors();
+  }, []);
 
   // Transform doctors data to match DoctorWithSpecialty type
-  const formattedDoctors = featuredDoctors.map((doctor, index) => ({
-    id: index + 1, // Adding a synthetic id for compatibility
-    name: doctor.name,
-    specialty: doctor.specialty,
-    specialty_id: index + 1, // Adding a synthetic specialty_id for compatibility
-    bio: doctor.bio,
-    image: doctor.image,
-    fees: doctor.fees,
-    schedule: doctor.schedule
+  const formattedDoctors = doctors.map((doctor) => ({
+    ...doctor,
+    specialty: specialties.find(s => s.id === doctor.specialty_id)?.name || 'تخصص غير محدد'
   }));
 
   return (
-    <Layout>
+    <>
       {/* Hero Carousel */}
       <HeroCarousel />
 
@@ -77,9 +89,15 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            {formattedDoctors.map((doctor) => (
-              <DoctorCard key={doctor.name} doctor={doctor} />
-            ))}
+            {loading ? (
+              <p className="text-center col-span-3">جاري تحميل بيانات الأطباء...</p>
+            ) : formattedDoctors.length > 0 ? (
+              formattedDoctors.map((doctor) => (
+                <DoctorCard key={doctor.id} doctor={doctor} />
+              ))
+            ) : (
+              <p className="text-center col-span-3">لا يوجد أطباء متاحين حالياً</p>
+            )}
           </div>
           
           <div className="text-center mt-8">
@@ -128,7 +146,7 @@ const Index = () => {
           </div>
         </div>
       </section>
-    </Layout>
+    </>
   );
 };
 
