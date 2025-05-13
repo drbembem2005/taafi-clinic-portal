@@ -194,6 +194,12 @@ const DoctorDetails = ({ doctor }: { doctor: DoctorWithSpecialty }) => {
   
   const availableDays = getAvailableDays();
   
+  const openWhatsApp = () => {
+    const message = `مرحباً، أود حجز موعد مع ${doctor.name} (${doctor.specialty})`;
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/201119007403?text=${encodedMessage}`, '_blank');
+  };
+  
   return (
     <div className="mt-4">
       <div className="grid md:grid-cols-2 gap-6">
@@ -267,11 +273,7 @@ const DoctorDetails = ({ doctor }: { doctor: DoctorWithSpecialty }) => {
       
       <div className="mt-6">
         <Button 
-          onClick={() => {
-            const message = `مرحباً، أود حجز موعد مع ${doctor.name} (${doctor.specialty})`;
-            const encodedMessage = encodeURIComponent(message);
-            window.open(`https://wa.me/201119007403?text=${encodedMessage}`, '_blank');
-          }}
+          onClick={openWhatsApp}
           className="bg-green-600 hover:bg-green-700 text-white w-full"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 24 24">
