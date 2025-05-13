@@ -136,7 +136,7 @@ const BookingWizard = () => {
           user_name: formData.name,
           user_phone: formData.phone,
           user_email: formData.email || null,
-          doctor_id: formData.doctor?.id || null, // Now correctly using the Doctor type from doctorService
+          doctor_id: formData.doctor?.id || null,
           specialty_id: specialtyId,
           booking_day: formData.day,
           booking_time: formData.time,
@@ -196,6 +196,13 @@ const BookingWizard = () => {
   const variants = {
     hidden: { opacity: 0, x: -20 },
     visible: { opacity: 1, x: 0 },
+  };
+
+  // Helper function to get specialty name by ID
+  const getSpecialtyNameById = (specialtyId: number | undefined): string => {
+    if (!specialtyId) return '';
+    const specialty = specialties.find(s => s.id === specialtyId);
+    return specialty ? specialty.name : '';
   };
 
   return (
@@ -302,7 +309,7 @@ const BookingWizard = () => {
                       </div>
                       <div>
                         <h3 className="font-bold text-gray-800">{doctor.name}</h3>
-                        <p className="text-gray-600 text-sm">{doctor.specialty}</p>
+                        <p className="text-gray-600 text-sm">{getSpecialtyNameById(doctor.specialty_id)}</p>
                       </div>
                     </div>
                     <div className="mt-3 flex justify-between text-sm">
@@ -344,7 +351,7 @@ const BookingWizard = () => {
             
             <div className="bg-blue-50 rounded-lg p-4 mb-6">
               <h3 className="font-bold text-gray-800 text-lg">{formData.doctor.name}</h3>
-              <p className="text-gray-600">{formData.doctor.specialty}</p>
+              <p className="text-gray-600">{getSpecialtyNameById(formData.doctor.specialty_id)}</p>
             </div>
 
             <div className="mb-6">
@@ -422,7 +429,7 @@ const BookingWizard = () => {
               <h3 className="font-bold text-gray-800 text-lg mb-2">تفاصيل الموعد</h3>
               <ul className="space-y-2 text-gray-700">
                 <li><strong>الطبيب:</strong> {formData.doctor?.name}</li>
-                <li><strong>التخصص:</strong> {formData.doctor?.specialty}</li>
+                <li><strong>التخصص:</strong> {formData.specialty}</li>
                 <li><strong>اليوم:</strong> {formData.day}</li>
                 <li><strong>الوقت:</strong> {formData.time}</li>
                 <li><strong>رسوم الكشف:</strong> {typeof formData.doctor?.fees.examination === 'number' 
