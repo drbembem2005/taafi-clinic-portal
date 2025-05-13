@@ -1,10 +1,8 @@
-
-import Layout from '@/components/layout/Layout';
 import { motion } from 'framer-motion';
 
 const About = () => {
   return (
-    <Layout>
+    <>
       {/* Hero Section */}
       <section className="bg-gray-100 py-16">
         <div className="container mx-auto px-4">
@@ -125,7 +123,7 @@ const About = () => {
           </div>
         </div>
       </section>
-    </Layout>
+    </>
   );
 };
 

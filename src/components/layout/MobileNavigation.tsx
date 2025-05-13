@@ -51,6 +51,14 @@ const MobileNavigation = () => {
           <BookOpen size={20} />
           <span className="text-xs mt-1">المدونة</span>
         </Link>
+        
+        <Link 
+          to="/contact" 
+          className={`flex flex-col items-center p-2 rounded-md ${isActive('/contact') ? 'text-brand' : 'text-gray-500'}`}
+        >
+          <Phone size={20} />
+          <span className="text-xs mt-1">اتصل بنا</span>
+        </Link>
       </div>
     </div>
   );
