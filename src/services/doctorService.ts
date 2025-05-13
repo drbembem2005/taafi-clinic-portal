@@ -1,12 +1,22 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Doctor } from '@/integrations/supabase/types';
-import { defaultDoctors } from '@/data/doctors';
+import { doctors as defaultDoctors } from '@/data/doctors';
 
 // Create a type for the fees with examination and consultation properties
-interface Fees {
+export interface Fees {
   examination: number;
   consultation: number;
+}
+
+// Define the Doctor type
+export interface Doctor {
+  id: number;
+  name: string;
+  specialty_id: number;
+  bio?: string;
+  image?: string;
+  fees: Fees;
+  schedule: Record<string, any>;
 }
 
 export async function getDoctors(): Promise<Doctor[]> {
@@ -25,11 +35,11 @@ export async function getDoctors(): Promise<Doctor[]> {
     ...doctor,
     fees: typeof doctor.fees === 'string' 
       ? JSON.parse(doctor.fees) 
-      : doctor.fees as Fees
+      : (doctor.fees as any) as Fees
   }));
 }
 
-export async function getDoctor(id: string): Promise<Doctor | null> {
+export async function getDoctor(id: number): Promise<Doctor | null> {
   const { data, error } = await supabase
     .from('doctors')
     .select('*')
@@ -46,11 +56,11 @@ export async function getDoctor(id: string): Promise<Doctor | null> {
     ...data,
     fees: typeof data.fees === 'string' 
       ? JSON.parse(data.fees) 
-      : data.fees as Fees
+      : (data.fees as any) as Fees
   };
 }
 
-export async function getDoctorsBySpecialty(specialtyId: string): Promise<Doctor[]> {
+export async function getDoctorsBySpecialty(specialtyId: number): Promise<Doctor[]> {
   const { data, error } = await supabase
     .from('doctors')
     .select('*')
@@ -67,7 +77,7 @@ export async function getDoctorsBySpecialty(specialtyId: string): Promise<Doctor
     ...doctor,
     fees: typeof doctor.fees === 'string' 
       ? JSON.parse(doctor.fees) 
-      : doctor.fees as Fees
+      : (doctor.fees as any) as Fees
   }));
 }
 

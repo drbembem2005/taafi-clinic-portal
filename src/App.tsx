@@ -14,7 +14,6 @@ import { Route, Routes } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { seedDoctorsData } from '@/services/doctorService';
 
-// Add Google Font via CSS
 const App = () => {
   const [loading, setLoading] = useState(true);
 
