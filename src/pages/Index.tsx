@@ -8,32 +8,36 @@ import SpecialtyCard from '@/components/shared/SpecialtyCard';
 import DoctorCard from '@/components/shared/DoctorCard';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { specialties } from '@/data/specialties';
-import { getDoctors } from '@/services/doctorService';
-import type { Doctor } from '@/services/doctorService';
+import { getSpecialties, Specialty } from '@/services/specialtyService';
+import { getDoctors, Doctor } from '@/services/doctorService';
 
 const Index = () => {
   const navigate = useNavigate();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Show only first 6 specialties
-  const featuredSpecialties = specialties.slice(0, 6);
-
   useEffect(() => {
-    const fetchDoctors = async () => {
+    const fetchData = async () => {
       try {
+        setLoading(true);
+        // Fetch specialties
+        const fetchedSpecialties = await getSpecialties();
+        setSpecialties(fetchedSpecialties.slice(0, 6)); // Show only first 6 specialties
+        
+        // Fetch doctors
         const fetchedDoctors = await getDoctors();
         // Get only 3 doctors for the featured section
         setDoctors(fetchedDoctors.slice(0, 3));
+        console.log("Index page - Fetched doctors:", fetchedDoctors);
       } catch (error) {
-        console.error('Error fetching doctors:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDoctors();
+    fetchData();
   }, []);
 
   // Transform doctors data to match DoctorWithSpecialty type
@@ -63,7 +67,7 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {featuredSpecialties.map((specialty) => (
+            {specialties.map((specialty) => (
               <SpecialtyCard key={specialty.id} specialty={specialty} />
             ))}
           </div>

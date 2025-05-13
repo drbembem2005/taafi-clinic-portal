@@ -36,6 +36,13 @@ export async function getDoctors(): Promise<Doctor[]> {
       return [];
     }
 
+    if (!data || data.length === 0) {
+      console.log('No doctors found in the database');
+      return [];
+    }
+
+    console.log('Doctors data from Supabase:', data);
+
     // Parse fees JSON string if needed
     return data.map(doctor => ({
       ...doctor,

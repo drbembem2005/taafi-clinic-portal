@@ -28,6 +28,7 @@ const Doctors = () => {
     const fetchSpecialties = async () => {
       try {
         const fetchedSpecialties = await getSpecialties();
+        console.log("Fetched specialties:", fetchedSpecialties);
         setSpecialties(fetchedSpecialties);
       } catch (error) {
         console.error("Error fetching specialties:", error);
@@ -55,13 +56,14 @@ const Doctors = () => {
           const specialty = specialties.find(s => s.name === selectedSpecialty);
           if (specialty) {
             fetchedDoctors = await getDoctorsBySpecialty(specialty.id);
+            console.log(`Fetched doctors by specialty (${specialty.name}):`, fetchedDoctors);
           }
         } else {
           fetchedDoctors = await getDoctors();
+          console.log("Fetched all doctors:", fetchedDoctors);
         }
         
         setDoctors(fetchedDoctors);
-        console.log("Fetched doctors:", fetchedDoctors);
       } catch (error) {
         console.error("Error fetching doctors:", error);
         toast({
