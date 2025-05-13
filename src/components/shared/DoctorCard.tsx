@@ -2,20 +2,36 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Doctor, getAvailableDays } from '@/data/doctors';
+import { Doctor as ServiceDoctor } from '@/services/doctorService';
+import { weekDays, dayMappings } from '@/data/doctors';
 import { motion } from 'framer-motion';
 
+interface DoctorWithSpecialty extends ServiceDoctor {
+  specialty: string;
+}
+
 interface DoctorCardProps {
-  doctor: Doctor;
+  doctor: DoctorWithSpecialty;
   compact?: boolean;
 }
 
 const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
   const [showDialog, setShowDialog] = useState(false);
-  const availableDays = getAvailableDays(doctor);
-
-  // Extract specialty title (remove the professional title)
-  const specialtyTitle = doctor.specialty;
+  
+  // Get available days from schedule
+  const getAvailableDays = () => {
+    return Object.entries(doctor.schedule)
+      .filter(([_, times]) => times.length > 0)
+      .map(([day, _]) => {
+        // Map English day key back to Arabic
+        const arabicDay = Object.keys(dayMappings).find(
+          (key) => dayMappings[key as keyof typeof dayMappings] === day
+        );
+        return arabicDay || day;
+      });
+  };
+  
+  const availableDays = getAvailableDays();
 
   // Format fees
   const formatFee = (fee: number | string | null) => {
@@ -24,7 +40,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
   };
 
   const openWhatsApp = () => {
-    const message = `مرحباً، أود حجز موعد مع ${doctor.name} (${specialtyTitle})`;
+    const message = `مرحباً، أود حجز موعد مع ${doctor.name} (${doctor.specialty})`;
     const encodedMessage = encodeURIComponent(message);
     window.open(`https://wa.me/201119007403?text=${encodedMessage}`, '_blank');
   };
@@ -48,7 +64,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
             </div>
             <div>
               <h3 className="font-bold text-gray-900">{doctor.name}</h3>
-              <p className="text-sm text-gray-600">{specialtyTitle}</p>
+              <p className="text-sm text-gray-600">{doctor.specialty}</p>
             </div>
           </div>
           
@@ -103,7 +119,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
         
         <div className="md:col-span-3 p-6">
           <h3 className="text-2xl font-bold text-gray-900 mb-2">{doctor.name}</h3>
-          <p className="text-brand font-medium mb-3">{specialtyTitle}</p>
+          <p className="text-brand font-medium mb-3">{doctor.specialty}</p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
@@ -163,8 +179,20 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
   );
 };
 
-const DoctorDetails = ({ doctor }: { doctor: Doctor }) => {
-  const availableDays = getAvailableDays(doctor);
+const DoctorDetails = ({ doctor }: { doctor: DoctorWithSpecialty }) => {
+  const getAvailableDays = () => {
+    return Object.entries(doctor.schedule)
+      .filter(([_, times]) => times.length > 0)
+      .map(([day, _]) => {
+        // Map English day key back to Arabic
+        const arabicDay = Object.keys(dayMappings).find(
+          (key) => dayMappings[key as keyof typeof dayMappings] === day
+        );
+        return arabicDay || day;
+      });
+  };
+  
+  const availableDays = getAvailableDays();
   
   return (
     <div className="mt-4">
@@ -205,9 +233,8 @@ const DoctorDetails = ({ doctor }: { doctor: Doctor }) => {
           {availableDays.length > 0 ? (
             <div className="space-y-2">
               {availableDays.map((day, index) => {
-                const englishDay = Object.entries(doctor.schedule).find(([k, _]) => {
-                  return Object.entries(day).some(([arabicDay, englishDay]) => englishDay === k);
-                })?.[0];
+                const englishDay = Object.entries(dayMappings)
+                  .find(([k, _]) => k === day)?.[1];
                 
                 const times = englishDay ? doctor.schedule[englishDay] : [];
                 
@@ -215,7 +242,7 @@ const DoctorDetails = ({ doctor }: { doctor: Doctor }) => {
                   <div key={index} className="flex justify-between items-center border-b border-gray-200 pb-2">
                     <span className="font-medium text-gray-700">{day}:</span>
                     <div className="flex flex-wrap gap-1 justify-end">
-                      {times.map((time, timeIndex) => (
+                      {times.map((time: string, timeIndex: number) => (
                         <span key={timeIndex} className="bg-blue-50 text-brand px-2 py-1 rounded text-sm">
                           {time}
                         </span>

@@ -1,3 +1,4 @@
+
 export interface Doctor {
   name: string;
   specialty: string; // Keeping this as "specialty" in the interface to maintain compatibility

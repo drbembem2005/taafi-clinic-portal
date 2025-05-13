@@ -96,7 +96,13 @@ const Doctors = () => {
       ) : doctors.length > 0 ? (
         <div className="space-y-6">
           {doctors.map((doctor) => (
-            <DoctorCard key={doctor.id} doctor={doctor} />
+            <DoctorCard 
+              key={doctor.id} 
+              doctor={{
+                ...doctor,
+                specialty: specialties.find(s => s.id === doctor.specialty_id)?.name || ''
+              }} 
+            />
           ))}
         </div>
       ) : (

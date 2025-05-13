@@ -4,8 +4,8 @@ import { doctors as defaultDoctors } from '@/data/doctors';
 
 // Create a type for the fees with examination and consultation properties
 export interface Fees {
-  examination: number;
-  consultation: number;
+  examination: number | string;
+  consultation: number | string | null;
 }
 
 // Define the Doctor type
@@ -35,8 +35,11 @@ export async function getDoctors(): Promise<Doctor[]> {
     ...doctor,
     fees: typeof doctor.fees === 'string' 
       ? JSON.parse(doctor.fees) 
-      : (doctor.fees as any) as Fees
-  }));
+      : doctor.fees,
+    schedule: typeof doctor.schedule === 'string'
+      ? JSON.parse(doctor.schedule)
+      : doctor.schedule
+  })) as Doctor[];
 }
 
 export async function getDoctor(id: number): Promise<Doctor | null> {
@@ -56,8 +59,11 @@ export async function getDoctor(id: number): Promise<Doctor | null> {
     ...data,
     fees: typeof data.fees === 'string' 
       ? JSON.parse(data.fees) 
-      : (data.fees as any) as Fees
-  };
+      : data.fees,
+    schedule: typeof data.schedule === 'string'
+      ? JSON.parse(data.schedule)
+      : data.schedule
+  } as Doctor;
 }
 
 export async function getDoctorsBySpecialty(specialtyId: number): Promise<Doctor[]> {
@@ -77,8 +83,11 @@ export async function getDoctorsBySpecialty(specialtyId: number): Promise<Doctor
     ...doctor,
     fees: typeof doctor.fees === 'string' 
       ? JSON.parse(doctor.fees) 
-      : (doctor.fees as any) as Fees
-  }));
+      : doctor.fees,
+    schedule: typeof doctor.schedule === 'string'
+      ? JSON.parse(doctor.schedule)
+      : doctor.schedule
+  })) as Doctor[];
 }
 
 // Function to seed doctors data if table is empty
@@ -98,13 +107,27 @@ export async function seedDoctorsData() {
     console.log('Seeding doctors table...');
     
     // Format the data properly for insertion
-    const doctorsToInsert = defaultDoctors.map(doctor => ({
-      ...doctor,
-      fees: JSON.stringify({
-        examination: doctor.fees.examination,
-        consultation: doctor.fees.consultation
-      })
-    }));
+    const doctorsToInsert = defaultDoctors.map(doctor => {
+      // Find specialty by name to get the specialty_id
+      const specialtyName = doctor.specialty;
+      
+      // We need to get the specialty_id based on the specialty name
+      // For now, we'll use 1 as a default value, but this should be updated
+      // with a proper lookup once specialties are seeded
+      const specialty_id = 1;
+      
+      return {
+        name: doctor.name,
+        specialty_id: specialty_id,
+        bio: doctor.bio,
+        image: doctor.image,
+        fees: JSON.stringify({
+          examination: doctor.fees.examination,
+          consultation: doctor.fees.consultation
+        }),
+        schedule: JSON.stringify(doctor.schedule)
+      };
+    });
 
     const { error: insertError } = await supabase
       .from('doctors')
