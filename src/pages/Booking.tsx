@@ -1,11 +1,10 @@
 
-import Layout from '@/components/layout/Layout';
 import BookingWizard from '@/components/booking/BookingWizard';
 import { motion } from 'framer-motion';
 
 const Booking = () => {
   return (
-    <Layout>
+    <>
       {/* Hero Section */}
       <section className="bg-brand-light py-12">
         <div className="container mx-auto px-4">
@@ -106,7 +105,7 @@ const Booking = () => {
           </div>
         </div>
       </section>
-    </Layout>
+    </>
   );
 };
 

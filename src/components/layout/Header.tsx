@@ -13,6 +13,7 @@ const Header = () => {
     { name: 'التخصصات', path: '/specialties' },
     { name: 'الأطباء', path: '/doctors' },
     { name: 'الحجز', path: '/booking' },
+    { name: 'المدونة', path: '/blog' },
     { name: 'اتصل بنا', path: '/contact' },
   ];
 

@@ -1,5 +1,5 @@
 
-import { Home, User, ListChecks, Calendar, BookOpen } from "lucide-react";
+import { Home, User, ListChecks, Calendar, BookOpen, Phone } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const MobileNavigation = () => {
