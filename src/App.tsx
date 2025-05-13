@@ -1,3 +1,4 @@
+
 import Index from '@/pages/Index';
 import About from '@/pages/About';
 import Booking from '@/pages/Booking';
@@ -10,14 +11,9 @@ import BlogPost from '@/pages/BlogPost';
 import { Toaster } from '@/components/ui/toaster';
 import { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import { Cairo } from "next/font/google";
+import Layout from '@/components/layout/Layout';
 
-const cairoFont = Cairo({
-  subsets: ["arabic"],
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-});
-
+// Add Google Font via CSS instead of Next.js font loader
 const App = () => {
   const [loading, setLoading] = useState(true);
 
@@ -30,7 +26,7 @@ const App = () => {
 
   return (
     <div className="App">
-      <div className={cairoFont.className}>
+      <div className="font-cairo">
         <Routes>
           <Route path="/" element={<Layout><Index /></Layout>} />
           <Route path="/specialties" element={<Layout><Specialties /></Layout>} />

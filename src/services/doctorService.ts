@@ -13,7 +13,7 @@ export interface Doctor {
   schedule: Record<string, string[]>;
   image: string | null;
   bio: string | null;
-  specialty?: string; // For joining with specialty name
+  specialty: string; // For joining with specialty name
 }
 
 export const getDoctors = async (): Promise<Doctor[]> => {
@@ -34,10 +34,15 @@ export const getDoctors = async (): Promise<Doctor[]> => {
       return [];
     }
     
-    // Map the joined data to include specialty name
+    // Map the joined data to include specialty name and ensure correct types
     return (data || []).map(doctor => ({
       ...doctor,
-      specialty: doctor.specialties?.name
+      specialty: doctor.specialties?.name || '',
+      // Ensure fees has the correct structure
+      fees: {
+        examination: doctor.fees?.examination || null,
+        consultation: doctor.fees?.consultation || null
+      }
     }));
   } catch (error) {
     console.error("Error fetching doctors:", error);
@@ -64,9 +69,15 @@ export const getDoctorsBySpecialty = async (specialtyId: number): Promise<Doctor
       return [];
     }
     
+    // Map the joined data to include specialty name and ensure correct types
     return (data || []).map(doctor => ({
       ...doctor,
-      specialty: doctor.specialties?.name
+      specialty: doctor.specialties?.name || '',
+      // Ensure fees has the correct structure
+      fees: {
+        examination: doctor.fees?.examination || null,
+        consultation: doctor.fees?.consultation || null
+      }
     }));
   } catch (error) {
     console.error("Error fetching doctors by specialty:", error);
