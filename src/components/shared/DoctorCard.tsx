@@ -154,14 +154,16 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
                 </svg>
               )}
             </div>
-            <div>
-              <h3 className="font-bold text-gray-900">{doctor.name}</h3>
-              <Badge 
-                variant="outline" 
-                className={`text-xs ${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} mt-1`}
-              >
-                {doctor.specialty}
-              </Badge>
+            <div className="flex-grow">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="font-bold text-gray-900">{doctor.name}</h3>
+                <Badge 
+                  variant="outline" 
+                  className={`text-xs ${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-[10px] py-0.5 px-1.5`}
+                >
+                  {doctor.specialty}
+                </Badge>
+              </div>
               {doctor.bio && (
                 <p className="text-xs text-gray-500 mt-1 line-clamp-1">{doctor.bio}</p>
               )}
@@ -215,20 +217,19 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
         </div>
         
         <div className="md:col-span-3 p-6">
-          <div className="flex flex-wrap items-center justify-between">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-1">{doctor.name}</h3>
-              {doctor.bio && (
-                <p className="text-gray-600 mb-2 line-clamp-2">{doctor.bio}</p>
-              )}
-            </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-2xl font-bold text-gray-900">{doctor.name}</h3>
             <Badge 
               variant="outline" 
-              className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-sm`}
+              className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs py-0.5`}
             >
               {doctor.specialty}
             </Badge>
           </div>
+          
+          {doctor.bio && (
+            <p className="text-gray-600 mb-2 line-clamp-2 mt-1">{doctor.bio}</p>
+          )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 mt-4">
             <div>
@@ -312,13 +313,15 @@ const DoctorDetails = ({ doctor, onBooking }: { doctor: DoctorWithSpecialty; onB
     <div className="overflow-hidden">
       {/* Header with doctor name and close button */}
       <div className="bg-brand text-white p-4 text-center relative">
-        <h3 className="text-xl font-bold">{doctor.name}</h3>
-        <Badge 
-          variant="outline" 
-          className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs mt-1`}
-        >
-          {doctor.specialty}
-        </Badge>
+        <div className="flex items-center justify-center gap-2">
+          <h3 className="text-xl font-bold">{doctor.name}</h3>
+          <Badge 
+            variant="outline" 
+            className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs`}
+          >
+            {doctor.specialty}
+          </Badge>
+        </div>
       </div>
       
       {/* Doctor details content */}
