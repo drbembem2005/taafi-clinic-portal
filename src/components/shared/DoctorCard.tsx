@@ -317,15 +317,15 @@ const DoctorDetails = ({ doctor, onBooking }: { doctor: DoctorWithSpecialty; onB
         <div className="flex items-center justify-center gap-2">
           <h3 className="text-xl font-bold">{doctor.name}</h3>
         </div>
-      </div>
-      <div>
-        <Badge 
+         <Badge 
             variant="outline" 
             className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs`}
           >
             {doctor.specialty}
           </Badge>
+        
       </div>
+      
       {/* Doctor details content */}
       <div className="p-4 max-h-[70vh] overflow-y-auto dir-rtl">
         {/* Bio section */}
