@@ -1,12 +1,13 @@
-import { useState, memo } from 'react';
+
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog'; // Removed DialogHeader, DialogTitle as they weren't directly used for DoctorDetails custom header
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Doctor as ServiceDoctor } from '@/services/doctorService';
-import { dayMappings } from '@/data/doctors'; // Removed unused weekDays
+import { weekDays, dayMappings } from '@/data/doctors';
 import { motion } from 'framer-motion';
-// import { Card, CardContent } from '@/components/ui/card'; // Not used directly, DoctorCard uses custom structure
+import { Card, CardContent } from '@/components/ui/card';
+import { Phone, Calendar, MessageCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-// Removed unused lucide-react icons: Phone, Calendar, MessageCircle
 
 interface DoctorWithSpecialty extends ServiceDoctor {
   specialty: string;
@@ -18,184 +19,122 @@ interface DoctorCardProps {
   compact?: boolean;
 }
 
-// --- Reusable Helper Functions ---
-
-// Function to get color for specialty badges (remains the same)
+// Function to get color for specialty badges
 const getSpecialtyColorClass = (specialty: string) => {
+  // Map of specialties to color classes
   const colorMap: Record<string, { bg: string, text: string, border: string }> = {
-    "طب الأطفال وحديثي الولادة": { bg: "bg-blue-50", text: "text-blue-600", border: "border-blue-100" },
-    "النساء والتوليد والعقم": { bg: "bg-pink-50", text: "text-pink-600", border: "border-pink-100" },
-    "الجلدية والتجميل": { bg: "bg-purple-50", text: "text-purple-600", border: "border-purple-100" },
-    "الجراحة العامة والمناظير": { bg: "bg-red-50", text: "text-red-600", border: "border-red-100" },
-    "الذكورة وتأخر الإنجاب": { bg: "bg-indigo-50", text: "text-indigo-600", border: "border-indigo-100" },
-    "الباطنة والسكري والغدد والكلى": { bg: "bg-green-50", text: "text-green-600", border: "border-green-100" },
-    "الأمراض النفسية وتعديل السلوك": { bg: "bg-violet-50", text: "text-violet-600", border: "border-violet-100" },
-    "علاج الأورام والمناظير": { bg: "bg-amber-50", text: "text-amber-600", border: "border-amber-100" },
-    "جراحة المخ والأعصاب والعمود الفقري": { bg: "bg-cyan-50", text: "text-cyan-600", border: "border-cyan-100" },
-    "الأنف والأذن والحنجرة": { bg: "bg-orange-50", text: "text-orange-600", border: "border-orange-100" },
-    "العظام والمفاصل وإصابات الملاعب": { bg: "bg-lime-50", text: "text-lime-600", border: "border-lime-100" },
-    "الروماتيزم والمفاصل": { bg: "bg-teal-50", text: "text-teal-600", border: "border-teal-100" },
-    "التغذية العلاجية والعلاج الطبيعي": { bg: "bg-emerald-50", text: "text-emerald-600", border: "border-emerald-100" },
-    "طب وجراحة الأسنان": { bg: "bg-sky-50", text: "text-sky-600", border: "border-sky-100" },
+    "طب الأطفال وحديثي الولادة": { 
+      bg: "bg-blue-50", 
+      text: "text-blue-600", 
+      border: "border-blue-100" 
+    },
+    "النساء والتوليد والعقم": { 
+      bg: "bg-pink-50", 
+      text: "text-pink-600", 
+      border: "border-pink-100" 
+    },
+    "الجلدية والتجميل": { 
+      bg: "bg-purple-50", 
+      text: "text-purple-600", 
+      border: "border-purple-100" 
+    },
+    "الجراحة العامة والمناظير": { 
+      bg: "bg-red-50", 
+      text: "text-red-600", 
+      border: "border-red-100" 
+    },
+    "الذكورة وتأخر الإنجاب": { 
+      bg: "bg-indigo-50", 
+      text: "text-indigo-600", 
+      border: "border-indigo-100" 
+    },
+    "الباطنة والسكري والغدد والكلى": { 
+      bg: "bg-green-50", 
+      text: "text-green-600", 
+      border: "border-green-100" 
+    },
+    "الأمراض النفسية وتعديل السلوك": { 
+      bg: "bg-violet-50", 
+      text: "text-violet-600", 
+      border: "border-violet-100" 
+    },
+    "علاج الأورام والمناظير": { 
+      bg: "bg-amber-50", 
+      text: "text-amber-600", 
+      border: "border-amber-100" 
+    },
+    "جراحة المخ والأعصاب والعمود الفقري": { 
+      bg: "bg-cyan-50", 
+      text: "text-cyan-600", 
+      border: "border-cyan-100" 
+    },
+    "الأنف والأذن والحنجرة": { 
+      bg: "bg-orange-50", 
+      text: "text-orange-600", 
+      border: "border-orange-100" 
+    },
+    "العظام والمفاصل وإصابات الملاعب": { 
+      bg: "bg-lime-50", 
+      text: "text-lime-600", 
+      border: "border-lime-100" 
+    },
+    "الروماتيزم والمفاصل": { 
+      bg: "bg-teal-50", 
+      text: "text-teal-600", 
+      border: "border-teal-100" 
+    },
+    "التغذية العلاجية والعلاج الطبيعي": { 
+      bg: "bg-emerald-50", 
+      text: "text-emerald-600", 
+      border: "border-emerald-100" 
+    },
+    "طب وجراحة الأسنان": { 
+      bg: "bg-sky-50", 
+      text: "text-sky-600", 
+      border: "border-sky-100" 
+    },
   };
-  const defaultColor = { bg: "bg-gray-50", text: "text-gray-600", border: "border-gray-100" };
+
+  // Default color if specialty not found in map
+  const defaultColor = { 
+    bg: "bg-gray-50", 
+    text: "text-gray-600", 
+    border: "border-gray-100" 
+  };
+
   return colorMap[specialty] || defaultColor;
 };
 
-// Format fees
-const formatFee = (fee: number | string | null | undefined): string => {
-  if (fee === null || fee === undefined) return 'غير متاح';
-  return typeof fee === 'number' ? `${fee} جنيه` : fee;
-};
-
-// Get available days from schedule, mapping to Arabic names
-const getDoctorAvailableDays = (
-  schedule: Record<string, string[]> | undefined,
-  currentDayMappings: typeof dayMappings
-): string[] => {
-  if (!schedule) return [];
-  return Object.entries(schedule)
-    .filter(([_, times]) => times && times.length > 0)
-    .map(([dayEng, _]) => { // dayEng is the English day key from schedule
-      // Find the Arabic day name from dayMappings that corresponds to the English day key
-      const arabicDay = Object.keys(currentDayMappings).find(
-        (keyAr) => currentDayMappings[keyAr as keyof typeof currentDayMappings] === dayEng
-      );
-      return arabicDay || dayEng; // Fallback to English key if no mapping found
-    });
-};
-
-// --- Icon Components ---
-const UserPlaceholderIcon = ({ className = "h-6 w-6 text-gray-400" }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-    />
-  </svg>
-);
-
-const WhatsAppIcon = ({ className = "h-5 w-5" }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    fill="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-  </svg>
-);
-
-// --- DoctorDetails Component (for Dialog) ---
-interface DoctorDetailsProps {
-  doctor: DoctorWithSpecialty;
-  onBooking: () => void;
-}
-
-const DoctorDetails = memo(({ doctor, onBooking }: DoctorDetailsProps) => {
-  const specialtyColors = getSpecialtyColorClass(doctor.specialty);
-  const availableDays = getDoctorAvailableDays(doctor.schedule, dayMappings);
-  
-  return (
-    <div className="overflow-hidden">
-      <div className="bg-brand text-white p-4 text-center relative">
-        <h3 className="text-xl font-bold">{doctor.name}</h3>
-        <Badge 
-          variant="outline" 
-          className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs mt-1`}
-        >
-          {doctor.specialty}
-        </Badge>
-      </div>
-      
-      <div className="p-4 max-h-[70vh] overflow-y-auto dir-rtl">
-        {doctor.bio && (
-          <div className="mb-4 bg-gray-50 p-3 rounded-lg">
-            <h4 className="font-bold text-lg text-gray-800 mb-2 text-right">نبذة عن الطبيب</h4>
-            <p className="text-gray-700 text-right">{doctor.bio}</p>
-          </div>
-        )}
-        
-        <div className="mb-4 bg-gray-50 p-3 rounded-lg">
-          <h4 className="font-bold text-lg text-gray-800 mb-2 text-right">الرسوم</h4>
-          <div className="flex justify-between items-center border-b border-gray-200 py-2">
-            <span className="text-gray-900 font-medium">
-              {formatFee(doctor.fees?.examination)}
-            </span>
-            <span className="text-gray-600">رسوم الكشف:</span>
-          </div>
-          <div className="flex justify-between items-center py-2">
-            <span className="text-gray-900 font-medium">
-              {formatFee(doctor.fees?.consultation)}
-            </span>
-            <span className="text-gray-600">رسوم الاستشارة:</span>
-          </div>
-        </div>
-        
-        <div className="mb-4 bg-gray-50 p-3 rounded-lg">
-          <h4 className="font-bold text-lg text-gray-800 mb-2 text-right">جدول المواعيد</h4>
-          {availableDays.length > 0 ? (
-            <div className="space-y-2">
-              {availableDays.map((dayAr, index) => { // dayAr is Arabic day name
-                // Map Arabic day name back to English key to access schedule times
-                const englishDayKey = dayMappings[dayAr as keyof typeof dayMappings];
-                const times = doctor.schedule?.[englishDayKey] || [];
-                
-                return (
-                  <div key={index} className="flex justify-between items-center border-b border-gray-200 pb-2 last:border-0">
-                    <div className="flex flex-wrap gap-1 text-left">
-                      {times.length > 0 ? times.map((time: string, timeIndex: number) => (
-                        <span key={timeIndex} className="bg-blue-50 text-brand px-2 py-1 rounded text-sm">
-                          {time}
-                        </span>
-                      )) : (
-                        <span className="text-gray-500 text-sm">لا توجد مواعيد محددة</span>
-                      )}
-                    </div>
-                    <span className="font-medium text-gray-700">{dayAr}:</span>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-gray-500 text-center">يرجى الاتصال بالعيادة لمعرفة المواعيد المتاحة.</p>
-          )}
-        </div>
-      </div>
-      
-      <div className="p-4 bg-gray-50 border-t border-gray-200">
-        <Button 
-          onClick={onBooking}
-          className="bg-green-600 hover:bg-green-700 text-white w-full flex items-center justify-center gap-2"
-        >
-          <WhatsAppIcon className="h-5 w-5 ml-2" />
-          احجز الآن عبر واتساب
-        </Button>
-      </div>
-    </div>
-  );
-});
-DoctorDetails.displayName = 'DoctorDetails'; // For better debugging with React.memo
-
-// --- Main DoctorCard Component ---
-const DoctorCard = memo(({ doctor, compact = false }: DoctorCardProps) => {
+const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
   const [showDialog, setShowDialog] = useState(false);
   
+  // Get specialty colors
   const specialtyColors = getSpecialtyColorClass(doctor.specialty);
-  const availableDays = getDoctorAvailableDays(doctor.schedule, dayMappings);
+  
+  // Get available days from schedule
+  const getAvailableDays = () => {
+    return Object.entries(doctor.schedule)
+      .filter(([_, times]) => times.length > 0)
+      .map(([day, _]) => {
+        // Map English day key back to Arabic
+        const arabicDay = Object.keys(dayMappings).find(
+          (key) => dayMappings[key as keyof typeof dayMappings] === day
+        );
+        return arabicDay || day;
+      });
+  };
+  
+  const availableDays = getAvailableDays();
+
+  // Format fees
+  const formatFee = (fee: number | string | null) => {
+    if (fee === null) return 'غير متاح';
+    return typeof fee === 'number' ? `${fee} جنيه` : fee;
+  };
 
   const openWhatsApp = () => {
     const message = `مرحباً، أود حجز موعد مع الدكتور ${doctor.name} (${doctor.specialty})`;
     const encodedMessage = encodeURIComponent(message);
-    // Ensure WhatsApp number is configurable if it changes often
     window.open(`https://wa.me/201119007403?text=${encodedMessage}`, '_blank');
   };
 
@@ -204,24 +143,24 @@ const DoctorCard = memo(({ doctor, compact = false }: DoctorCardProps) => {
       <motion.div 
         className="doctor-card bg-white rounded-lg shadow-md overflow-hidden"
         whileHover={{ y: -5 }}
-        // It's generally better to apply layout and sizing to specific elements
-        // rather than CardContent if CardContent is not used.
       >
         <div className="p-4">
           <div className="flex items-center mb-3">
-            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden ml-3 shrink-0">
+            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden ml-3">
               {doctor.image ? (
                 <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover" />
               ) : (
-                <UserPlaceholderIcon className="h-8 w-8 text-gray-400" />
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
               )}
             </div>
-            <div className="flex-grow min-w-0"> {/* Added min-w-0 for proper truncation if name is too long */}
+            <div className="flex-grow">
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="font-bold text-gray-900 truncate">{doctor.name}</h3>
+                <h3 className="font-bold text-gray-900">{doctor.name}</h3>
                 <Badge 
                   variant="outline" 
-                  className={`text-xs ${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} py-0.5 px-1.5 whitespace-nowrap`}
+                  className={`text-xs ${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-[10px] py-0.5 px-1.5`}
                 >
                   {doctor.specialty}
                 </Badge>
@@ -252,7 +191,7 @@ const DoctorCard = memo(({ doctor, compact = false }: DoctorCardProps) => {
         </div>
         
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DialogContent className="p-0 max-w-[95vw] sm:max-w-md mx-auto rounded-lg overflow-hidden">
+          <DialogContent className="p-0 max-w-[95%] sm:max-w-md mx-auto rounded-lg overflow-hidden">
             <DoctorDetails doctor={doctor} onBooking={openWhatsApp} />
           </DialogContent>
         </Dialog>
@@ -266,12 +205,14 @@ const DoctorCard = memo(({ doctor, compact = false }: DoctorCardProps) => {
       whileHover={{ y: -5 }}
     >
       <div className="grid md:grid-cols-4">
-        <div className="md:col-span-1 bg-gray-50 flex items-center justify-center p-4">
+        <div className="md:col-span-1 bg-gray-100 flex items-center justify-center p-4">
           <div className="w-32 h-32 rounded-full bg-white shadow-inner flex items-center justify-center overflow-hidden">
             {doctor.image ? (
               <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover" />
             ) : (
-              <UserPlaceholderIcon className="h-20 w-20 text-gray-400" />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
             )}
           </div>
         </div>
@@ -281,7 +222,7 @@ const DoctorCard = memo(({ doctor, compact = false }: DoctorCardProps) => {
             <h3 className="text-2xl font-bold text-gray-900">{doctor.name}</h3>
             <Badge 
               variant="outline" 
-              className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-sm py-1 px-2`} // Slightly larger badge for non-compact
+              className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs py-0.5`}
             >
               {doctor.specialty}
             </Badge>
@@ -291,14 +232,14 @@ const DoctorCard = memo(({ doctor, compact = false }: DoctorCardProps) => {
             <p className="text-gray-600 mb-2 line-clamp-2 mt-1">{doctor.bio}</p>
           )}
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 mt-4">
             <div>
               <h4 className="font-bold text-gray-700">رسوم الكشف:</h4>
-              <p className="text-gray-600">{formatFee(doctor.fees?.examination)}</p>
+              <p className="text-gray-600">{formatFee(doctor.fees.examination)}</p>
             </div>
             <div>
               <h4 className="font-bold text-gray-700">رسوم الاستشارة:</h4>
-              <p className="text-gray-600">{formatFee(doctor.fees?.consultation)}</p>
+              <p className="text-gray-600">{formatFee(doctor.fees.consultation)}</p>
             </div>
           </div>
 
@@ -312,7 +253,7 @@ const DoctorCard = memo(({ doctor, compact = false }: DoctorCardProps) => {
                   </span>
                 ))
               ) : (
-                <span className="text-gray-500 text-sm">يرجى الاتصال لمعرفة المواعيد</span>
+                <span className="text-gray-500">يرجى الاتصال لمعرفة المواعيد</span>
               )}
             </div>
           </div>
@@ -325,10 +266,12 @@ const DoctorCard = memo(({ doctor, compact = false }: DoctorCardProps) => {
               عرض التفاصيل
             </Button>
             <Button 
-              className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-1" // Added gap for icon and text
+              className="bg-green-600 hover:bg-green-700 text-white"
               onClick={openWhatsApp}
             >
-              <WhatsAppIcon className="h-5 w-5" /> {/* Removed ml-2 as gap handles spacing */}
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+              </svg>
               احجز الآن
             </Button>
           </div>
@@ -336,13 +279,125 @@ const DoctorCard = memo(({ doctor, compact = false }: DoctorCardProps) => {
       </div>
       
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="p-0 max-w-[95vw] sm:max-w-md mx-auto rounded-lg overflow-hidden">
+        <DialogContent className="p-0 max-w-[95%] sm:max-w-md mx-auto rounded-lg overflow-hidden">
           <DoctorDetails doctor={doctor} onBooking={openWhatsApp} />
         </DialogContent>
       </Dialog>
     </motion.div>
   );
-});
-DoctorCard.displayName = 'DoctorCard'; // For better debugging with React.memo
+};
+
+// DoctorDetails component for the dialog with RTL adjustments
+const DoctorDetails = ({ doctor, onBooking }: { doctor: DoctorWithSpecialty; onBooking: () => void }) => {
+  const specialtyColors = getSpecialtyColorClass(doctor.specialty);
+
+  const formatFee = (fee: number | string | null) => {
+    if (fee === null) return 'غير متاح';
+    return typeof fee === 'number' ? `${fee} جنيه` : fee;
+  };
+
+  const getAvailableDays = () => {
+    return Object.entries(doctor.schedule)
+      .filter(([_, times]) => times.length > 0)
+      .map(([day, _]) => {
+        // Map English day key back to Arabic
+        const arabicDay = Object.keys(dayMappings).find(
+          (key) => dayMappings[key as keyof typeof dayMappings] === day
+        );
+        return arabicDay || day;
+      });
+  };
+  
+  const availableDays = getAvailableDays();
+  
+  return (
+    <div className="overflow-hidden">
+      {/* Header with doctor name and close button */}
+      <div className="bg-brand text-white p-4 text-center relative">
+        <div className="flex items-center justify-center gap-2">
+          <h3 className="text-xl font-bold">{doctor.name}</h3>
+        </div>
+         <Badge 
+            variant="outline" 
+            className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs`}
+          >
+            {doctor.specialty}
+          </Badge>
+        
+      </div>
+      
+      {/* Doctor details content */}
+      <div className="p-4 max-h-[70vh] overflow-y-auto dir-rtl">
+        {/* Bio section */}
+        {doctor.bio && (
+          <div className="mb-4 bg-gray-50 p-3 rounded-lg">
+            <h4 className="font-bold text-lg text-gray-800 mb-2 text-right">نبذة عن الطبيب</h4>
+            <p className="text-gray-700 text-right">{doctor.bio}</p>
+          </div>
+        )}
+        
+        {/* Fees section */}
+        <div className="mb-4 bg-gray-50 p-3 rounded-lg">
+          <h4 className="font-bold text-lg text-gray-800 mb-2 text-right">الرسوم</h4>
+          <div className="flex justify-between items-center border-b border-gray-200 py-2">
+            <span className="text-gray-900 font-medium">
+              {formatFee(doctor.fees.examination)}
+            </span>
+            <span className="text-gray-600">رسوم الكشف:</span>
+          </div>
+          <div className="flex justify-between items-center py-2">
+            <span className="text-gray-900 font-medium">
+              {doctor.fees.consultation 
+                ? formatFee(doctor.fees.consultation)
+                : 'غير متاح'}
+            </span>
+            <span className="text-gray-600">رسوم الاستشارة:</span>
+          </div>
+        </div>
+        
+        {/* Schedule section */}
+        <div className="mb-4 bg-gray-50 p-3 rounded-lg">
+          <h4 className="font-bold text-lg text-gray-800 mb-2 text-right">جدول المواعيد</h4>
+          {availableDays.length > 0 ? (
+            <div className="space-y-2">
+              {availableDays.map((day, index) => {
+                const englishDay = dayMappings[day as keyof typeof dayMappings];
+                const times = doctor.schedule[englishDay] || [];
+                
+                return (
+                  <div key={index} className="flex justify-between items-center border-b border-gray-200 pb-2 last:border-0">
+                    <div className="flex flex-wrap gap-1 text-left">
+                      {times.map((time: string, timeIndex: number) => (
+                        <span key={timeIndex} className="bg-blue-50 text-brand px-2 py-1 rounded text-sm">
+                          {time}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="font-medium text-gray-700">{day}:</span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center">يرجى الاتصال بالعيادة لمعرفة المواعيد المتاحة.</p>
+          )}
+        </div>
+      </div>
+      
+      {/* Call to action button */}
+      <div className="p-4 bg-gray-50 border-t border-gray-200">
+        <Button 
+          onClick={onBooking}
+          className="bg-green-600 hover:bg-green-700 text-white w-full flex items-center justify-center gap-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+          </svg>
+          احجز الآن عبر واتساب
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 export default DoctorCard;
