@@ -1,4 +1,3 @@
-
 import BookingWizard from '@/components/booking/BookingWizard';
 import { motion } from 'framer-motion';
 

@@ -108,6 +108,41 @@ export type Database = {
           },
         ]
       }
+      doctor_schedules: {
+        Row: {
+          created_at: string
+          day: string
+          doctor_id: number
+          id: number
+          time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          doctor_id: number
+          id?: number
+          time: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          doctor_id?: number
+          id?: number
+          time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctor_schedules_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       doctors: {
         Row: {
           bio: string | null
@@ -115,7 +150,7 @@ export type Database = {
           id: number
           image: string | null
           name: string
-          schedule: Json
+          old_schedule: Json
           specialty_id: number
         }
         Insert: {
@@ -124,7 +159,7 @@ export type Database = {
           id?: number
           image?: string | null
           name: string
-          schedule?: Json
+          old_schedule?: Json
           specialty_id: number
         }
         Update: {
@@ -133,7 +168,7 @@ export type Database = {
           id?: number
           image?: string | null
           name?: string
-          schedule?: Json
+          old_schedule?: Json
           specialty_id?: number
         }
         Relationships: [

@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 
 interface DoctorWithSpecialty extends ServiceDoctor {
   specialty: string;
+  schedule: Record<string, string[]>;
 }
 
 interface DoctorCardProps {
@@ -359,10 +360,8 @@ const DoctorDetails = ({ doctor, onBooking }: { doctor: DoctorWithSpecialty; onB
           {availableDays.length > 0 ? (
             <div className="space-y-2">
               {availableDays.map((day, index) => {
-                const englishDay = Object.entries(dayMappings)
-                  .find(([k, _]) => k === day)?.[1];
-                
-                const times = englishDay ? doctor.schedule[englishDay] : [];
+                const englishDay = dayMappings[day as keyof typeof dayMappings];
+                const times = doctor.schedule[englishDay] || [];
                 
                 return (
                   <div key={index} className="flex justify-between items-center border-b border-gray-200 pb-2 last:border-0">

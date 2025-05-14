@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HeroCarousel from '@/components/shared/HeroCarousel';
@@ -9,11 +8,12 @@ import DoctorCard from '@/components/shared/DoctorCard';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { getSpecialties, Specialty } from '@/services/specialtyService';
-import { getDoctors, Doctor } from '@/services/doctorService';
+import { getDoctors, Doctor, getDoctorSchedule } from '@/services/doctorService';
 
 const Index = () => {
   const navigate = useNavigate();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [doctorSchedules, setDoctorSchedules] = useState<Record<number, Record<string, string[]>>>({});
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -28,8 +28,18 @@ const Index = () => {
         // Fetch doctors
         const fetchedDoctors = await getDoctors();
         // Get only 3 doctors for the featured section
-        setDoctors(fetchedDoctors.slice(0, 3));
+        const featuredDoctors = fetchedDoctors.slice(0, 3);
+        setDoctors(featuredDoctors);
         console.log("Index page - Fetched doctors:", fetchedDoctors);
+        
+        // Fetch schedules for featured doctors
+        const schedules: Record<number, Record<string, string[]>> = {};
+        for (const doctor of featuredDoctors) {
+          const doctorSchedule = await getDoctorSchedule(doctor.id);
+          schedules[doctor.id] = doctorSchedule;
+        }
+        setDoctorSchedules(schedules);
+        
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -43,7 +53,8 @@ const Index = () => {
   // Transform doctors data to match DoctorWithSpecialty type
   const formattedDoctors = doctors.map((doctor) => ({
     ...doctor,
-    specialty: specialties.find(s => s.id === doctor.specialty_id)?.name || 'تخصص غير محدد'
+    specialty: specialties.find(s => s.id === doctor.specialty_id)?.name || 'تخصص غير محدد',
+    schedule: doctorSchedules[doctor.id] || {}
   }));
 
   return (
@@ -97,7 +108,7 @@ const Index = () => {
               <p className="text-center col-span-3">جاري تحميل بيانات الأطباء...</p>
             ) : formattedDoctors.length > 0 ? (
               formattedDoctors.map((doctor) => (
-                <DoctorCard key={doctor.id} doctor={doctor} />
+                <DoctorCard key={doctor.id} doctor={doctor} compact />
               ))
             ) : (
               <p className="text-center col-span-3">لا يوجد أطباء متاحين حالياً</p>

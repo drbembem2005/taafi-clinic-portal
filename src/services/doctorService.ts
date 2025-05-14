@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
@@ -16,7 +15,15 @@ export interface Doctor {
   bio?: string;
   image?: string;
   fees: Fees;
-  schedule: Record<string, any>;
+  schedule?: Record<string, any>; // Keep for backward compatibility during transition
+}
+
+// Define the DoctorSchedule type
+export interface DoctorSchedule {
+  id: number;
+  doctor_id: number;
+  day: string;
+  time: string;
 }
 
 export async function getDoctors(): Promise<Doctor[]> {
@@ -48,10 +55,7 @@ export async function getDoctors(): Promise<Doctor[]> {
       ...doctor,
       fees: typeof doctor.fees === 'string' 
         ? JSON.parse(doctor.fees) 
-        : doctor.fees,
-      schedule: typeof doctor.schedule === 'string'
-        ? JSON.parse(doctor.schedule)
-        : doctor.schedule
+        : doctor.fees
     })) as Doctor[];
   } catch (error) {
     console.error('Error in getDoctors:', error);
@@ -82,10 +86,7 @@ export async function getDoctor(id: number): Promise<Doctor | null> {
       ...data,
       fees: typeof data.fees === 'string' 
         ? JSON.parse(data.fees) 
-        : data.fees,
-      schedule: typeof data.schedule === 'string'
-        ? JSON.parse(data.schedule)
-        : data.schedule
+        : data.fees
     } as Doctor;
   } catch (error) {
     console.error('Error in getDoctor:', error);
@@ -116,14 +117,46 @@ export async function getDoctorsBySpecialty(specialtyId: number): Promise<Doctor
       ...doctor,
       fees: typeof doctor.fees === 'string' 
         ? JSON.parse(doctor.fees) 
-        : doctor.fees,
-      schedule: typeof doctor.schedule === 'string'
-        ? JSON.parse(doctor.schedule)
-        : doctor.schedule
+        : doctor.fees
     })) as Doctor[];
   } catch (error) {
     console.error('Error in getDoctorsBySpecialty:', error);
     return [];
+  }
+}
+
+// New function to get a doctor's schedule from the doctor_schedules table
+export async function getDoctorSchedule(doctorId: number): Promise<Record<string, string[]>> {
+  try {
+    const { data, error } = await supabase
+      .from('doctor_schedules')
+      .select('*')
+      .eq('doctor_id', doctorId);
+    
+    if (error) {
+      console.error('Error fetching doctor schedule:', error);
+      toast({
+        title: "خطأ",
+        description: error.message,
+        variant: "destructive",
+      });
+      return {};
+    }
+
+    // Convert the flat structure to the grouped day -> times[] format
+    const schedule: Record<string, string[]> = {};
+    
+    data.forEach((item: DoctorSchedule) => {
+      if (!schedule[item.day]) {
+        schedule[item.day] = [];
+      }
+      schedule[item.day].push(item.time);
+    });
+
+    return schedule;
+  } catch (error) {
+    console.error('Error in getDoctorSchedule:', error);
+    return {};
   }
 }
 
@@ -140,7 +173,7 @@ export async function seedDoctorsData() {
       },
       {
         name: "الجلدية والتجميل",
-        description: "علاج أمراض البشرة والتجميل",
+        description: "علاج أ��راض البشرة والتجميل",
         details: "علاج أمراض الجلد المختلفة وإجراءات التجميل غير الجراحية",
         icon: "sparkles"
       },

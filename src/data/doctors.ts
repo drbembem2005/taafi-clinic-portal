@@ -13,6 +13,7 @@ export interface Doctor {
   bio?: string;
 }
 
+// Note: This static data is mainly for reference now that we're using the database
 export const doctors: Doctor[] = [
   {"name":"د. حنان زغلول","specialty":"طب الأطفال وحديثي الولادة","fees":{"examination":400,"consultation":200},"schedule":{"Sat":[],"Sun":["18:00"],"Mon":[],"Tue":["18:00"],"Wed":[],"Thu":["18:00"]}},
   {"name":"د. سمية علي عسكر","specialty":"طب الأطفال وحديثي الولادة","fees":{"examination":400,"consultation":100},"schedule":{"Sat":["19:00"],"Sun":[],"Mon":["19:00"],"Tue":[],"Wed":["19:00"],"Thu":[]}},

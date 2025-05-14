@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { getDoctors, getDoctorsBySpecialty, Doctor } from '@/services/doctorService';
+import { getDoctors, getDoctorsBySpecialty, Doctor, getDoctorSchedule } from '@/services/doctorService';
 import { getSpecialties, Specialty } from '@/services/specialtyService';
 import DoctorCard from '@/components/shared/DoctorCard';
 import { Label } from '@/components/ui/label';
@@ -12,6 +12,7 @@ import { toast } from '@/components/ui/use-toast';
 const Doctors = () => {
   const location = useLocation();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [doctorSchedules, setDoctorSchedules] = useState<Record<number, Record<string, string[]>>>({});
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>("all");
   const [loading, setLoading] = useState(true);
@@ -64,6 +65,15 @@ const Doctors = () => {
         }
         
         setDoctors(fetchedDoctors);
+        
+        // Fetch schedules for all doctors
+        const schedules: Record<number, Record<string, string[]>> = {};
+        for (const doctor of fetchedDoctors) {
+          const doctorSchedule = await getDoctorSchedule(doctor.id);
+          schedules[doctor.id] = doctorSchedule;
+        }
+        setDoctorSchedules(schedules);
+        
       } catch (error) {
         console.error("Error fetching doctors:", error);
         toast({
@@ -123,7 +133,8 @@ const Doctors = () => {
               key={doctor.id} 
               doctor={{
                 ...doctor,
-                specialty: specialties.find(s => s.id === doctor.specialty_id)?.name || ''
+                specialty: specialties.find(s => s.id === doctor.specialty_id)?.name || '',
+                schedule: doctorSchedules[doctor.id] || {}
               }} 
             />
           ))}
