@@ -316,12 +316,6 @@ const DoctorDetails = ({ doctor, onBooking }: { doctor: DoctorWithSpecialty; onB
       <div className="bg-brand text-white p-4 text-center relative">
         <div className="flex items-center justify-center gap-2">
           <h3 className="text-xl font-bold">{doctor.name}</h3>
-          <Badge 
-            variant="outline" 
-            className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs`}
-          >
-            {doctor.specialty}
-          </Badge>
         </div>
       </div>
       
