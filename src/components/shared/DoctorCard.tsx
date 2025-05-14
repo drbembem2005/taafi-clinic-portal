@@ -18,8 +18,97 @@ interface DoctorCardProps {
   compact?: boolean;
 }
 
+// Function to get color for specialty badges
+const getSpecialtyColorClass = (specialty: string) => {
+  // Map of specialties to color classes
+  const colorMap: Record<string, { bg: string, text: string, border: string }> = {
+    "طب الأطفال وحديثي الولادة": { 
+      bg: "bg-blue-50", 
+      text: "text-blue-600", 
+      border: "border-blue-100" 
+    },
+    "النساء والتوليد والعقم": { 
+      bg: "bg-pink-50", 
+      text: "text-pink-600", 
+      border: "border-pink-100" 
+    },
+    "الجلدية والتجميل": { 
+      bg: "bg-purple-50", 
+      text: "text-purple-600", 
+      border: "border-purple-100" 
+    },
+    "الجراحة العامة والمناظير": { 
+      bg: "bg-red-50", 
+      text: "text-red-600", 
+      border: "border-red-100" 
+    },
+    "الذكورة وتأخر الإنجاب": { 
+      bg: "bg-indigo-50", 
+      text: "text-indigo-600", 
+      border: "border-indigo-100" 
+    },
+    "الباطنة والسكري والغدد والكلى": { 
+      bg: "bg-green-50", 
+      text: "text-green-600", 
+      border: "border-green-100" 
+    },
+    "الأمراض النفسية وتعديل السلوك": { 
+      bg: "bg-violet-50", 
+      text: "text-violet-600", 
+      border: "border-violet-100" 
+    },
+    "علاج الأورام والمناظير": { 
+      bg: "bg-amber-50", 
+      text: "text-amber-600", 
+      border: "border-amber-100" 
+    },
+    "جراحة المخ والأعصاب والعمود الفقري": { 
+      bg: "bg-cyan-50", 
+      text: "text-cyan-600", 
+      border: "border-cyan-100" 
+    },
+    "الأنف والأذن والحنجرة": { 
+      bg: "bg-orange-50", 
+      text: "text-orange-600", 
+      border: "border-orange-100" 
+    },
+    "العظام والمفاصل وإصابات الملاعب": { 
+      bg: "bg-lime-50", 
+      text: "text-lime-600", 
+      border: "border-lime-100" 
+    },
+    "الروماتيزم والمفاصل": { 
+      bg: "bg-teal-50", 
+      text: "text-teal-600", 
+      border: "border-teal-100" 
+    },
+    "التغذية العلاجية والعلاج الطبيعي": { 
+      bg: "bg-emerald-50", 
+      text: "text-emerald-600", 
+      border: "border-emerald-100" 
+    },
+    "طب وجراحة الأسنان": { 
+      bg: "bg-sky-50", 
+      text: "text-sky-600", 
+      border: "border-sky-100" 
+    },
+  };
+
+  // Default color if specialty not found in map
+  const defaultColor = { 
+    bg: "bg-gray-50", 
+    text: "text-gray-600", 
+    border: "border-gray-100" 
+  };
+
+  return colorMap[specialty] || defaultColor;
+};
+
 const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
   const [showDialog, setShowDialog] = useState(false);
+  
+  // Get specialty colors
+  const specialtyColors = getSpecialtyColorClass(doctor.specialty);
   
   // Get available days from schedule
   const getAvailableDays = () => {
@@ -67,7 +156,10 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
             </div>
             <div>
               <h3 className="font-bold text-gray-900">{doctor.name}</h3>
-              <Badge variant="outline" className="text-xs bg-blue-50 text-brand border-blue-100 mt-1">
+              <Badge 
+                variant="outline" 
+                className={`text-xs ${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} mt-1`}
+              >
                 {doctor.specialty}
               </Badge>
               {doctor.bio && (
@@ -124,17 +216,21 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
         
         <div className="md:col-span-3 p-6">
           <div className="flex flex-wrap items-center justify-between">
-            <h3 className="text-2xl font-bold text-gray-900 mb-1">{doctor.name}</h3>
-            <Badge variant="outline" className="bg-blue-50 text-brand border-blue-100">
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-1">{doctor.name}</h3>
+              {doctor.bio && (
+                <p className="text-gray-600 mb-2 line-clamp-2">{doctor.bio}</p>
+              )}
+            </div>
+            <Badge 
+              variant="outline" 
+              className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-sm`}
+            >
               {doctor.specialty}
             </Badge>
           </div>
           
-          {doctor.bio && (
-            <p className="text-gray-600 mb-3 line-clamp-2">{doctor.bio}</p>
-          )}
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 mt-4">
             <div>
               <h4 className="font-bold text-gray-700">رسوم الكشف:</h4>
               <p className="text-gray-600">{formatFee(doctor.fees.examination)}</p>
@@ -189,8 +285,10 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
   );
 };
 
-// Redesigned DoctorDetails component for the dialog with RTL adjustments
+// DoctorDetails component for the dialog with RTL adjustments
 const DoctorDetails = ({ doctor, onBooking }: { doctor: DoctorWithSpecialty; onBooking: () => void }) => {
+  const specialtyColors = getSpecialtyColorClass(doctor.specialty);
+
   const formatFee = (fee: number | string | null) => {
     if (fee === null) return 'غير متاح';
     return typeof fee === 'number' ? `${fee} جنيه` : fee;
@@ -215,11 +313,24 @@ const DoctorDetails = ({ doctor, onBooking }: { doctor: DoctorWithSpecialty; onB
       {/* Header with doctor name and close button */}
       <div className="bg-brand text-white p-4 text-center relative">
         <h3 className="text-xl font-bold">{doctor.name}</h3>
-        <p className="text-sm text-blue-100">{doctor.specialty}</p>
+        <Badge 
+          variant="outline" 
+          className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs mt-1`}
+        >
+          {doctor.specialty}
+        </Badge>
       </div>
       
       {/* Doctor details content */}
       <div className="p-4 max-h-[70vh] overflow-y-auto dir-rtl">
+        {/* Bio section */}
+        {doctor.bio && (
+          <div className="mb-4 bg-gray-50 p-3 rounded-lg">
+            <h4 className="font-bold text-lg text-gray-800 mb-2 text-right">نبذة عن الطبيب</h4>
+            <p className="text-gray-700 text-right">{doctor.bio}</p>
+          </div>
+        )}
+        
         {/* Fees section */}
         <div className="mb-4 bg-gray-50 p-3 rounded-lg">
           <h4 className="font-bold text-lg text-gray-800 mb-2 text-right">الرسوم</h4>
@@ -268,14 +379,6 @@ const DoctorDetails = ({ doctor, onBooking }: { doctor: DoctorWithSpecialty; onB
             <p className="text-gray-500 text-center">يرجى الاتصال بالعيادة لمعرفة المواعيد المتاحة.</p>
           )}
         </div>
-        
-        {/* Bio section */}
-        {doctor.bio && (
-          <div className="mb-4 bg-gray-50 p-3 rounded-lg">
-            <h4 className="font-bold text-lg text-gray-800 mb-2 text-right">نبذة عن الطبيب</h4>
-            <p className="text-gray-700 text-right">{doctor.bio}</p>
-          </div>
-        )}
       </div>
       
       {/* Call to action button */}
