@@ -2,7 +2,7 @@
 import { motion } from 'framer-motion';
 import { Specialty } from '@/data/specialties';
 import { Link } from 'react-router-dom';
-import { Heart, Baby, Brain, User, Flask, Stethoscope } from 'lucide-react';
+import { Heart, Baby, Brain, User, Stethoscope, Microscope } from 'lucide-react';
 
 interface SpecialtyCardProps {
   specialty: Specialty;
@@ -50,6 +50,8 @@ const SpecialtyCard = ({ specialty }: SpecialtyCardProps) => {
       case 'female':
       case 'male':
         return <User className={iconClass} />;
+      case 'microscope':
+        return <Microscope className={iconClass} />;
       default:
         return <Stethoscope className={iconClass} />;
     }
