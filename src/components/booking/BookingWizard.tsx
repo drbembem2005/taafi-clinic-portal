@@ -1,700 +1,572 @@
 
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { motion, AnimatePresence } from 'framer-motion';
-import { weekDays, dayMappings } from '@/data/doctors';
-import { Doctor, getDoctors, getDoctorsBySpecialty } from '@/services/doctorService';
-import { specialties } from '@/data/specialties';
+import { Card, CardContent } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { getSpecialties, Specialty } from '@/services/specialtyService';
+import { getDoctorsBySpecialty, Doctor, getDoctorSchedule } from '@/services/doctorService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Calendar, Phone, User, CalendarIcon, ChevronRight, ChevronLeft } from 'lucide-react';
+import { dayMappings } from '@/data/doctors';
 
 interface BookingFormData {
-  specialty: string | null;
-  doctor: Doctor | null;
-  day: string | null;
-  time: string | null;
-  name: string;
-  phone: string;
-  email?: string;
-  notes: string;
+  specialtyId: number;
+  doctorId: number;
+  bookingDay: string;
+  bookingTime: string;
+  userName: string;
+  userPhone: string;
+  userEmail?: string;
+  notes?: string;
+  bookingMethod: 'whatsapp' | 'call' | 'email';
 }
 
 const BookingWizard = () => {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<BookingFormData>({
-    specialty: null,
-    doctor: null,
-    day: null,
-    time: null,
-    name: '',
-    phone: '',
-    email: '',
-    notes: '',
-  });
-  const [filteredDoctors, setFilteredDoctors] = useState<Doctor[]>([]);
+  const [specialties, setSpecialties] = useState<Specialty[]>([]);
+  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [schedule, setSchedule] = useState<Record<string, string[]>>({});
+  const [availableDays, setAvailableDays] = useState<string[]>([]);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
-  const [bookingMethod, setBookingMethod] = useState<'whatsapp' | 'form'>('whatsapp');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [formData, setFormData] = useState<BookingFormData>({
+    specialtyId: 0,
+    doctorId: 0,
+    bookingDay: '',
+    bookingTime: '',
+    userName: '',
+    userPhone: '',
+    userEmail: '',
+    notes: '',
+    bookingMethod: 'whatsapp'
+  });
 
-  // Reorder weekDays to start with Saturday
-  const orderedWeekDays = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
-
-  // Handle input changes for form fields
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+  // Convert English day to Arabic
+  const getArabicDay = (englishDay: string): string => {
+    const arabicDay = Object.keys(dayMappings).find(
+      key => dayMappings[key as keyof typeof dayMappings] === englishDay
+    );
+    return arabicDay || englishDay;
   };
 
-  // Step 1: Select specialty
-  const handleSpecialtySelect = async (specialtyName: string) => {
-    // Find the specialty ID
-    const specialty = specialties.find(s => s.name === specialtyName);
-    
-    if (!specialty) {
-      toast({
-        title: "خطأ",
-        description: "لم يتم العثور على التخصص",
-        variant: "destructive"
-      });
+  // Convert Arabic day to English
+  const getEnglishDay = (arabicDay: string): string => {
+    return dayMappings[arabicDay as keyof typeof dayMappings] || arabicDay;
+  };
+
+  // Fetch specialties
+  useEffect(() => {
+    const fetchSpecialties = async () => {
+      try {
+        setLoading(true);
+        const data = await getSpecialties();
+        setSpecialties(data);
+      } catch (error) {
+        console.error('Error fetching specialties:', error);
+        toast({
+          title: "خطأ",
+          description: "حدث خطأ أثناء تحميل التخصصات",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSpecialties();
+  }, []);
+
+  // When specialty changes, fetch doctors
+  useEffect(() => {
+    const fetchDoctors = async () => {
+      if (!formData.specialtyId) return;
+      try {
+        setLoading(true);
+        const data = await getDoctorsBySpecialty(formData.specialtyId);
+        setDoctors(data);
+      } catch (error) {
+        console.error('Error fetching doctors:', error);
+        toast({
+          title: "خطأ",
+          description: "حدث خطأ أثناء تحميل بيانات الأطباء",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDoctors();
+  }, [formData.specialtyId]);
+
+  // When doctor changes, fetch schedule
+  useEffect(() => {
+    const fetchDoctorSchedule = async () => {
+      if (!formData.doctorId) return;
+      
+      try {
+        setLoading(true);
+        console.log(`Fetching schedule for doctor ID: ${formData.doctorId}`);
+        const scheduleData = await getDoctorSchedule(formData.doctorId);
+        console.log('Fetched schedule:', scheduleData);
+        
+        setSchedule(scheduleData);
+        
+        // Get available days from schedule
+        const days = Object.keys(scheduleData).filter(
+          day => scheduleData[day] && scheduleData[day].length > 0
+        );
+        
+        console.log('Available days:', days);
+        const arabicDays = days.map(day => getArabicDay(day));
+        setAvailableDays(arabicDays);
+        
+        // Reset booking day and time
+        setFormData(prev => ({
+          ...prev,
+          bookingDay: '',
+          bookingTime: ''
+        }));
+        setAvailableTimes([]);
+      } catch (error) {
+        console.error('Error fetching doctor schedule:', error);
+        toast({
+          title: "خطأ",
+          description: "حدث خطأ أثناء تحميل جدول المواعيد",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDoctorSchedule();
+  }, [formData.doctorId]);
+
+  // When day changes, update available times
+  useEffect(() => {
+    if (!formData.bookingDay) {
+      setAvailableTimes([]);
       return;
     }
 
-    // Filter doctors by specialty ID
-    const doctorsInSpecialty = await getDoctorsBySpecialty(specialty.id);
-
-    setFormData({ ...formData, specialty: specialtyName, doctor: null, day: null, time: null });
-    setFilteredDoctors(doctorsInSpecialty);
-    setAvailableTimes([]);
-    setStep(2);
-  };
-
-  // Step 2: Select doctor
-  const handleDoctorSelect = (doctor: Doctor) => {
-    setFormData({ ...formData, doctor, day: null, time: null });
-    setStep(3);
-  };
-
-  // Step 3: Select day and time
-  const handleDaySelect = (day: string) => {
-    if (!formData.doctor) return;
-
-    const englishDay = Object.entries({
-      'السبت': 'Sat',
-      'الأحد': 'Sun',
-      'الاثنين': 'Mon',
-      'الثلاثاء': 'Tue',
-      'الأربعاء': 'Wed',
-      'الخميس': 'Thu',
-      'الجمعة': 'Fri'
-    }).find(([arabicDay]) => arabicDay === day)?.[1];
-
-    if (!englishDay) return;
-
-    // Get available times for the selected doctor and day
-    const schedule = formData.doctor.schedule;
-    const times = (schedule && schedule[englishDay]) || [];
-    
-    setFormData({ ...formData, day, time: null });
+    const englishDay = getEnglishDay(formData.bookingDay);
+    const times = schedule[englishDay] || [];
     setAvailableTimes(times);
-  };
-
-  const handleTimeSelect = (time: string) => {
-    setFormData({ ...formData, time });
-  };
-
-  const handleScheduleConfirm = () => {
-    setStep(4);
-  };
-
-  // Go back one step
-  const handleBack = () => {
-    if (step > 1) {
-      setStep(step - 1);
-    }
-  };
-
-  // Find specialty ID by specialty name
-  const findSpecialtyId = (specialtyName: string | null): number | null => {
-    if (!specialtyName) return null;
-    const specialty = specialties.find(s => s.name === specialtyName);
-    return specialty ? specialty.id : null;
-  };
-
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
     
-    if (bookingMethod === 'whatsapp') {
-      // Format message for WhatsApp
-      const { specialty, doctor, day, time } = formData;
-      const message = `مرحباً، أود حجز موعد مع ${doctor?.name} (${specialty}) يوم ${day} الساعة ${time}.`;
-      const encodedMessage = encodeURIComponent(message);
-      window.open(`https://wa.me/201119007403?text=${encodedMessage}`, '_blank');
-    } else {
-      // Handle form submission to Supabase
-      try {
-        setIsSubmitting(true);
-        
-        // Find specialty ID
-        const specialtyId = findSpecialtyId(formData.specialty);
-        
-        const bookingData = {
-          user_name: formData.name,
-          user_phone: formData.phone,
-          user_email: formData.email || null,
-          doctor_id: formData.doctor?.id || null,
-          specialty_id: specialtyId,
-          booking_day: formData.day,
-          booking_time: formData.time,
-          notes: formData.notes || null,
-          booking_method: 'form'
-        };
-        
-        console.log('Submitting booking data:', bookingData);
-        
-        const { error } = await supabase
-          .from('bookings')
-          .insert(bookingData);
-          
-        if (error) throw error;
-        
-        // Show success toast
-        toast({
-          title: "تم إرسال طلب الحجز بنجاح!",
-          description: "سنتواصل معك قريباً لتأكيد الموعد.",
-        });
-        
-        // Reset form
-        setFormData({
-          specialty: null,
-          doctor: null,
-          day: null,
-          time: null,
-          name: '',
-          phone: '',
-          email: '',
-          notes: '',
-        });
-        
-        // Go back to first step
-        setStep(1);
-      } catch (error) {
+    // Reset booking time
+    setFormData(prev => ({
+      ...prev,
+      bookingTime: ''
+    }));
+  }, [formData.bookingDay, schedule]);
+
+  const handleInputChange = (field: keyof BookingFormData, value: string | number) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const nextStep = () => {
+    setStep(prevStep => prevStep + 1);
+  };
+
+  const prevStep = () => {
+    setStep(prevStep => prevStep - 1);
+  };
+
+  const handleSubmit = async () => {
+    setSubmitLoading(true);
+    try {
+      // Convert Arabic day to English before sending to backend
+      const englishDay = getEnglishDay(formData.bookingDay);
+      
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert([
+          {
+            doctor_id: formData.doctorId,
+            specialty_id: formData.specialtyId,
+            booking_day: englishDay,
+            booking_time: formData.bookingTime,
+            user_name: formData.userName,
+            user_phone: formData.userPhone,
+            user_email: formData.userEmail || null,
+            notes: formData.notes || null,
+            booking_method: formData.bookingMethod
+          }
+        ])
+        .select();
+
+      if (error) {
         console.error('Error submitting booking:', error);
         toast({
-          title: "حدث خطأ أثناء إرسال طلب الحجز",
-          description: "يرجى المحاولة مرة أخرى لاحقاً.",
-          variant: "destructive"
+          title: "خطأ في الحجز",
+          description: error.message,
+          variant: "destructive",
         });
-      } finally {
-        setIsSubmitting(false);
+      } else {
+        toast({
+          title: "تم الحجز بنجاح",
+          description: "سيتم التواصل معك قريباً لتأكيد الحجز",
+        });
+        setStep(5); // Success step
       }
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: "خطأ غير متوقع",
+        description: "حدث خطأ أثناء إرسال طلب الحجز، يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
-  // Check if doctor is available on a specific day
-  const isDoctorAvailableOnDay = (doctor: Doctor, arabicDay: string): boolean => {
-    const englishDay = dayMappings[arabicDay as keyof typeof dayMappings];
-    const schedule = doctor.schedule || {};
-    return !!schedule[englishDay]?.length;
+  // Helper to find a doctor's name by ID
+  const getDoctorName = (id: number) => {
+    const doctor = doctors.find(d => d.id === id);
+    return doctor ? doctor.name : 'طبيب غير معروف';
   };
 
-  // Animation variants
-  const variants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: { opacity: 1, x: 0 },
+  // Helper to find a specialty's name by ID
+  const getSpecialtyName = (id: number) => {
+    const specialty = specialties.find(s => s.id === id);
+    return specialty ? specialty.name : 'تخصص غير معروف';
   };
 
-  // Helper function to get specialty name by ID
-  const getSpecialtyNameById = (specialtyId: number | undefined): string => {
-    if (!specialtyId) return '';
-    const specialty = specialties.find(s => s.id === specialtyId);
-    return specialty ? specialty.name : '';
-  };
+  // Render the current step
+  const renderStep = () => {
+    switch (step) {
+      case 1:
+        return (
+          <Card className="w-full max-w-md mx-auto">
+            <CardContent className="pt-6">
+              <h2 className="text-xl font-bold text-center mb-6">اختر التخصص</h2>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="specialty">التخصص</Label>
+                  <Select 
+                    value={formData.specialtyId.toString()} 
+                    onValueChange={(value) => handleInputChange('specialtyId', parseInt(value))}
+                    disabled={loading}
+                  >
+                    <SelectTrigger id="specialty" className="w-full">
+                      <SelectValue placeholder="اختر التخصص" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {specialties.map((specialty) => (
+                        <SelectItem key={specialty.id} value={specialty.id.toString()}>
+                          {specialty.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-  // Get color for specialty badges
-  const getSpecialtyColor = (specialtyName: string) => {
-    const colorMap: Record<string, string> = {
-      "طب الأطفال وحديثي الولادة": "bg-blue-500",
-      "النساء والتوليد والعقم": "bg-pink-500",
-      "الجلدية والتجميل": "bg-purple-500",
-      "الجراحة العامة والمناظير": "bg-red-500",
-      "الذكورة وتأخر الإنجاب": "bg-indigo-500",
-      "الباطنة والسكري والغدد والكلى": "bg-green-500",
-      "الأمراض النفسية وتعديل السلوك": "bg-violet-500",
-      "علاج الأورام والمناظير": "bg-amber-500",
-      "جراحة المخ والأعصاب والعمود الفقري": "bg-cyan-500",
-      "الأنف والأذن والحنجرة": "bg-orange-500",
-      "العظام والمفاصل وإصابات الملاعب": "bg-lime-500",
-      "الروماتيزم والمفاصل": "bg-teal-500",
-      "التغذية العلاجية والعلاج الطبيعي": "bg-emerald-500",
-      "طب وجراحة الأسنان": "bg-sky-500",
-    };
-    return colorMap[specialtyName] || "bg-gray-500";
-  };
+                <div className="flex justify-end pt-4">
+                  <Button 
+                    onClick={nextStep} 
+                    disabled={!formData.specialtyId || loading}
+                    className="bg-brand hover:bg-brand-dark"
+                  >
+                    التالي
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      
+      case 2:
+        return (
+          <Card className="w-full max-w-md mx-auto">
+            <CardContent className="pt-6">
+              <h2 className="text-xl font-bold text-center mb-6">اختر الطبيب</h2>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="doctor">الطبيب</Label>
+                  <Select 
+                    value={formData.doctorId.toString()} 
+                    onValueChange={(value) => handleInputChange('doctorId', parseInt(value))}
+                    disabled={loading}
+                  >
+                    <SelectTrigger id="doctor" className="w-full">
+                      <SelectValue placeholder="اختر الطبيب" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {doctors.map((doctor) => (
+                        <SelectItem key={doctor.id} value={doctor.id.toString()}>
+                          {doctor.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-  // Progress step components
-  const ProgressBar = () => (
-    <div className="relative mt-2 mb-8">
-      <div className="absolute inset-0 flex items-center">
-        <div className="h-0.5 w-full bg-gray-200"></div>
-      </div>
-      <div className="relative flex justify-between">
-        {[1, 2, 3, 4].map((i) => (
-          <div
-            key={i}
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
-              step === i 
-                ? 'bg-brand text-white' 
-                : step > i 
-                  ? 'bg-green-500 text-white' 
-                  : 'bg-gray-200 text-gray-500'
-            }`}
-          >
-            {step > i ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            ) : (
-              i
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="flex justify-between mt-2 text-xs text-gray-500 px-1">
-        <div className="text-center">التخصص</div>
-        <div className="text-center">الطبيب</div>
-        <div className="text-center">الموعد</div>
-        <div className="text-center">التأكيد</div>
-      </div>
-    </div>
-  );
+                <div className="flex justify-between pt-4">
+                  <Button variant="outline" onClick={prevStep}>السابق</Button>
+                  <Button 
+                    onClick={nextStep} 
+                    disabled={!formData.doctorId || loading}
+                    className="bg-brand hover:bg-brand-dark"
+                  >
+                    التالي
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      
+      case 3:
+        return (
+          <Card className="w-full max-w-md mx-auto">
+            <CardContent className="pt-6">
+              <h2 className="text-xl font-bold text-center mb-6">اختر الموعد</h2>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="day">اليوم</Label>
+                  <Select 
+                    value={formData.bookingDay} 
+                    onValueChange={(value) => handleInputChange('bookingDay', value)}
+                    disabled={loading || availableDays.length === 0}
+                  >
+                    <SelectTrigger id="day" className="w-full">
+                      <SelectValue placeholder={availableDays.length ? "اختر اليوم" : "لا توجد أيام متاحة"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableDays.map((day) => (
+                        <SelectItem key={day} value={day}>
+                          {day}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="time">الوقت</Label>
+                  <Select 
+                    value={formData.bookingTime} 
+                    onValueChange={(value) => handleInputChange('bookingTime', value)}
+                    disabled={loading || !formData.bookingDay || availableTimes.length === 0}
+                  >
+                    <SelectTrigger id="time" className="w-full">
+                      <SelectValue placeholder={availableTimes.length ? "اختر الوقت" : "لا توجد أوقات متاحة"} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableTimes.map((time) => (
+                        <SelectItem key={time} value={time}>
+                          {time}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex justify-between pt-4">
+                  <Button variant="outline" onClick={prevStep}>السابق</Button>
+                  <Button 
+                    onClick={nextStep} 
+                    disabled={!formData.bookingDay || !formData.bookingTime || loading}
+                    className="bg-brand hover:bg-brand-dark"
+                  >
+                    التالي
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      
+      case 4:
+        return (
+          <Card className="w-full max-w-md mx-auto">
+            <CardContent className="pt-6">
+              <h2 className="text-xl font-bold text-center mb-6">بيانات الحجز</h2>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">الاسم</Label>
+                  <Input 
+                    id="name" 
+                    value={formData.userName} 
+                    onChange={(e) => handleInputChange('userName', e.target.value)}
+                    placeholder="الاسم بالكامل"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="phone">رقم الهاتف</Label>
+                  <Input 
+                    id="phone" 
+                    value={formData.userPhone} 
+                    onChange={(e) => handleInputChange('userPhone', e.target.value)}
+                    placeholder="رقم الهاتف"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email">البريد الإلكتروني (اختياري)</Label>
+                  <Input 
+                    id="email" 
+                    value={formData.userEmail || ''} 
+                    onChange={(e) => handleInputChange('userEmail', e.target.value)}
+                    placeholder="البريد الإلكتروني"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="notes">ملاحظات إضافية (اختياري)</Label>
+                  <Textarea 
+                    id="notes" 
+                    value={formData.notes || ''} 
+                    onChange={(e) => handleInputChange('notes', e.target.value)}
+                    placeholder="أي معلومات إضافية تود إضافتها"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="method">طريقة التواصل المفضلة</Label>
+                  <Select 
+                    value={formData.bookingMethod} 
+                    onValueChange={(value) => handleInputChange('bookingMethod', value)}
+                  >
+                    <SelectTrigger id="method" className="w-full">
+                      <SelectValue placeholder="اختر طريقة التواصل" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="whatsapp">واتساب</SelectItem>
+                      <SelectItem value="call">مكالمة هاتفية</SelectItem>
+                      <SelectItem value="email">البريد الإلكتروني</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="mt-6 p-4 bg-gray-50 rounded-md">
+                  <h3 className="font-bold text-lg mb-2">ملخص الحجز</h3>
+                  <p className="mb-1"><span className="font-bold">التخصص:</span> {getSpecialtyName(formData.specialtyId)}</p>
+                  <p className="mb-1"><span className="font-bold">الطبيب:</span> {getDoctorName(formData.doctorId)}</p>
+                  <p className="mb-1"><span className="font-bold">اليوم:</span> {formData.bookingDay}</p>
+                  <p><span className="font-bold">الوقت:</span> {formData.bookingTime}</p>
+                </div>
+
+                <div className="flex justify-between pt-4">
+                  <Button variant="outline" onClick={prevStep}>السابق</Button>
+                  <Button 
+                    onClick={handleSubmit} 
+                    className="bg-brand hover:bg-brand-dark"
+                    disabled={!formData.userName || !formData.userPhone || submitLoading}
+                  >
+                    {submitLoading ? 'جاري الإرسال...' : 'تأكيد الحجز'}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      
+      case 5:
+        return (
+          <Card className="w-full max-w-md mx-auto">
+            <CardContent className="pt-6">
+              <div className="text-center my-8">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">تم الحجز بنجاح</h2>
+                <p className="text-gray-600 mb-6">
+                  شكراً لك، سيتم التواصل معك قريباً لتأكيد الحجز
+                </p>
+                <div className="mt-6 p-4 bg-gray-50 rounded-md text-right">
+                  <h3 className="font-bold text-lg mb-2">تفاصيل الحجز</h3>
+                  <p className="mb-1"><span className="font-bold">التخصص:</span> {getSpecialtyName(formData.specialtyId)}</p>
+                  <p className="mb-1"><span className="font-bold">الطبيب:</span> {getDoctorName(formData.doctorId)}</p>
+                  <p className="mb-1"><span className="font-bold">اليوم:</span> {formData.bookingDay}</p>
+                  <p><span className="font-bold">الوقت:</span> {formData.bookingTime}</p>
+                </div>
+                <Button 
+                  className="mt-6 bg-brand hover:bg-brand-dark"
+                  onClick={() => window.location.href = '/'}
+                >
+                  العودة للرئيسية
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      
+      default:
+        return <div>خطأ غير متوقع</div>;
+    }
+  };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="p-4 md:p-6">
-        <ProgressBar />
-
-        <AnimatePresence mode="wait">
-          {step === 1 && (
-            <motion.div
-              key="step1"
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              variants={variants}
-              transition={{ duration: 0.3 }}
-              className="space-y-4"
+    <div className="max-w-4xl mx-auto">
+      {/* Progress steps */}
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-2">
+          {[1, 2, 3, 4].map((stepNumber) => (
+            <div 
+              key={stepNumber}
+              className={`flex items-center ${step !== 5 ? 'w-1/4' : 'w-1/5'}`}
             >
-              <div className="text-center mb-6">
-                <h2 className="text-xl md:text-2xl font-bold text-gray-800">اختر التخصص الطبي</h2>
-                <p className="text-gray-500 text-sm mt-1">الخطوة الأولى: تحديد نوع التخصص المطلوب</p>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {specialties.map((specialty) => (
-                  <motion.div
-                    key={specialty.id}
-                    className={`p-3 rounded-lg cursor-pointer transition-all border shadow-sm hover:shadow-md hover:border-brand/50 flex items-center`}
-                    onClick={() => handleSpecialtySelect(specialty.name)}
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <div className={`w-10 h-10 rounded-full ${getSpecialtyColor(specialty.name)} text-white flex items-center justify-center shrink-0 ml-3`}>
-                      <span className="text-lg font-bold">{specialty.name.charAt(0)}</span>
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-800">{specialty.name}</h3>
-                      <p className="text-gray-500 text-xs line-clamp-1">{specialty.description}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {step === 2 && (
-            <motion.div
-              key="step2"
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              variants={variants}
-              transition={{ duration: 0.3 }}
-              className="space-y-4"
-            >
-              <div className="text-center mb-6">
-                <h2 className="text-xl md:text-2xl font-bold text-gray-800">اختر الطبيب</h2>
-                <p className="text-gray-500 text-sm mt-1">الخطوة الثانية: تحديد الطبيب المناسب لحالتك</p>
-              </div>
-
-              <div className="bg-blue-50 rounded-lg p-3 flex items-center mb-3">
-                <div className={`w-8 h-8 rounded-full ${getSpecialtyColor(formData.specialty || '')} text-white flex items-center justify-center mr-3`}>
-                  <span className="text-sm font-bold">{formData.specialty?.charAt(0)}</span>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">
-                    التخصص المختار: <span className="font-bold text-brand">{formData.specialty}</span>
-                  </p>
-                </div>
-              </div>
-              
-              {filteredDoctors.length > 0 ? (
-                <div className="space-y-3">
-                  {filteredDoctors.map((doctor) => (
-                    <motion.div
-                      key={doctor.id}
-                      className="border rounded-lg p-3 cursor-pointer transition-all hover:border-brand/50 hover:shadow-sm"
-                      onClick={() => handleDoctorSelect(doctor)}
-                      whileHover={{ scale: 1.01 }}
-                    >
-                      <div className="flex items-center">
-                        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center ml-3 shrink-0">
-                          {doctor.image ? (
-                            <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover rounded-full" />
-                          ) : (
-                            <User className="h-6 w-6 text-gray-500" />
-                          )}
-                        </div>
-                        <div className="flex-grow">
-                          <h3 className="font-bold text-gray-800">{doctor.name}</h3>
-                          <p className="text-gray-500 text-xs">
-                            {getSpecialtyNameById(doctor.specialty_id)}
-                          </p>
-                        </div>
-                        <ChevronLeft className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <div className="mt-2 pt-2 border-t flex justify-between items-center">
-                        <span className="text-xs text-gray-500">
-                          رسوم الكشف: 
-                          <span className="font-medium text-gray-700 mr-1">
-                            {typeof doctor.fees.examination === 'number' 
-                              ? `${doctor.fees.examination} جنيه` 
-                              : doctor.fees.examination}
-                          </span>
-                        </span>
-                        <span className="text-xs bg-brand/10 text-brand px-2 py-1 rounded-full">
-                          متاح
-                        </span>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="text-gray-400 mx-auto w-16 h-16 flex items-center justify-center rounded-full bg-gray-100 mb-3">
-                    <User className="h-8 w-8" />
-                  </div>
-                  <p className="text-gray-500">لا يوجد أطباء متاحين في هذا التخصص حالياً.</p>
-                </div>
-              )}
-              
-              <div className="mt-6 flex">
-                <Button 
-                  variant="outline" 
-                  onClick={handleBack}
-                  className="flex-1"
-                >
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                  رجوع
-                </Button>
-              </div>
-            </motion.div>
-          )}
-
-          {step === 3 && formData.doctor && (
-            <motion.div
-              key="step3"
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              variants={variants}
-              transition={{ duration: 0.3 }}
-              className="space-y-4"
-            >
-              <div className="text-center mb-6">
-                <h2 className="text-xl md:text-2xl font-bold text-gray-800">اختر الموعد</h2>
-                <p className="text-gray-500 text-sm mt-1">الخطوة الثالثة: تحديد يوم وتوقيت الزيارة</p>
-              </div>
-              
-              <div className="bg-blue-50 rounded-lg p-3 flex items-center">
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center ml-3 shrink-0">
-                  {formData.doctor.image ? (
-                    <img src={formData.doctor.image} alt={formData.doctor.name} className="w-full h-full object-cover rounded-full" />
-                  ) : (
-                    <User className="h-6 w-6 text-gray-500" />
-                  )}
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-800 text-md">{formData.doctor.name}</h3>
-                  <p className="text-xs text-gray-600">{getSpecialtyNameById(formData.doctor.specialty_id)}</p>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="bg-white">
-                  <h3 className="text-md font-bold text-gray-800 mb-2">اختر اليوم:</h3>
-                  <div className="grid grid-cols-4 gap-2">
-                    {orderedWeekDays.map((day) => {
-                      const isAvailable = isDoctorAvailableOnDay(formData.doctor!, day);
-                      return (
-                        <Button
-                          key={day}
-                          variant={formData.day === day ? "default" : "outline"}
-                          className={`text-xs ${!isAvailable ? "opacity-40 cursor-not-allowed" : ""}`}
-                          onClick={() => isAvailable && handleDaySelect(day)}
-                          disabled={!isAvailable}
-                          size="sm"
-                        >
-                          {day}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {formData.day && (
-                  <div className="bg-white">
-                    <h3 className="text-md font-bold text-gray-800 mb-2">اختر الوقت:</h3>
-                    {availableTimes.length > 0 ? (
-                      <div className="grid grid-cols-3 gap-2">
-                        {availableTimes.map((time) => (
-                          <Button
-                            key={time}
-                            variant={formData.time === time ? "default" : "outline"}
-                            onClick={() => handleTimeSelect(time)}
-                            size="sm"
-                            className="text-xs"
-                          >
-                            {time}
-                          </Button>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500 text-sm">لا توجد مواعيد متاحة في هذا اليوم.</p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-6 flex flex-col sm:flex-row gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={handleBack}
-                  className="flex-1"
-                >
-                  <ChevronRight className="h-4 w-4 ml-1" />
-                  رجوع
-                </Button>
-                
-                {formData.time && (
-                  <Button 
-                    className="bg-brand hover:bg-brand-dark flex-1" 
-                    onClick={handleScheduleConfirm}
-                  >
-                    متابعة
-                    <ChevronLeft className="h-4 w-4 mr-1" />
-                  </Button>
-                )}
-              </div>
-            </motion.div>
-          )}
-
-          {step === 4 && (
-            <motion.div
-              key="step4"
-              initial="hidden"
-              animate="visible"
-              exit="hidden"
-              variants={variants}
-              transition={{ duration: 0.3 }}
-              className="space-y-4"
-            >
-              <div className="text-center mb-6">
-                <h2 className="text-xl md:text-2xl font-bold text-gray-800">أكمل الحجز</h2>
-                <p className="text-gray-500 text-sm mt-1">الخطوة الرابعة: تأكيد بيانات الحجز</p>
-              </div>
-              
-              <div className="bg-blue-50 rounded-lg p-4">
-                <h3 className="font-bold text-lg text-gray-800 mb-3 text-center">تفاصيل الموعد</h3>
-                
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-white p-2 rounded-full">
-                      <User className="h-5 w-5 text-brand" />
-                    </div>
-                    <div className="flex-grow">
-                      <p className="text-sm text-gray-500">الطبيب</p>
-                      <p className="font-medium">{formData.doctor?.name}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <div className="bg-white p-2 rounded-full">
-                      <Calendar className="h-5 w-5 text-brand" />
-                    </div>
-                    <div className="flex-grow">
-                      <p className="text-sm text-gray-500">الموعد</p>
-                      <p className="font-medium">{formData.day} - {formData.time}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <div className="bg-white p-2 rounded-full">
-                      <CalendarIcon className="h-5 w-5 text-brand" />
-                    </div>
-                    <div className="flex-grow">
-                      <p className="text-sm text-gray-500">التخصص</p>
-                      <p className="font-medium">{formData.specialty}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <div className="bg-white p-2 rounded-full">
-                      <Phone className="h-5 w-5 text-brand" />
-                    </div>
-                    <div className="flex-grow">
-                      <p className="text-sm text-gray-500">رسوم الكشف</p>
-                      <p className="font-medium">
-                        {typeof formData.doctor?.fees.examination === 'number' 
-                          ? `${formData.doctor?.fees.examination} جنيه` 
-                          : formData.doctor?.fees.examination}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <Tabs 
-                defaultValue="whatsapp" 
-                className="mt-6" 
-                onValueChange={(value) => setBookingMethod(value as 'whatsapp' | 'form')}
+              <div 
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  stepNumber === step 
+                    ? 'bg-brand text-white' 
+                    : stepNumber < step 
+                      ? 'bg-green-500 text-white' 
+                      : 'bg-gray-200 text-gray-600'
+                }`}
               >
-                <div className="bg-gray-50 rounded-lg p-1">
-                  <TabsList className="w-full bg-transparent grid grid-cols-2 gap-1">
-                    <TabsTrigger value="whatsapp" className="text-xs py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-                      </svg>
-                      حجز عبر واتساب
-                    </TabsTrigger>
-                    <TabsTrigger value="form" className="text-xs py-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      تعبئة نموذج
-                    </TabsTrigger>
-                  </TabsList>
-                </div>
-                
-                <TabsContent value="whatsapp" className="mt-4">
-                  <div className="bg-white border border-gray-100 rounded-lg p-3 text-center">
-                    <div className="text-green-600 bg-green-50 p-3 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-3">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-                      </svg>
-                    </div>
-                    <p className="mb-4 text-gray-600 text-sm">سيتم تحويلك إلى واتساب لإتمام عملية الحجز</p>
-                    <Button 
-                      className="bg-green-600 hover:bg-green-700 text-white w-full" 
-                      onClick={handleSubmit}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-                      </svg>
-                      إكمال الحجز عبر واتساب
-                    </Button>
-                  </div>
-                </TabsContent>
-                
-                <TabsContent value="form" className="mt-4">
-                  <form onSubmit={handleSubmit} className="space-y-3">
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div className="form-group">
-                          <label className="block text-gray-700 mb-1 text-sm" htmlFor="name">الاسم الكامل</label>
-                          <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full rounded-md border-gray-300 p-2 bg-white border focus:outline-none focus:ring-1 focus:ring-brand text-sm"
-                            placeholder="أدخل اسمك الكامل"
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label className="block text-gray-700 mb-1 text-sm" htmlFor="phone">رقم الهاتف</label>
-                          <input
-                            type="tel"
-                            id="phone"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full rounded-md border-gray-300 p-2 bg-white border focus:outline-none focus:ring-1 focus:ring-brand text-sm"
-                            placeholder="أدخل رقم هاتفك"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="form-group">
-                        <label className="block text-gray-700 mb-1 text-sm" htmlFor="email">البريد الإلكتروني (اختياري)</label>
-                        <input
-                          type="email"
-                          id="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          className="w-full rounded-md border-gray-300 p-2 bg-white border focus:outline-none focus:ring-1 focus:ring-brand text-sm"
-                          placeholder="أدخل بريدك الإلكتروني"
-                        />
-                      </div>
-                      
-                      <div className="form-group">
-                        <label className="block text-gray-700 mb-1 text-sm" htmlFor="notes">ملاحظات إضافية (اختياري)</label>
-                        <textarea
-                          id="notes"
-                          name="notes"
-                          value={formData.notes}
-                          onChange={handleInputChange}
-                          rows={3}
-                          className="w-full rounded-md border-gray-300 p-2 bg-white border focus:outline-none focus:ring-1 focus:ring-brand text-sm"
-                          placeholder="أضف أي ملاحظات إضافية مثل سبب الزيارة أو أعراض المرض"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-2 mt-4">
-                      <Button 
-                        variant="outline" 
-                        onClick={handleBack}
-                        type="button"
-                        className="flex-1"
-                      >
-                        <ChevronRight className="h-4 w-4 ml-1" />
-                        رجوع
-                      </Button>
-                      
-                      <Button 
-                        type="submit" 
-                        className="bg-brand hover:bg-brand-dark flex-1" 
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? 'جاري الإرسال...' : 'تأكيد الحجز'}
-                      </Button>
-                    </div>
-                  </form>
-                </TabsContent>
-              </Tabs>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                {stepNumber < step ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  stepNumber
+                )}
+              </div>
+              {stepNumber < 4 && (
+                <div 
+                  className={`flex-1 h-1 mx-2 ${
+                    stepNumber < step ? 'bg-green-500' : 'bg-gray-200'
+                  }`}
+                ></div>
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-between text-xs text-gray-600 px-1">
+          <span className="w-16 text-center">التخصص</span>
+          <span className="w-16 text-center">الطبيب</span>
+          <span className="w-16 text-center">الموعد</span>
+          <span className="w-16 text-center">البيانات</span>
+        </div>
       </div>
+
+      {/* Current step content */}
+      <motion.div
+        key={step}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{ duration: 0.3 }}
+      >
+        {renderStep()}
+      </motion.div>
     </div>
   );
 };

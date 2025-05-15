@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Doctor as ServiceDoctor } from '@/services/doctorService';
 import { weekDays, dayMappings } from '@/data/doctors';
 import { motion } from 'framer-motion';
@@ -191,7 +191,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
         </div>
         
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DialogContent className="p-0 max-w-[95%] sm:max-w-md mx-auto rounded-lg overflow-hidden max-h-[90vh]">
+          <DialogContent className="p-0 max-w-[95%] sm:max-w-md mx-auto rounded-lg overflow-hidden">
             <DoctorDetails doctor={doctor} onBooking={openWhatsApp} onClose={() => setShowDialog(false)} />
           </DialogContent>
         </Dialog>
@@ -279,7 +279,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
       </div>
       
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="p-0 max-w-[95%] sm:max-w-md mx-auto rounded-lg overflow-hidden max-h-[90vh]">
+        <DialogContent className="p-0 max-w-[95%] sm:max-w-md mx-auto rounded-lg overflow-hidden">
           <DoctorDetails doctor={doctor} onBooking={openWhatsApp} onClose={() => setShowDialog(false)} />
         </DialogContent>
       </Dialog>
@@ -319,11 +319,11 @@ const DoctorDetails = ({
   const availableDays = getAvailableDays();
   
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-visible">
       {/* Header with doctor name and close button */}
-      <DialogHeader className="bg-brand text-white p-4 text-center relative">
+      <div className="bg-brand text-white p-4 text-center relative">
         <div className="flex items-center justify-center gap-2">
-          <DialogTitle className="text-xl font-bold">{doctor.name}</DialogTitle>
+          <h2 className="text-xl font-bold">{doctor.name}</h2>
           <Badge 
             variant="outline" 
             className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs`}
@@ -331,65 +331,73 @@ const DoctorDetails = ({
             {doctor.specialty}
           </Badge>
         </div>
-        <DialogDescription className="text-white/80">
-          {doctor.bio ? doctor.bio.substring(0, 60) + (doctor.bio.length > 60 ? '...' : '') : ''}
-        </DialogDescription>
         <button 
           onClick={onClose} 
           className="absolute top-2 left-2 w-7 h-7 rounded-full bg-white/30 flex items-center justify-center text-white hover:bg-white/40"
         >
           ×
         </button>
-      </DialogHeader>
+      </div>
       
-      {/* Doctor details content - redesigned to fit on mobile without scrolling */}
-      <div className="p-3 max-h-[calc(80vh-120px)] overflow-auto dir-rtl">
-        {/* Fees section */}
-        <div className="mb-3 bg-gray-50 p-3 rounded-lg">
-          <h4 className="font-bold text-lg text-gray-800 mb-1 text-right">الرسوم</h4>
-          <div className="flex justify-between items-center border-b border-gray-200 py-1">
-            <span className="text-gray-900 font-medium">
-              {formatFee(doctor.fees.examination)}
-            </span>
-            <span className="text-gray-600">رسوم الكشف:</span>
-          </div>
-          <div className="flex justify-between items-center py-1">
-            <span className="text-gray-900 font-medium">
-              {doctor.fees.consultation 
-                ? formatFee(doctor.fees.consultation)
-                : 'غير متاح'}
-            </span>
-            <span className="text-gray-600">رسوم الاستشارة:</span>
-          </div>
-        </div>
-        
-        {/* Schedule section */}
-        <div className="mb-3 bg-gray-50 p-3 rounded-lg">
-          <h4 className="font-bold text-lg text-gray-800 mb-1 text-right">جدول المواعيد</h4>
-          {availableDays.length > 0 ? (
-            <div className="space-y-1">
-              {availableDays.map((day, index) => {
-                const englishDay = dayMappings[day as keyof typeof dayMappings];
-                const times = doctor.schedule[englishDay] || [];
-                
-                return (
-                  <div key={index} className="flex justify-between items-center border-b border-gray-200 pb-1 last:border-0">
-                    <div className="flex flex-wrap gap-1 text-left">
-                      {times.map((time: string, timeIndex: number) => (
-                        <span key={timeIndex} className="bg-blue-50 text-brand px-2 py-0.5 rounded text-xs">
-                          {time}
-                        </span>
-                      ))}
-                    </div>
-                    <span className="font-medium text-gray-700">{day}:</span>
-                  </div>
-                );
-              })}
-            </div>
+      {/* Doctor image and bio */}
+      <div className="bg-gray-50 p-4 flex flex-col sm:flex-row items-center gap-4">
+        <div className="w-20 h-20 rounded-full bg-white border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+          {doctor.image ? (
+            <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover" />
           ) : (
-            <p className="text-gray-500 text-center text-sm">يرجى الاتصال بالعيادة لمعرفة المواعيد المتاحة.</p>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
           )}
         </div>
+        <div className="text-center sm:text-right sm:flex-grow">
+          <p className="text-gray-700 text-sm">
+            {doctor.bio || `${doctor.name} - ${doctor.specialty}`}
+          </p>
+        </div>
+      </div>
+      
+      {/* Fees section - simplified for mobile */}
+      <div className="p-3">
+        <h3 className="font-bold text-lg text-gray-800 mb-2 text-right">الرسوم</h3>
+        <div className="flex justify-between items-center border-b border-gray-200 py-2">
+          <span className="font-medium">{formatFee(doctor.fees.examination)}</span>
+          <span className="text-gray-600">رسوم الكشف:</span>
+        </div>
+        <div className="flex justify-between items-center py-2">
+          <span className="font-medium">
+            {doctor.fees.consultation ? formatFee(doctor.fees.consultation) : 'غير متاح'}
+          </span>
+          <span className="text-gray-600">رسوم الاستشارة:</span>
+        </div>
+      </div>
+      
+      {/* Schedule section - redesigned for mobile */}
+      <div className="p-3 border-t border-gray-200 bg-gray-50">
+        <h3 className="font-bold text-lg text-gray-800 mb-2 text-right">جدول المواعيد</h3>
+        {availableDays.length > 0 ? (
+          <div className="grid grid-cols-1 gap-1">
+            {availableDays.map((day, index) => {
+              const englishDay = dayMappings[day as keyof typeof dayMappings];
+              const times = doctor.schedule[englishDay] || [];
+              
+              return (
+                <div key={index} className="flex justify-between items-center py-1">
+                  <div className="flex flex-wrap gap-1 justify-end">
+                    {times.map((time: string, timeIndex: number) => (
+                      <span key={timeIndex} className="bg-blue-50 text-brand px-2 py-0.5 rounded text-xs">
+                        {time}
+                      </span>
+                    ))}
+                  </div>
+                  <span className="font-medium text-gray-700 ml-2">{day}:</span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-center text-sm">يرجى الاتصال بالعيادة لمعرفة المواعيد المتاحة.</p>
+        )}
       </div>
       
       {/* Call to action button */}

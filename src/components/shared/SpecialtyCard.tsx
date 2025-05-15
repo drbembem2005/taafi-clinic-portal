@@ -66,7 +66,7 @@ const SpecialtyCard = ({ specialty }: SpecialtyCardProps) => {
 
   return (
     <motion.div
-      className="specialty-card rounded-xl shadow-md overflow-hidden h-64 relative"
+      className="specialty-card rounded-xl shadow-md overflow-hidden h-64 relative cursor-pointer"
       whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
       onClick={toggleDetails}
     >
