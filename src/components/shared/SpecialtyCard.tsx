@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Specialty } from '@/data/specialties';
 import { Link } from 'react-router-dom';
@@ -9,6 +10,8 @@ interface SpecialtyCardProps {
 }
 
 const SpecialtyCard = ({ specialty }: SpecialtyCardProps) => {
+  const [showDetails, setShowDetails] = useState(false);
+  
   // Get a background color based on the specialty id
   const getBgColor = () => {
     const colors = [
@@ -57,10 +60,15 @@ const SpecialtyCard = ({ specialty }: SpecialtyCardProps) => {
     }
   };
 
+  const toggleDetails = () => {
+    setShowDetails(!showDetails);
+  };
+
   return (
     <motion.div
       className="specialty-card rounded-xl shadow-md overflow-hidden h-64 relative"
       whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)' }}
+      onClick={toggleDetails}
     >
       <div className={`h-full flex flex-col ${getBgColor()}`}>
         <div className="p-6 flex-grow">
@@ -79,17 +87,19 @@ const SpecialtyCard = ({ specialty }: SpecialtyCardProps) => {
             to={`/doctors`}
             state={{ specialty: specialty.name }}
             className={`px-4 py-2 rounded-full text-sm font-medium ${getTextColor()} border ${getBorderColor()} bg-white/50 hover:bg-white transition-colors`}
+            onClick={(e) => e.stopPropagation()}
           >
             عرض الأطباء
           </Link>
         </div>
         
-        {/* Hover details overlay */}
+        {/* Details overlay - now toggled by click instead of hover */}
         <motion.div 
           className="specialty-details absolute inset-0 bg-gradient-to-t from-white/95 via-white/95 to-white/90 p-6 flex flex-col justify-between"
           initial={{ opacity: 0 }}
-          whileHover={{ opacity: 1 }}
+          animate={{ opacity: showDetails ? 1 : 0 }}
           transition={{ duration: 0.3 }}
+          style={{ pointerEvents: showDetails ? 'auto' : 'none' }}
         >
           <div>
             <div className={`w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center bg-white ${getBorderColor()} border shadow-sm`}>
@@ -104,6 +114,7 @@ const SpecialtyCard = ({ specialty }: SpecialtyCardProps) => {
               to={`/doctors`}
               state={{ specialty: specialty.name }}
               className={`px-5 py-2 rounded-full text-sm font-medium bg-brand text-white hover:bg-brand-dark transition-colors shadow-sm`}
+              onClick={(e) => e.stopPropagation()}
             >
               عرض الأطباء
             </Link>

@@ -125,9 +125,10 @@ export async function getDoctorsBySpecialty(specialtyId: number): Promise<Doctor
   }
 }
 
-// New function to get a doctor's schedule from the doctor_schedules table
+// Enhanced function to get a doctor's schedule from the doctor_schedules table
 export async function getDoctorSchedule(doctorId: number): Promise<Record<string, string[]>> {
   try {
+    console.log(`Fetching schedule for doctor ID: ${doctorId}`);
     const { data, error } = await supabase
       .from('doctor_schedules')
       .select('*')
@@ -143,6 +144,8 @@ export async function getDoctorSchedule(doctorId: number): Promise<Record<string
       return {};
     }
 
+    console.log(`Retrieved ${data.length} schedule entries for doctor ${doctorId}:`, data);
+
     // Convert the flat structure to the grouped day -> times[] format
     const schedule: Record<string, string[]> = {};
     
@@ -153,6 +156,7 @@ export async function getDoctorSchedule(doctorId: number): Promise<Record<string
       schedule[item.day].push(item.time);
     });
 
+    console.log(`Formatted schedule for doctor ${doctorId}:`, schedule);
     return schedule;
   } catch (error) {
     console.error('Error in getDoctorSchedule:', error);

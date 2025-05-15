@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HeroCarousel from '@/components/shared/HeroCarousel';
@@ -30,7 +31,6 @@ const Index = () => {
         // Get only 3 doctors for the featured section
         const featuredDoctors = fetchedDoctors.slice(0, 3);
         setDoctors(featuredDoctors);
-        console.log("Index page - Fetched doctors:", fetchedDoctors);
         
         // Fetch schedules for featured doctors
         const schedules: Record<number, Record<string, string[]>> = {};
@@ -51,11 +51,14 @@ const Index = () => {
   }, []);
 
   // Transform doctors data to match DoctorWithSpecialty type
-  const formattedDoctors = doctors.map((doctor) => ({
-    ...doctor,
-    specialty: specialties.find(s => s.id === doctor.specialty_id)?.name || 'تخصص غير محدد',
-    schedule: doctorSchedules[doctor.id] || {}
-  }));
+  const formattedDoctors = doctors.map((doctor) => {
+    const specialty = specialties.find(s => s.id === doctor.specialty_id);
+    return {
+      ...doctor,
+      specialty: specialty ? specialty.name : 'تخصص غير محدد',
+      schedule: doctorSchedules[doctor.id] || {}
+    };
+  });
 
   return (
     <>

@@ -69,10 +69,13 @@ const Doctors = () => {
         // Fetch schedules for all doctors
         const schedules: Record<number, Record<string, string[]>> = {};
         for (const doctor of fetchedDoctors) {
+          console.log(`Fetching schedule for doctor: ${doctor.name} (ID: ${doctor.id})`);
           const doctorSchedule = await getDoctorSchedule(doctor.id);
+          console.log(`Schedule for doctor ${doctor.name}:`, doctorSchedule);
           schedules[doctor.id] = doctorSchedule;
         }
         setDoctorSchedules(schedules);
+        console.log("All doctor schedules:", schedules);
         
       } catch (error) {
         console.error("Error fetching doctors:", error);
@@ -94,6 +97,16 @@ const Doctors = () => {
   const handleSpecialtyChange = (value: string) => {
     setSelectedSpecialty(value);
   };
+
+  // Format doctors with their specialties for display
+  const formattedDoctors = doctors.map(doctor => {
+    const doctorSpecialty = specialties.find(s => s.id === doctor.specialty_id);
+    return {
+      ...doctor,
+      specialty: doctorSpecialty ? doctorSpecialty.name : 'تخصص غير محدد',
+      schedule: doctorSchedules[doctor.id] || {}
+    };
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -126,16 +139,12 @@ const Doctors = () => {
             </div>
           ))}
         </div>
-      ) : doctors.length > 0 ? (
+      ) : formattedDoctors.length > 0 ? (
         <div className="space-y-6">
-          {doctors.map((doctor) => (
+          {formattedDoctors.map((doctor) => (
             <DoctorCard 
               key={doctor.id} 
-              doctor={{
-                ...doctor,
-                specialty: specialties.find(s => s.id === doctor.specialty_id)?.name || '',
-                schedule: doctorSchedules[doctor.id] || {}
-              }} 
+              doctor={doctor}
             />
           ))}
         </div>

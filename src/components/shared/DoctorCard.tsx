@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Doctor as ServiceDoctor } from '@/services/doctorService';
 import { weekDays, dayMappings } from '@/data/doctors';
 import { motion } from 'framer-motion';
@@ -113,8 +113,8 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
   
   // Get available days from schedule
   const getAvailableDays = () => {
-    return Object.entries(doctor.schedule)
-      .filter(([_, times]) => times.length > 0)
+    return Object.entries(doctor.schedule || {})
+      .filter(([_, times]) => times && times.length > 0)
       .map(([day, _]) => {
         // Map English day key back to Arabic
         const arabicDay = Object.keys(dayMappings).find(
@@ -191,8 +191,8 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
         </div>
         
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DialogContent className="p-0 max-w-[95%] sm:max-w-md mx-auto rounded-lg overflow-hidden">
-            <DoctorDetails doctor={doctor} onBooking={openWhatsApp} />
+          <DialogContent className="p-0 max-w-[95%] sm:max-w-md mx-auto rounded-lg overflow-hidden max-h-[90vh]">
+            <DoctorDetails doctor={doctor} onBooking={openWhatsApp} onClose={() => setShowDialog(false)} />
           </DialogContent>
         </Dialog>
       </motion.div>
@@ -279,8 +279,8 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
       </div>
       
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="p-0 max-w-[95%] sm:max-w-md mx-auto rounded-lg overflow-hidden">
-          <DoctorDetails doctor={doctor} onBooking={openWhatsApp} />
+        <DialogContent className="p-0 max-w-[95%] sm:max-w-md mx-auto rounded-lg overflow-hidden max-h-[90vh]">
+          <DoctorDetails doctor={doctor} onBooking={openWhatsApp} onClose={() => setShowDialog(false)} />
         </DialogContent>
       </Dialog>
     </motion.div>
@@ -288,7 +288,15 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
 };
 
 // DoctorDetails component for the dialog with RTL adjustments
-const DoctorDetails = ({ doctor, onBooking }: { doctor: DoctorWithSpecialty; onBooking: () => void }) => {
+const DoctorDetails = ({ 
+  doctor, 
+  onBooking, 
+  onClose 
+}: { 
+  doctor: DoctorWithSpecialty; 
+  onBooking: () => void; 
+  onClose: () => void;
+}) => {
   const specialtyColors = getSpecialtyColorClass(doctor.specialty);
 
   const formatFee = (fee: number | string | null) => {
@@ -297,8 +305,8 @@ const DoctorDetails = ({ doctor, onBooking }: { doctor: DoctorWithSpecialty; onB
   };
 
   const getAvailableDays = () => {
-    return Object.entries(doctor.schedule)
-      .filter(([_, times]) => times.length > 0)
+    return Object.entries(doctor.schedule || {})
+      .filter(([_, times]) => times && times.length > 0)
       .map(([day, _]) => {
         // Map English day key back to Arabic
         const arabicDay = Object.keys(dayMappings).find(
@@ -313,39 +321,39 @@ const DoctorDetails = ({ doctor, onBooking }: { doctor: DoctorWithSpecialty; onB
   return (
     <div className="overflow-hidden">
       {/* Header with doctor name and close button */}
-      <div className="bg-brand text-white p-4 text-center relative">
+      <DialogHeader className="bg-brand text-white p-4 text-center relative">
         <div className="flex items-center justify-center gap-2">
-          <h3 className="text-xl font-bold">{doctor.name}</h3>
-        </div>
-         <Badge 
+          <DialogTitle className="text-xl font-bold">{doctor.name}</DialogTitle>
+          <Badge 
             variant="outline" 
             className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs`}
           >
             {doctor.specialty}
           </Badge>
-        
-      </div>
+        </div>
+        <DialogDescription className="text-white/80">
+          {doctor.bio ? doctor.bio.substring(0, 60) + (doctor.bio.length > 60 ? '...' : '') : ''}
+        </DialogDescription>
+        <button 
+          onClick={onClose} 
+          className="absolute top-2 left-2 w-7 h-7 rounded-full bg-white/30 flex items-center justify-center text-white hover:bg-white/40"
+        >
+          ×
+        </button>
+      </DialogHeader>
       
-      {/* Doctor details content */}
-      <div className="p-4 max-h-[70vh] overflow-y-auto dir-rtl">
-        {/* Bio section */}
-        {doctor.bio && (
-          <div className="mb-4 bg-gray-50 p-3 rounded-lg">
-            <h4 className="font-bold text-lg text-gray-800 mb-2 text-right">نبذة عن الطبيب</h4>
-            <p className="text-gray-700 text-right">{doctor.bio}</p>
-          </div>
-        )}
-        
+      {/* Doctor details content - redesigned to fit on mobile without scrolling */}
+      <div className="p-3 max-h-[calc(80vh-120px)] overflow-auto dir-rtl">
         {/* Fees section */}
-        <div className="mb-4 bg-gray-50 p-3 rounded-lg">
-          <h4 className="font-bold text-lg text-gray-800 mb-2 text-right">الرسوم</h4>
-          <div className="flex justify-between items-center border-b border-gray-200 py-2">
+        <div className="mb-3 bg-gray-50 p-3 rounded-lg">
+          <h4 className="font-bold text-lg text-gray-800 mb-1 text-right">الرسوم</h4>
+          <div className="flex justify-between items-center border-b border-gray-200 py-1">
             <span className="text-gray-900 font-medium">
               {formatFee(doctor.fees.examination)}
             </span>
             <span className="text-gray-600">رسوم الكشف:</span>
           </div>
-          <div className="flex justify-between items-center py-2">
+          <div className="flex justify-between items-center py-1">
             <span className="text-gray-900 font-medium">
               {doctor.fees.consultation 
                 ? formatFee(doctor.fees.consultation)
@@ -356,19 +364,19 @@ const DoctorDetails = ({ doctor, onBooking }: { doctor: DoctorWithSpecialty; onB
         </div>
         
         {/* Schedule section */}
-        <div className="mb-4 bg-gray-50 p-3 rounded-lg">
-          <h4 className="font-bold text-lg text-gray-800 mb-2 text-right">جدول المواعيد</h4>
+        <div className="mb-3 bg-gray-50 p-3 rounded-lg">
+          <h4 className="font-bold text-lg text-gray-800 mb-1 text-right">جدول المواعيد</h4>
           {availableDays.length > 0 ? (
-            <div className="space-y-2">
+            <div className="space-y-1">
               {availableDays.map((day, index) => {
                 const englishDay = dayMappings[day as keyof typeof dayMappings];
                 const times = doctor.schedule[englishDay] || [];
                 
                 return (
-                  <div key={index} className="flex justify-between items-center border-b border-gray-200 pb-2 last:border-0">
+                  <div key={index} className="flex justify-between items-center border-b border-gray-200 pb-1 last:border-0">
                     <div className="flex flex-wrap gap-1 text-left">
                       {times.map((time: string, timeIndex: number) => (
-                        <span key={timeIndex} className="bg-blue-50 text-brand px-2 py-1 rounded text-sm">
+                        <span key={timeIndex} className="bg-blue-50 text-brand px-2 py-0.5 rounded text-xs">
                           {time}
                         </span>
                       ))}
@@ -379,13 +387,13 @@ const DoctorDetails = ({ doctor, onBooking }: { doctor: DoctorWithSpecialty; onB
               })}
             </div>
           ) : (
-            <p className="text-gray-500 text-center">يرجى الاتصال بالعيادة لمعرفة المواعيد المتاحة.</p>
+            <p className="text-gray-500 text-center text-sm">يرجى الاتصال بالعيادة لمعرفة المواعيد المتاحة.</p>
           )}
         </div>
       </div>
       
       {/* Call to action button */}
-      <div className="p-4 bg-gray-50 border-t border-gray-200">
+      <div className="p-3 bg-gray-50 border-t border-gray-200">
         <Button 
           onClick={onBooking}
           className="bg-green-600 hover:bg-green-700 text-white w-full flex items-center justify-center gap-2"
