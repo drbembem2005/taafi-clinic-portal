@@ -12,6 +12,7 @@ import { getDoctorsBySpecialty, Doctor, getDoctorSchedule } from '@/services/doc
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { dayMappings } from '@/data/doctors';
+import { useLocation } from 'react-router-dom';
 
 interface BookingFormData {
   specialtyId: number;
@@ -26,6 +27,7 @@ interface BookingFormData {
 }
 
 const BookingWizard = () => {
+  const location = useLocation();
   const [step, setStep] = useState(1);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -58,6 +60,30 @@ const BookingWizard = () => {
   const getEnglishDay = (arabicDay: string): string => {
     return dayMappings[arabicDay as keyof typeof dayMappings] || arabicDay;
   };
+
+  // Check for state from doctor card navigation
+  useEffect(() => {
+    if (location.state?.selectedDoctor) {
+      const doctorId = location.state.selectedDoctor;
+      const specialtyId = location.state.selectedSpecialty;
+      
+      console.log("Received state from navigation:", { doctorId, specialtyId });
+      
+      if (specialtyId) {
+        setFormData(prev => ({
+          ...prev,
+          specialtyId: specialtyId
+        }));
+      }
+      
+      if (doctorId) {
+        setFormData(prev => ({
+          ...prev,
+          doctorId: doctorId
+        }));
+      }
+    }
+  }, [location.state]);
 
   // Fetch specialties
   useEffect(() => {
@@ -102,7 +128,7 @@ const BookingWizard = () => {
     fetchDoctors();
   }, [formData.specialtyId]);
 
-  // When doctor changes, fetch schedule
+  // When doctor changes, fetch schedule from doctor_schedules table
   useEffect(() => {
     const fetchDoctorSchedule = async () => {
       if (!formData.doctorId) return;
@@ -110,8 +136,36 @@ const BookingWizard = () => {
       try {
         setLoading(true);
         console.log(`Fetching schedule for doctor ID: ${formData.doctorId}`);
-        const scheduleData = await getDoctorSchedule(formData.doctorId);
-        console.log('Fetched schedule:', scheduleData);
+        
+        // Get schedule from the doctor_schedules table
+        const { data, error } = await supabase
+          .from('doctor_schedules')
+          .select('*')
+          .eq('doctor_id', formData.doctorId);
+          
+        if (error) {
+          console.error('Error fetching doctor schedule:', error);
+          toast({
+            title: "خطأ",
+            description: "حدث خطأ أثناء تحميل جدول المواعيد",
+            variant: "destructive",
+          });
+          setSchedule({});
+          setAvailableDays([]);
+          setLoading(false);
+          return;
+        }
+        
+        // Convert the flat structure to grouped by day format
+        const scheduleData: Record<string, string[]> = {};
+        data.forEach((item: any) => {
+          if (!scheduleData[item.day]) {
+            scheduleData[item.day] = [];
+          }
+          scheduleData[item.day].push(item.time);
+        });
+        
+        console.log('Fetched and processed schedule:', scheduleData);
         
         setSchedule(scheduleData);
         
@@ -132,7 +186,7 @@ const BookingWizard = () => {
         }));
         setAvailableTimes([]);
       } catch (error) {
-        console.error('Error fetching doctor schedule:', error);
+        console.error('Error in fetchDoctorSchedule:', error);
         toast({
           title: "خطأ",
           description: "حدث خطأ أثناء تحميل جدول المواعيد",
