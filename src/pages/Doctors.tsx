@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/use-toast';
+import { motion } from 'framer-motion';
 
 const Doctors = () => {
   const location = useLocation();
@@ -110,13 +111,28 @@ const Doctors = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center mb-10">الأطباء</h1>
+      <motion.div 
+        className="mb-10 text-center"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">فريقنا الطبي</h1>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          نخبة من الأطباء الاستشاريين والأخصائيين لتقديم أفضل رعاية طبية لك ولعائلتك
+        </p>
+      </motion.div>
       
-      <div className="mb-8 max-w-md mx-auto">
+      <motion.div 
+        className="mb-8 max-w-md mx-auto bg-white rounded-lg shadow-sm p-4 border"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
         <div className="flex flex-col space-y-2">
-          <Label htmlFor="specialty">تصفية حسب التخصص</Label>
+          <Label htmlFor="specialty" className="text-gray-700">تصفية حسب التخصص</Label>
           <Select value={selectedSpecialty} onValueChange={handleSpecialtyChange}>
-            <SelectTrigger>
+            <SelectTrigger className="border-gray-300">
               <SelectValue placeholder="جميع التخصصات" />
             </SelectTrigger>
             <SelectContent>
@@ -129,29 +145,55 @@ const Doctors = () => {
             </SelectContent>
           </Select>
         </div>
-      </div>
+      </motion.div>
       
       {loading ? (
         <div className="space-y-6">
           {[...Array(3)].map((_, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
-              <Skeleton className="h-48 w-full" />
-            </div>
+            <Skeleton key={index} className="h-48 w-full rounded-lg" />
           ))}
         </div>
       ) : formattedDoctors.length > 0 ? (
-        <div className="space-y-6">
-          {formattedDoctors.map((doctor) => (
-            <DoctorCard 
-              key={doctor.id} 
-              doctor={doctor}
-            />
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={{
+            visible: {
+              transition: {
+                staggerChildren: 0.1
+              }
+            }
+          }}
+          className="space-y-6"
+        >
+          {formattedDoctors.map((doctor, index) => (
+            <motion.div
+              key={doctor.id}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 }
+              }}
+              transition={{ duration: 0.5 }}
+            >
+              <DoctorCard doctor={doctor} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       ) : (
-        <div className="text-center py-20">
-          <p className="text-xl text-gray-500">لا يوجد أطباء متاحين حالياً للتخصص المحدد</p>
-        </div>
+        <motion.div 
+          className="text-center py-20"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <div className="bg-gray-50 p-8 rounded-lg max-w-md mx-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-xl text-gray-600 mb-1">لا يوجد أطباء متاحين حالياً</p>
+            <p className="text-gray-500">يرجى تحديد تخصص آخر</p>
+          </div>
+        </motion.div>
       )}
     </div>
   );

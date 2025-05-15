@@ -28,13 +28,15 @@ const Index = () => {
         
         // Fetch doctors
         const fetchedDoctors = await getDoctors();
-        // Get only 3 doctors for the featured section
-        const featuredDoctors = fetchedDoctors.slice(0, 3);
-        setDoctors(featuredDoctors);
+        
+        // Shuffle and get 3 random doctors
+        const shuffledDoctors = [...fetchedDoctors].sort(() => 0.5 - Math.random());
+        const randomDoctors = shuffledDoctors.slice(0, 3);
+        setDoctors(randomDoctors);
         
         // Fetch schedules for featured doctors
         const schedules: Record<number, Record<string, string[]>> = {};
-        for (const doctor of featuredDoctors) {
+        for (const doctor of randomDoctors) {
           const doctorSchedule = await getDoctorSchedule(doctor.id);
           schedules[doctor.id] = doctorSchedule;
         }
@@ -98,7 +100,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Featured Doctors */}
+      {/* Featured Doctors - Completely Redesigned */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
@@ -107,21 +109,35 @@ const Index = () => {
             <div className="w-24 h-1 bg-brand mx-auto"></div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            {loading ? (
-              <p className="text-center col-span-3">جاري تحميل بيانات الأطباء...</p>
-            ) : formattedDoctors.length > 0 ? (
-              formattedDoctors.map((doctor) => (
-                <DoctorCard key={doctor.id} doctor={doctor} compact />
-              ))
-            ) : (
-              <p className="text-center col-span-3">لا يوجد أطباء متاحين حالياً</p>
-            )}
-          </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-10">
+              <div className="w-10 h-10 border-4 border-brand border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
+            <div className="relative overflow-hidden py-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {formattedDoctors.length > 0 ? (
+                  formattedDoctors.map((doctor, index) => (
+                    <motion.div
+                      key={doctor.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.2 }}
+                      className="transform transition-all duration-300 hover:scale-105"
+                    >
+                      <DoctorCard doctor={doctor} compact />
+                    </motion.div>
+                  ))
+                ) : (
+                  <p className="text-center col-span-3 py-8 text-gray-500">لا يوجد أطباء متاحين حالياً</p>
+                )}
+              </div>
+            </div>
+          )}
           
           <div className="text-center mt-8">
             <Button 
-              className="bg-brand hover:bg-brand-dark text-white px-6 py-3"
+              className="bg-brand hover:bg-brand-dark text-white px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition-all"
               onClick={() => navigate('/doctors')}
             >
               عرض جميع الأطباء

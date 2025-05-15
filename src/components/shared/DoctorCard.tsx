@@ -6,8 +6,10 @@ import { Doctor as ServiceDoctor } from '@/services/doctorService';
 import { weekDays, dayMappings } from '@/data/doctors';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
-import { Phone, Calendar, MessageCircle } from 'lucide-react';
+import { Phone, Calendar, MessageCircle, Clock, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
 
 interface DoctorWithSpecialty extends ServiceDoctor {
   specialty: string;
@@ -138,60 +140,73 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
     window.open(`https://wa.me/201119007403?text=${encodedMessage}`, '_blank');
   };
 
+  // Redesigned Compact Doctor Card
   if (compact) {
     return (
       <motion.div 
-        className="doctor-card bg-white rounded-lg shadow-md overflow-hidden"
-        whileHover={{ y: -5 }}
+        className="relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+        whileHover={{ y: -5, transition: { duration: 0.3 } }}
       >
-        <div className="p-4">
-          <div className="flex items-center mb-3">
-            <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden ml-3">
+        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-400 to-brand"></div>
+        
+        <div className="p-5">
+          <div className="flex gap-4 items-center">
+            <Avatar className="h-16 w-16 border-2 border-brand/20">
               {doctor.image ? (
-                <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover" />
+                <AvatarImage src={doctor.image} alt={doctor.name} className="object-cover" />
               ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
+                <AvatarFallback className="bg-brand/10 text-brand">
+                  <User className="h-6 w-6" />
+                </AvatarFallback>
               )}
-            </div>
+            </Avatar>
+            
             <div className="flex-grow">
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className="font-bold text-gray-900">{doctor.name}</h3>
-                <Badge 
-                  variant="outline" 
-                  className={`text-xs ${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-[10px] py-0.5 px-1.5`}
-                >
-                  {doctor.specialty}
-                </Badge>
-              </div>
+              <Badge 
+                variant="outline" 
+                className={`mb-1 ${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs py-0.5 px-2`}
+              >
+                {doctor.specialty}
+              </Badge>
+              <h3 className="font-bold text-lg text-gray-800">{doctor.name}</h3>
               {doctor.bio && (
-                <p className="text-xs text-gray-500 mt-1 line-clamp-1">{doctor.bio}</p>
+                <p className="text-sm text-gray-500 mt-1 line-clamp-1">{doctor.bio}</p>
               )}
             </div>
           </div>
           
-          <div className="mt-3 flex justify-between">
+          <div className="mt-4 flex items-center gap-3 text-xs text-gray-500">
+            <span className="flex items-center gap-1">
+              <Calendar className="h-3.5 w-3.5 text-brand" />
+              <span>{availableDays.length} أيام</span>
+            </span>
+            
+            <span className="flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5 text-brand" />
+              <span>رسوم: {formatFee(doctor.fees.examination)}</span>
+            </span>
+          </div>
+          
+          <div className="mt-4 flex justify-between gap-2">
             <Button 
               variant="outline" 
-              size="sm" 
-              className="text-xs"
+              className="flex-1 text-brand border-brand/30 hover:bg-brand/5 text-sm"
               onClick={() => setShowDialog(true)}
             >
               التفاصيل
             </Button>
             <Button 
-              size="sm" 
-              className="bg-green-600 hover:bg-green-700 text-white text-xs"
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm"
               onClick={openWhatsApp}
             >
+              <MessageCircle className="h-4 w-4 ml-1.5" />
               احجز الآن
             </Button>
           </div>
         </div>
         
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DialogContent className="p-0 max-w-[95%] sm:max-w-md mx-auto rounded-lg overflow-hidden">
+          <DialogContent className="p-0 max-w-[95%] sm:max-w-md md:max-w-lg mx-auto rounded-lg overflow-hidden">
             <DoctorDetails doctor={doctor} onBooking={openWhatsApp} onClose={() => setShowDialog(false)} />
           </DialogContent>
         </Dialog>
@@ -199,68 +214,78 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
     );
   }
 
+  // Redesigned Full Doctor Card for doctor listing page
   return (
     <motion.div 
-      className="doctor-card bg-white rounded-lg shadow-md overflow-hidden"
+      className="rounded-xl shadow-md overflow-hidden bg-white border border-gray-100"
       whileHover={{ y: -5 }}
+      transition={{ duration: 0.2 }}
     >
-      <div className="grid md:grid-cols-4">
-        <div className="md:col-span-1 bg-gray-100 flex items-center justify-center p-4">
-          <div className="w-32 h-32 rounded-full bg-white shadow-inner flex items-center justify-center overflow-hidden">
+      <div className="flex flex-col md:flex-row">
+        <div className="md:w-1/3 bg-gradient-to-br from-brand/5 to-brand/10 p-6 flex items-center justify-center">
+          <div className="w-32 h-32 rounded-full bg-white shadow p-1.5 flex items-center justify-center overflow-hidden">
             {doctor.image ? (
-              <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover" />
+              <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover rounded-full" />
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
+              <div className="w-full h-full rounded-full bg-brand/10 flex items-center justify-center">
+                <User className="h-16 w-16 text-brand/40" />
+              </div>
             )}
           </div>
         </div>
         
-        <div className="md:col-span-3 p-6">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-2xl font-bold text-gray-900">{doctor.name}</h3>
+        <div className="md:w-2/3 p-6">
+          <div className="mb-2">
             <Badge 
               variant="outline" 
-              className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs py-0.5`}
+              className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs px-2 py-0.5 mb-2`}
             >
               {doctor.specialty}
             </Badge>
+            <h3 className="text-2xl font-bold text-gray-800">{doctor.name}</h3>
           </div>
           
           {doctor.bio && (
-            <p className="text-gray-600 mb-2 line-clamp-2 mt-1">{doctor.bio}</p>
+            <p className="text-gray-600 mb-4 line-clamp-2">{doctor.bio}</p>
           )}
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 mt-4">
-            <div>
-              <h4 className="font-bold text-gray-700">رسوم الكشف:</h4>
-              <p className="text-gray-600">{formatFee(doctor.fees.examination)}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+            <div className="bg-gray-50 rounded p-2 flex items-center">
+              <Calendar className="h-4 w-4 text-brand ml-2" />
+              <div>
+                <span className="text-xs text-gray-500">رسوم الكشف</span>
+                <p className="font-semibold">{formatFee(doctor.fees.examination)}</p>
+              </div>
             </div>
-            <div>
-              <h4 className="font-bold text-gray-700">رسوم الاستشارة:</h4>
-              <p className="text-gray-600">{formatFee(doctor.fees.consultation)}</p>
+            
+            <div className="bg-gray-50 rounded p-2 flex items-center">
+              <Calendar className="h-4 w-4 text-brand ml-2" />
+              <div>
+                <span className="text-xs text-gray-500">رسوم الاستشارة</span>
+                <p className="font-semibold">{formatFee(doctor.fees.consultation)}</p>
+              </div>
             </div>
           </div>
 
           <div className="mb-4">
-            <h4 className="font-bold text-gray-700 mb-1">أيام العمل:</h4>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">أيام العمل:</h4>
             <div className="flex flex-wrap gap-1">
               {availableDays.length > 0 ? (
                 availableDays.map((day, index) => (
-                  <span key={index} className="bg-blue-50 text-brand px-2 py-1 rounded text-sm">
+                  <span key={index} className="bg-blue-50 text-brand px-2 py-0.5 rounded-full text-xs">
                     {day}
                   </span>
                 ))
               ) : (
-                <span className="text-gray-500">يرجى الاتصال لمعرفة المواعيد</span>
+                <span className="text-gray-500 text-sm">يرجى الاتصال لمعرفة المواعيد</span>
               )}
             </div>
           </div>
           
-          <div className="flex flex-wrap gap-3 mt-4">
+          <div className="flex flex-wrap gap-2">
             <Button 
-              variant="outline" 
+              variant="outline"
+              className="border-brand/20 text-brand hover:bg-brand/5"
               onClick={() => setShowDialog(true)}
             >
               عرض التفاصيل
@@ -269,7 +294,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
               className="bg-green-600 hover:bg-green-700 text-white"
               onClick={openWhatsApp}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 24 24">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
               </svg>
               احجز الآن
@@ -279,7 +304,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
       </div>
       
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="p-0 max-w-[95%] sm:max-w-md mx-auto rounded-lg overflow-hidden">
+        <DialogContent className="p-0 max-w-[95%] sm:max-w-md md:max-w-lg mx-auto rounded-lg overflow-hidden">
           <DoctorDetails doctor={doctor} onBooking={openWhatsApp} onClose={() => setShowDialog(false)} />
         </DialogContent>
       </Dialog>
@@ -287,7 +312,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
   );
 };
 
-// DoctorDetails component for the dialog with RTL adjustments
+// Completely redesigned DoctorDetails component for the dialog
 const DoctorDetails = ({ 
   doctor, 
   onBooking, 
@@ -306,107 +331,133 @@ const DoctorDetails = ({
 
   const getAvailableDays = () => {
     return Object.entries(doctor.schedule || {})
-      .filter(([_, times]) => times && times.length > 0)
-      .map(([day, _]) => {
-        // Map English day key back to Arabic
-        const arabicDay = Object.keys(dayMappings).find(
-          (key) => dayMappings[key as keyof typeof dayMappings] === day
-        );
-        return arabicDay || day;
-      });
+      .filter(([_, times]) => times && times.length > 0);
   };
   
   const availableDays = getAvailableDays();
   
   return (
-    <div className="overflow-visible">
-      {/* Header with doctor name and close button */}
-      <div className="bg-brand text-white p-4 text-center relative">
-        <div className="flex items-center justify-center gap-2">
-          <h2 className="text-xl font-bold">{doctor.name}</h2>
-          <Badge 
-            variant="outline" 
-            className={`${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs`}
-          >
-            {doctor.specialty}
-          </Badge>
-        </div>
+    <div className="overflow-hidden max-h-[80vh] flex flex-col">
+      {/* Header with gradient background */}
+      <div 
+        className="p-6 relative bg-gradient-to-r from-brand to-blue-600 text-white"
+      >
+        {/* Close button */}
         <button 
           onClick={onClose} 
-          className="absolute top-2 left-2 w-7 h-7 rounded-full bg-white/30 flex items-center justify-center text-white hover:bg-white/40"
+          className="absolute top-3 left-3 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30"
+          aria-label="إغلاق"
         >
-          ×
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
         </button>
+        
+        <div className="flex items-center gap-4">
+          {/* Doctor avatar */}
+          <div className="w-20 h-20 rounded-full border-2 border-white/30 overflow-hidden flex-shrink-0 bg-white/10">
+            {doctor.image ? (
+              <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <User className="h-10 w-10 text-white/70" />
+              </div>
+            )}
+          </div>
+          
+          {/* Doctor info */}
+          <div className="flex-1">
+            <Badge 
+              variant="outline" 
+              className="mb-1 border-white/30 bg-white/10 text-white py-0.5 px-2 text-xs"
+            >
+              {doctor.specialty}
+            </Badge>
+            <h2 className="text-xl font-bold">{doctor.name}</h2>
+          </div>
+        </div>
       </div>
       
-      {/* Doctor image and bio */}
-      <div className="bg-gray-50 p-4 flex flex-col sm:flex-row items-center gap-4">
-        <div className="w-20 h-20 rounded-full bg-white border border-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
-          {doctor.image ? (
-            <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover" />
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          )}
-        </div>
-        <div className="text-center sm:text-right sm:flex-grow">
-          <p className="text-gray-700 text-sm">
-            {doctor.bio || `${doctor.name} - ${doctor.specialty}`}
+      {/* Doctor bio */}
+      {doctor.bio && (
+        <div className="p-4 bg-gray-50 border-b">
+          <p className="text-gray-700 text-sm leading-relaxed">
+            {doctor.bio}
           </p>
         </div>
-      </div>
+      )}
       
-      {/* Fees section - simplified for mobile */}
-      <div className="p-3">
-        <h3 className="font-bold text-lg text-gray-800 mb-2 text-right">الرسوم</h3>
-        <div className="flex justify-between items-center border-b border-gray-200 py-2">
-          <span className="font-medium">{formatFee(doctor.fees.examination)}</span>
-          <span className="text-gray-600">رسوم الكشف:</span>
-        </div>
-        <div className="flex justify-between items-center py-2">
-          <span className="font-medium">
-            {doctor.fees.consultation ? formatFee(doctor.fees.consultation) : 'غير متاح'}
-          </span>
-          <span className="text-gray-600">رسوم الاستشارة:</span>
-        </div>
-      </div>
-      
-      {/* Schedule section - redesigned for mobile */}
-      <div className="p-3 border-t border-gray-200 bg-gray-50">
-        <h3 className="font-bold text-lg text-gray-800 mb-2 text-right">جدول المواعيد</h3>
-        {availableDays.length > 0 ? (
-          <div className="grid grid-cols-1 gap-1">
-            {availableDays.map((day, index) => {
-              const englishDay = dayMappings[day as keyof typeof dayMappings];
-              const times = doctor.schedule[englishDay] || [];
-              
-              return (
-                <div key={index} className="flex justify-between items-center py-1">
-                  <div className="flex flex-wrap gap-1 justify-end">
-                    {times.map((time: string, timeIndex: number) => (
-                      <span key={timeIndex} className="bg-blue-50 text-brand px-2 py-0.5 rounded text-xs">
-                        {time}
-                      </span>
-                    ))}
-                  </div>
-                  <span className="font-medium text-gray-700 ml-2">{day}:</span>
-                </div>
-              );
-            })}
+      {/* Scrollable content area */}
+      <div className="overflow-y-auto p-4 flex flex-col gap-4">
+        {/* Fees section */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-blue-50 rounded-lg p-3 text-center">
+            <p className="text-xs text-gray-600 mb-1">رسوم الكشف</p>
+            <p className="font-bold text-lg text-brand">
+              {formatFee(doctor.fees.examination)}
+            </p>
           </div>
-        ) : (
-          <p className="text-gray-500 text-center text-sm">يرجى الاتصال بالعيادة لمعرفة المواعيد المتاحة.</p>
-        )}
+          
+          <div className="bg-green-50 rounded-lg p-3 text-center">
+            <p className="text-xs text-gray-600 mb-1">رسوم الاستشارة</p>
+            <p className="font-bold text-lg text-green-600">
+              {formatFee(doctor.fees.consultation || 'غير متاح')}
+            </p>
+          </div>
+        </div>
+        
+        {/* Schedule section */}
+        <div className="border rounded-lg overflow-hidden">
+          <div className="bg-gray-50 px-4 py-2 border-b">
+            <h3 className="font-bold text-gray-700 flex items-center">
+              <Calendar className="ml-2 h-4 w-4 text-brand" />
+              جدول المواعيد
+            </h3>
+          </div>
+          
+          <div className="p-3">
+            {availableDays.length > 0 ? (
+              <div className="grid gap-2">
+                {availableDays.map(([englishDay, times], index) => {
+                  const arabicDay = Object.keys(dayMappings).find(
+                    (key) => dayMappings[key as keyof typeof dayMappings] === englishDay
+                  ) || englishDay;
+                  
+                  return (
+                    <div key={index} className="flex flex-wrap items-center border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                      <div className="w-20 text-gray-700 font-medium ml-2">{arabicDay}:</div>
+                      <div className="flex flex-wrap gap-1 flex-1">
+                        {times.map((time: string, timeIndex: number) => (
+                          <span key={timeIndex} className="bg-brand/10 text-brand px-2 py-0.5 rounded-full text-xs">
+                            {time}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-3 text-sm">يرجى الاتصال بالعيادة لمعرفة المواعيد المتاحة</p>
+            )}
+          </div>
+        </div>
       </div>
       
-      {/* Call to action button */}
-      <div className="p-3 bg-gray-50 border-t border-gray-200">
+      {/* Action buttons - fixed at bottom */}
+      <div className="p-3 border-t mt-auto bg-gray-50 flex flex-col sm:flex-row gap-2">
+        <Button 
+          variant="outline"
+          className="sm:flex-1 text-brand border-brand/30"
+          onClick={onClose}
+        >
+          إغلاق
+        </Button>
         <Button 
           onClick={onBooking}
-          className="bg-green-600 hover:bg-green-700 text-white w-full flex items-center justify-center gap-2"
+          className="sm:flex-1 bg-green-600 hover:bg-green-700 text-white flex items-center justify-center gap-2"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 24 24">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1" fill="currentColor" viewBox="0 0 24 24">
             <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
           </svg>
           احجز الآن عبر واتساب
