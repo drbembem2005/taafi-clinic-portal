@@ -107,7 +107,7 @@ const NextAvailableDaysPicker = ({
           </div>
           <CardContent className="p-3">
             <div className="flex flex-wrap gap-2">
-              {dayInfo.times.map((time, timeIndex) => (
+              {dayInfo.times && Array.isArray(dayInfo.times) && dayInfo.times.map((time, timeIndex) => (
                 <Button
                   key={timeIndex}
                   size="sm"

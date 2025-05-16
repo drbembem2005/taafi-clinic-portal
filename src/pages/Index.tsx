@@ -9,7 +9,7 @@ import DoctorCard from '@/components/shared/DoctorCard';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { getSpecialties, Specialty } from '@/services/specialtyService';
-import { getDoctors, Doctor, getDoctorSchedule } from '@/services/doctorService';
+import { getDoctors, Doctor, getDoctorSchedule, getAvailableDays } from '@/services/doctorService';
 
 const Index = () => {
   const navigate = useNavigate();

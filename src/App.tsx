@@ -12,6 +12,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
+import ScrollToTop from '@/components/utils/ScrollToTop';
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -39,6 +40,7 @@ const App = () => {
   return (
     <div className="App">
       <div className="font-cairo">
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Layout><Index /></Layout>} />
           <Route path="/specialties" element={<Layout><Specialties /></Layout>} />
