@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HeroCarousel from '@/components/shared/HeroCarousel';
@@ -8,12 +9,13 @@ import DoctorCard from '@/components/shared/DoctorCard';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { getSpecialties, Specialty } from '@/services/specialtyService';
-import { getDoctors, Doctor } from '@/services/doctorService';
+import { getDoctors, Doctor, getDoctorSchedule } from '@/services/doctorService';
 
 const Index = () => {
   const navigate = useNavigate();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
+  const [doctorSchedules, setDoctorSchedules] = useState<Record<number, Record<string, string[]>>>({});
   const [loading, setLoading] = useState(true);
   
   useEffect(() => {
@@ -33,6 +35,14 @@ const Index = () => {
         const randomDoctors = shuffledDoctors.slice(0, 3);
         setDoctors(randomDoctors);
         
+        // Fetch schedules for all doctors
+        const schedules: Record<number, Record<string, string[]>> = {};
+        for (const doctor of randomDoctors) {
+          const doctorSchedule = await getDoctorSchedule(doctor.id);
+          schedules[doctor.id] = doctorSchedule;
+        }
+        setDoctorSchedules(schedules);
+        
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -43,13 +53,14 @@ const Index = () => {
     fetchData();
   }, []);
 
-  // Transform doctors data to include specialty name
+  // Transform doctors data to include specialty name and schedule
   const formattedDoctors = doctors.map((doctor) => {
     const specialty = specialties.find(s => s.id === doctor.specialty_id);
     
     return {
       ...doctor,
       specialty: specialty ? specialty.name : 'تخصص غير محدد',
+      schedule: doctorSchedules[doctor.id] || {},
     };
   });
 

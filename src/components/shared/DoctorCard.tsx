@@ -417,7 +417,7 @@ const DoctorDetails = ({
                   <div key={index} className="flex flex-wrap items-center border-b border-gray-100 pb-2 last:border-0 last:pb-0">
                     <div className="w-20 text-gray-700 font-medium ml-2">{arabicDay}:</div>
                     <div className="flex flex-wrap gap-1 flex-1">
-                      {times.map((time: string, timeIndex: number) => (
+                      {Array.isArray(times) && times.map((time: string, timeIndex: number) => (
                         <span key={timeIndex} className="bg-brand/10 text-brand px-2 py-0.5 rounded-full text-xs">
                           {time}
                         </span>
