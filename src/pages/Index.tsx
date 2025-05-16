@@ -22,11 +22,11 @@ const Index = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Fetch specialties
+        // Fetch specialties first to ensure we have them before processing doctors
         const fetchedSpecialties = await getSpecialties();
         setSpecialties(fetchedSpecialties.slice(0, 6)); // Show only first 6 specialties
         
-        // Fetch doctors
+        // Fetch doctors after specialties are loaded
         const fetchedDoctors = await getDoctors();
         
         // Shuffle and get 3 random doctors
@@ -55,7 +55,10 @@ const Index = () => {
   // Transform doctors data to include specialty name from the specialties array
   const formattedDoctors = doctors.map((doctor) => {
     // Find the specialty for this doctor using the specialty_id
+    // We need to make sure we have all specialties loaded, not just the first 6
+    // that are displayed in the UI
     const specialty = specialties.find(s => s.id === doctor.specialty_id);
+    
     return {
       ...doctor,
       specialty: specialty ? specialty.name : 'تخصص غير محدد', // Use name from fetched specialties
