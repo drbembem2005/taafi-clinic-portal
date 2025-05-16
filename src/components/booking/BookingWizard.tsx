@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Check, Calendar, Users, Phone, Mail, StickyNote } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, Calendar, Users, Phone, Mail, StickyNote, MessageSquare, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,10 +12,12 @@ import {
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { getSpecialties, Specialty } from '@/services/specialtyService';
-import { getDoctors, Doctor } from '@/services/doctorService';
+import { getDoctors, Doctor, getDoctor } from '@/services/doctorService';
 import { createBooking } from '@/services/bookingService';
 import { toast } from '@/hooks/use-toast';
 import NextAvailableDaysPicker from './NextAvailableDaysPicker';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 
 interface BookingFormData {
   user_name: string;
@@ -45,11 +47,13 @@ const BookingWizard = () => {
   });
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [bookingComplete, setBookingComplete] = useState<boolean>(false);
   const [bookingReference, setBookingReference] = useState<string>('');
   const [formattedDate, setFormattedDate] = useState<string>('');
+  const [bookingMethod, setBookingMethod] = useState<'online' | 'whatsapp'>('online');
   
   const location = useLocation();
   
@@ -83,6 +87,13 @@ const BookingWizard = () => {
               ...prev,
               doctor_id: state.selectedDoctor
             }));
+            
+            // Fetch doctor details
+            const doctorDetails = await getDoctor(state.selectedDoctor);
+            if (doctorDetails) {
+              setSelectedDoctor(doctorDetails);
+            }
+            
             setCurrentStep(2); // Jump to time selection step
           } else {
             setCurrentStep(1); // Stay at doctor selection step
@@ -128,6 +139,24 @@ const BookingWizard = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Handle doctor selection
+  const handleDoctorSelect = async (doctorId: number) => {
+    setFormData(prev => ({
+      ...prev,
+      doctor_id: doctorId
+    }));
+
+    // Fetch doctor details for bio
+    try {
+      const doctorDetails = await getDoctor(doctorId);
+      if (doctorDetails) {
+        setSelectedDoctor(doctorDetails);
+      }
+    } catch (error) {
+      console.error('Error fetching doctor details:', error);
     }
   };
   
@@ -196,6 +225,12 @@ const BookingWizard = () => {
           return;
         }
       }
+
+      // Update booking method
+      setFormData(prev => ({
+        ...prev,
+        booking_method: bookingMethod
+      }));
     }
     
     // All validations passed, go to next step
@@ -211,18 +246,43 @@ const BookingWizard = () => {
   
   // Get selected doctor name
   const getSelectedDoctorName = () => {
+    if (selectedDoctor) return selectedDoctor.name;
     const doctor = doctors.find(d => d.id === formData.doctor_id);
     return doctor ? doctor.name : 'غير محدد';
   };
   
   // Get selected specialty name
   const getSelectedSpecialtyName = () => {
+    if (selectedDoctor && specialties.length > 0) {
+      const specialty = specialties.find(s => s.id === selectedDoctor.specialty_id);
+      return specialty ? specialty.name : 'غير محدد';
+    }
+    
     const specialty = specialties.find(s => s.id === formData.specialty_id);
     return specialty ? specialty.name : 'غير محدد';
+  };
+
+  // Get WhatsApp booking link
+  const getWhatsAppLink = () => {
+    const doctorName = getSelectedDoctorName();
+    const specialtyName = getSelectedSpecialtyName();
+    const message = encodeURIComponent(
+      `مرحباً، أرغب في حجز موعد مع ${doctorName} (${specialtyName}) في يوم ${formattedDate} الساعة ${formData.booking_time}.\n\nالاسم: ${formData.user_name}\nرقم الهاتف: ${formData.user_phone}${formData.notes ? `\nملاحظات: ${formData.notes}` : ''}`
+    );
+    return `https://wa.me/201119007403?text=${message}`;
   };
   
   // Submit booking
   const handleSubmit = async () => {
+    // For WhatsApp booking, redirect to WhatsApp
+    if (bookingMethod === 'whatsapp') {
+      window.open(getWhatsAppLink(), '_blank');
+      setBookingComplete(true);
+      setBookingReference('whatsapp-' + Date.now());
+      return;
+    }
+    
+    // For online booking
     setSubmitting(true);
     try {
       // Make API call to create booking
@@ -266,6 +326,8 @@ const BookingWizard = () => {
     });
     setBookingComplete(false);
     setCurrentStep(1);
+    setSelectedDoctor(null);
+    setBookingMethod('online');
   };
   
   // Get progress percentage based on current step
@@ -288,7 +350,9 @@ const BookingWizard = () => {
           </div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">تم الحجز بنجاح!</h2>
           <p className="text-gray-600">
-            شكراً لك، تم استلام طلب حجزك بنجاح. سيتم التواصل معك قريباً عبر واتساب أو الهاتف لتأكيد الحجز.
+            {bookingMethod === 'whatsapp' 
+              ? 'تم توجيهك إلى واتساب لإكمال الحجز. يرجى متابعة المحادثة هناك.'
+              : 'شكراً لك، تم استلام طلب حجزك بنجاح. سيتم التواصل معك قريباً عبر واتساب أو الهاتف لتأكيد الحجز.'}
           </p>
           
           {bookingReference && (
@@ -435,27 +499,38 @@ const BookingWizard = () => {
                             className={`cursor-pointer transition-all hover:border-brand ${
                               formData.doctor_id === doctor.id ? 'border-brand ring-1 ring-brand' : ''
                             }`}
-                            onClick={() => setFormData(prev => ({ ...prev, doctor_id: doctor.id }))}
+                            onClick={() => handleDoctorSelect(doctor.id)}
                           >
-                            <CardContent className="p-3 flex items-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center ml-3 flex-shrink-0">
-                                {doctor.image ? (
-                                  <img 
-                                    src={doctor.image} 
-                                    alt={doctor.name} 
-                                    className="w-full h-full rounded-full object-cover" 
-                                  />
-                                ) : (
-                                  <Users className="h-6 w-6 text-gray-400" />
+                            <CardContent className="p-3">
+                              <div className="flex items-center mb-2">
+                                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center ml-3 flex-shrink-0">
+                                  {doctor.image ? (
+                                    <img 
+                                      src={doctor.image} 
+                                      alt={doctor.name} 
+                                      className="w-full h-full rounded-full object-cover" 
+                                    />
+                                  ) : (
+                                    <Users className="h-6 w-6 text-gray-400" />
+                                  )}
+                                </div>
+                                <div className="flex-grow">
+                                  <div className="text-sm font-medium">{doctor.name}</div>
+                                  <div className="text-xs text-gray-500">{specialtyName}</div>
+                                </div>
+                                {formData.doctor_id === doctor.id && (
+                                  <div className="w-6 h-6 bg-brand rounded-full flex items-center justify-center flex-shrink-0">
+                                    <Check className="h-4 w-4 text-white" />
+                                  </div>
                                 )}
                               </div>
-                              <div className="flex-grow">
-                                <div className="text-sm font-medium">{doctor.name}</div>
-                                <div className="text-xs text-gray-500">{specialtyName}</div>
-                              </div>
-                              {formData.doctor_id === doctor.id && (
-                                <div className="w-6 h-6 bg-brand rounded-full flex items-center justify-center flex-shrink-0">
-                                  <Check className="h-4 w-4 text-white" />
+                              
+                              {/* Show bio if this doctor is selected */}
+                              {formData.doctor_id === doctor.id && doctor.bio && (
+                                <div className="mt-2 pt-2 border-t border-gray-100">
+                                  <div className="text-xs text-gray-600">
+                                    {doctor.bio}
+                                  </div>
                                 </div>
                               )}
                             </CardContent>
@@ -481,6 +556,34 @@ const BookingWizard = () => {
           >
             <h2 className="text-xl font-bold mb-4 text-center">حدد موعدًا للكشف</h2>
             
+            {/* Display selected doctor info */}
+            {selectedDoctor && (
+              <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center">
+                  <div className="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center ml-3 flex-shrink-0">
+                    {selectedDoctor.image ? (
+                      <img 
+                        src={selectedDoctor.image} 
+                        alt={selectedDoctor.name} 
+                        className="w-full h-full rounded-full object-cover" 
+                      />
+                    ) : (
+                      <User className="h-6 w-6 text-gray-400" />
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium">{selectedDoctor.name}</h3>
+                    <p className="text-sm text-gray-600">
+                      {getSelectedSpecialtyName()}
+                    </p>
+                    {selectedDoctor.bio && (
+                      <p className="text-xs text-gray-500 mt-1">{selectedDoctor.bio}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {formData.doctor_id ? (
               <NextAvailableDaysPicker
                 doctorId={formData.doctor_id}
@@ -503,6 +606,38 @@ const BookingWizard = () => {
             exit={{ opacity: 0 }}
           >
             <h2 className="text-xl font-bold mb-4 text-center">أدخل بياناتك</h2>
+            
+            {/* Booking method tabs */}
+            <div className="mb-6">
+              <Label className="block mb-2">طريقة الحجز</Label>
+              <Tabs 
+                defaultValue="online" 
+                className="w-full"
+                value={bookingMethod}
+                onValueChange={(value) => setBookingMethod(value as 'online' | 'whatsapp')}
+              >
+                <TabsList className="grid grid-cols-2 w-full mb-2">
+                  <TabsTrigger value="online" className={bookingMethod === 'online' ? 'data-[state=active]:bg-brand data-[state=active]:text-white' : ''}>
+                    <Phone className="h-4 w-4 ml-2" />
+                    حجز مباشر
+                  </TabsTrigger>
+                  <TabsTrigger value="whatsapp" className={bookingMethod === 'whatsapp' ? 'data-[state=active]:bg-green-600 data-[state=active]:text-white' : ''}>
+                    <MessageSquare className="h-4 w-4 ml-2" />
+                    حجز عبر واتساب
+                  </TabsTrigger>
+                </TabsList>
+                
+                <div className={cn(
+                  "p-3 bg-gray-50 rounded-md text-sm mb-4",
+                  bookingMethod === 'whatsapp' ? 'bg-green-50 text-green-800' : 'text-gray-700'
+                )}>
+                  {bookingMethod === 'whatsapp' ? 
+                    'سيتم توجيهك إلى واتساب مع رسالة تتضمن تفاصيل حجزك' : 
+                    'سيتم إرسال طلب حجزك مباشرة وسنتواصل معك قريباً لتأكيده'
+                  }
+                </div>
+              </Tabs>
+            </div>
             
             <div className="space-y-4">
               <div>
@@ -619,18 +754,38 @@ const BookingWizard = () => {
                     </div>
                   </li>
                 )}
+                <li className="flex">
+                  <MessageSquare className="h-5 w-5 text-brand ml-2 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-gray-500">طريقة الحجز:</p>
+                    <p className="font-medium">
+                      {bookingMethod === 'whatsapp' ? 'حجز عبر واتساب' : 'حجز مباشر'}
+                    </p>
+                  </div>
+                </li>
               </ul>
             </div>
             
-            <div className="bg-yellow-50 border border-yellow-100 p-3 rounded-md mb-6">
-              <p className="text-sm text-yellow-800">
-                بعد تأكيد الحجز، سيتم التواصل معك عبر واتساب أو الهاتف لتأكيد موعدك في أقرب وقت ممكن.
-              </p>
+            <div className={cn(
+              "p-3 rounded-md mb-6 text-sm",
+              bookingMethod === 'whatsapp' 
+                ? 'bg-green-50 border border-green-100 text-green-800'
+                : 'bg-yellow-50 border border-yellow-100 text-yellow-800'
+            )}>
+              {bookingMethod === 'whatsapp' 
+                ? 'سيتم توجيهك إلى تطبيق واتساب لإكمال الحجز بعد النقر على زر التأكيد أدناه.'
+                : 'بعد تأكيد الحجز، سيتم التواصل معك عبر واتساب أو الهاتف لتأكيد موعدك في أقرب وقت ممكن.'
+              }
             </div>
             
             <Button 
               onClick={handleSubmit} 
-              className="w-full bg-brand hover:bg-brand-dark text-white py-3"
+              className={cn(
+                "w-full text-white py-3",
+                bookingMethod === 'whatsapp'
+                  ? 'bg-green-600 hover:bg-green-700'
+                  : 'bg-brand hover:bg-brand-dark'
+              )}
               disabled={submitting}
             >
               {submitting ? (
@@ -639,7 +794,7 @@ const BookingWizard = () => {
                   جاري إرسال طلب الحجز...
                 </>
               ) : (
-                'تأكيد الحجز'
+                bookingMethod === 'whatsapp' ? 'تأكيد الحجز عبر واتساب' : 'تأكيد الحجز'
               )}
             </Button>
           </motion.div>
