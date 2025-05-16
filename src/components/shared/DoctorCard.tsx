@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -9,13 +8,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Phone, Calendar, MessageCircle, Clock, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
-import { toast } from '@/components/ui/use-toast';
 
 interface DoctorWithSpecialty extends ServiceDoctor {
   specialty: string;
-  schedule: Record<string, string[]>;
+  schedule?: Record<string, string[]>;
 }
 
 interface DoctorCardProps {
@@ -62,41 +59,6 @@ const getSpecialtyColorClass = (specialty: string) => {
       text: "text-violet-600", 
       border: "border-violet-100" 
     },
-    "علاج الأورام والمناظير": { 
-      bg: "bg-amber-50", 
-      text: "text-amber-600", 
-      border: "border-amber-100" 
-    },
-    "جراحة المخ والأعصاب والعمود الفقري": { 
-      bg: "bg-cyan-50", 
-      text: "text-cyan-600", 
-      border: "border-cyan-100" 
-    },
-    "الأنف والأذن والحنجرة": { 
-      bg: "bg-orange-50", 
-      text: "text-orange-600", 
-      border: "border-orange-100" 
-    },
-    "العظام والمفاصل وإصابات الملاعب": { 
-      bg: "bg-lime-50", 
-      text: "text-lime-600", 
-      border: "border-lime-100" 
-    },
-    "الروماتيزم والمفاصل": { 
-      bg: "bg-teal-50", 
-      text: "text-teal-600", 
-      border: "border-teal-100" 
-    },
-    "التغذية العلاجية والعلاج الطبيعي": { 
-      bg: "bg-emerald-50", 
-      text: "text-emerald-600", 
-      border: "border-emerald-100" 
-    },
-    "طب وجراحة الأسنان": { 
-      bg: "bg-sky-50", 
-      text: "text-sky-600", 
-      border: "border-sky-100" 
-    },
   };
 
   // Default color if specialty not found in map
@@ -116,21 +78,6 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
   // Get specialty colors
   const specialtyColors = getSpecialtyColorClass(doctor.specialty);
   
-  // Get available days from schedule
-  const getAvailableDays = () => {
-    return Object.entries(doctor.schedule || {})
-      .filter(([_, times]) => times && times.length > 0)
-      .map(([day, _]) => {
-        // Map English day key back to Arabic
-        const arabicDay = Object.keys(dayMappings).find(
-          (key) => dayMappings[key as keyof typeof dayMappings] === day
-        );
-        return arabicDay || day;
-      });
-  };
-  
-  const availableDays = getAvailableDays();
-
   // Format fees
   const formatFee = (fee: number | string | null) => {
     if (fee === null) return 'غير متاح';
@@ -153,81 +100,89 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
     });
   };
 
-  // Redesigned Compact Doctor Card
+  // Completely redesigned compact doctor card
   if (compact) {
     return (
-      <motion.div 
-        className="relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
-        whileHover={{ y: -5, transition: { duration: 0.3 } }}
-      >
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-blue-400 to-brand"></div>
-        
-        <div className="p-5">
-          <div className="flex gap-4 items-center">
-            <Avatar className="h-16 w-16 border-2 border-brand/20">
-              {doctor.image ? (
-                <AvatarImage src={doctor.image} alt={doctor.name} className="object-cover" />
-              ) : (
-                <AvatarFallback className="bg-brand/10 text-brand">
-                  <User className="h-6 w-6" />
-                </AvatarFallback>
-              )}
-            </Avatar>
-            
-            <div className="flex-grow">
-              <Badge 
-                variant="outline" 
-                className={`mb-1 ${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs py-0.5 px-2`}
-              >
-                {doctor.specialty}
-              </Badge>
-              <h3 className="font-bold text-lg text-gray-800">{doctor.name}</h3>
-              {doctor.bio && (
-                <p className="text-sm text-gray-500 mt-1 line-clamp-1">{doctor.bio}</p>
-              )}
+      <Card className="overflow-hidden border border-gray-200 hover:border-brand/30 transition-colors rounded-xl shadow-sm hover:shadow-md">
+        <div className="relative">
+          {/* Colored accent line at top */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand to-blue-500"></div>
+          
+          <div className="p-5">
+            {/* Doctor info with avatar */}
+            <div className="flex items-center gap-4">
+              <Avatar className="h-16 w-16 rounded-full border-2 border-gray-100">
+                {doctor.image ? (
+                  <AvatarImage src={doctor.image} alt={doctor.name} className="object-cover" />
+                ) : (
+                  <AvatarFallback className="bg-brand/10 text-brand">
+                    <User className="h-6 w-6" />
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              
+              <div className="flex-grow">
+                <Badge 
+                  variant="outline" 
+                  className={`mb-1 ${specialtyColors.bg} ${specialtyColors.text} ${specialtyColors.border} text-xs py-0.5 px-2`}
+                >
+                  {doctor.specialty}
+                </Badge>
+                <h3 className="font-bold text-lg text-gray-800">{doctor.name}</h3>
+                {doctor.bio && (
+                  <p className="text-sm text-gray-500 line-clamp-1">{doctor.bio}</p>
+                )}
+              </div>
             </div>
-          </div>
-          
-          <div className="mt-4 flex items-center gap-3 text-xs text-gray-500">
-            <span className="flex items-center gap-1">
-              <Calendar className="h-3.5 w-3.5 text-brand" />
-              <span>{availableDays.length} أيام</span>
-            </span>
             
-            <span className="flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5 text-brand" />
-              <span>رسوم: {formatFee(doctor.fees.examination)}</span>
-            </span>
-          </div>
-          
-          <div className="mt-4 flex justify-between gap-2">
-            <Button 
-              variant="outline" 
-              className="flex-1 text-brand border-brand/30 hover:bg-brand/5 text-sm"
-              onClick={() => setShowDialog(true)}
-            >
-              التفاصيل
-            </Button>
-            <Button 
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm"
-              onClick={openWhatsApp}
-            >
-              <MessageCircle className="h-4 w-4 ml-1.5" />
-              احجز الآن
-            </Button>
+            {/* Doctor fees */}
+            <div className="mt-4 flex justify-between text-xs text-gray-500">
+              <div className="flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5 text-brand" />
+                <span>رسوم الكشف: {formatFee(doctor.fees.examination)}</span>
+              </div>
+              
+              <div className="flex items-center gap-1">
+                <Calendar className="h-3.5 w-3.5 text-brand" />
+                <span>الاستشارة: {formatFee(doctor.fees.consultation || 'غير متاح')}</span>
+              </div>
+            </div>
+            
+            {/* Action buttons */}
+            <div className="mt-4 flex justify-between gap-2">
+              <Button 
+                variant="outline" 
+                className="flex-1 text-brand border-brand/30 hover:bg-brand/5"
+                onClick={() => setShowDialog(true)}
+              >
+                التفاصيل
+              </Button>
+              <Button 
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                onClick={openWhatsApp}
+              >
+                <MessageCircle className="h-4 w-4 ml-1.5" />
+                احجز الآن
+              </Button>
+            </div>
           </div>
         </div>
         
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DialogContent className="p-0 max-w-[95%] sm:max-w-md md:max-w-lg mx-auto rounded-lg overflow-hidden">
-            <DoctorDetails doctor={doctor} onBookingWizard={redirectToBookingWizard} onWhatsApp={openWhatsApp} onClose={() => setShowDialog(false)} />
+          <DialogContent className="p-0 sm:max-w-lg mx-auto rounded-lg overflow-hidden">
+            <DoctorDetails 
+              doctor={doctor} 
+              onBookingWizard={redirectToBookingWizard} 
+              onWhatsApp={openWhatsApp} 
+              onClose={() => setShowDialog(false)} 
+            />
           </DialogContent>
         </Dialog>
-      </motion.div>
+      </Card>
     );
   }
 
-  // Redesigned Full Doctor Card for doctor listing page
+  // Full sized doctor card
   return (
     <motion.div 
       className="rounded-xl shadow-md overflow-hidden bg-white border border-gray-100"
@@ -275,7 +230,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
               <Calendar className="h-4 w-4 text-brand ml-2" />
               <div>
                 <span className="text-xs text-gray-500">رسوم الاستشارة</span>
-                <p className="font-semibold">{formatFee(doctor.fees.consultation)}</p>
+                <p className="font-semibold">{formatFee(doctor.fees.consultation || 'غير متاح')}</p>
               </div>
             </div>
           </div>
@@ -318,14 +273,19 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
       
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent className="p-0 max-w-[95%] sm:max-w-md md:max-w-lg mx-auto rounded-lg overflow-hidden">
-          <DoctorDetails doctor={doctor} onBookingWizard={redirectToBookingWizard} onWhatsApp={openWhatsApp} onClose={() => setShowDialog(false)} />
+          <DoctorDetails 
+            doctor={doctor} 
+            onBookingWizard={redirectToBookingWizard} 
+            onWhatsApp={openWhatsApp} 
+            onClose={() => setShowDialog(false)} 
+          />
         </DialogContent>
       </Dialog>
     </motion.div>
   );
 };
 
-// Completely redesigned DoctorDetails component for the dialog
+// Dialog component for doctor details
 const DoctorDetails = ({ 
   doctor, 
   onBookingWizard,
@@ -344,8 +304,11 @@ const DoctorDetails = ({
     return typeof fee === 'number' ? `${fee} جنيه` : fee;
   };
 
+  // Get available days from schedule
   const getAvailableDays = () => {
-    return Object.entries(doctor.schedule || {})
+    if (!doctor.schedule) return [];
+    
+    return Object.entries(doctor.schedule)
       .filter(([_, times]) => times && times.length > 0);
   };
   
@@ -355,7 +318,6 @@ const DoctorDetails = ({
     <div className="bg-white overflow-hidden max-h-[85vh] flex flex-col">
       {/* Header with gradient background and doctor info */}
       <div className="relative bg-gradient-to-r from-brand to-blue-600 p-6 text-white">
-        {/* Only one close button in the top-right corner */}
         <button 
           onClick={onClose} 
           className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30"

@@ -1,7 +1,6 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { format, addDays, isBefore, parseISO, isToday, startOfDay } from 'date-fns';
+import { format, addDays, startOfDay } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
 // Create a type for the fees with examination and consultation properties
@@ -230,6 +229,11 @@ export async function getNextAvailableDays(doctorId: number): Promise<Array<{dat
     return availableDays;
   } catch (error) {
     console.error('Error in getNextAvailableDays:', error);
+    toast({
+      title: "خطأ",
+      description: "حدث خطأ أثناء جلب المواعيد المتاحة",
+      variant: "destructive",
+    });
     return [];
   }
 }

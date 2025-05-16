@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HeroCarousel from '@/components/shared/HeroCarousel';
@@ -9,12 +8,11 @@ import DoctorCard from '@/components/shared/DoctorCard';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { getSpecialties, Specialty } from '@/services/specialtyService';
-import { getDoctors, Doctor, getDoctorSchedule } from '@/services/doctorService';
+import { getDoctors, Doctor } from '@/services/doctorService';
 
 const Index = () => {
   const navigate = useNavigate();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
-  const [doctorSchedules, setDoctorSchedules] = useState<Record<number, Record<string, string[]>>>({});
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -22,9 +20,10 @@ const Index = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Fetch specialties first to ensure we have them before processing doctors
+        
+        // Fetch all specialties first to ensure we have them for doctor mapping
         const fetchedSpecialties = await getSpecialties();
-        setSpecialties(fetchedSpecialties.slice(0, 6)); // Show only first 6 specialties
+        setSpecialties(fetchedSpecialties);
         
         // Fetch doctors after specialties are loaded
         const fetchedDoctors = await getDoctors();
@@ -33,14 +32,6 @@ const Index = () => {
         const shuffledDoctors = [...fetchedDoctors].sort(() => 0.5 - Math.random());
         const randomDoctors = shuffledDoctors.slice(0, 3);
         setDoctors(randomDoctors);
-        
-        // Fetch schedules for featured doctors
-        const schedules: Record<number, Record<string, string[]>> = {};
-        for (const doctor of randomDoctors) {
-          const doctorSchedule = await getDoctorSchedule(doctor.id);
-          schedules[doctor.id] = doctorSchedule;
-        }
-        setDoctorSchedules(schedules);
         
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -52,17 +43,13 @@ const Index = () => {
     fetchData();
   }, []);
 
-  // Transform doctors data to include specialty name from the specialties array
+  // Transform doctors data to include specialty name
   const formattedDoctors = doctors.map((doctor) => {
-    // Find the specialty for this doctor using the specialty_id
-    // We need to make sure we have all specialties loaded, not just the first 6
-    // that are displayed in the UI
     const specialty = specialties.find(s => s.id === doctor.specialty_id);
     
     return {
       ...doctor,
-      specialty: specialty ? specialty.name : 'تخصص غير محدد', // Use name from fetched specialties
-      schedule: doctorSchedules[doctor.id] || {}
+      specialty: specialty ? specialty.name : 'تخصص غير محدد',
     };
   });
 
@@ -87,7 +74,7 @@ const Index = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {specialties.map((specialty) => (
+            {specialties.slice(0, 6).map((specialty) => (
               <SpecialtyCard key={specialty.id} specialty={specialty} />
             ))}
           </div>
@@ -103,7 +90,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Featured Doctors - Completely Redesigned */}
+      {/* Featured Doctors */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
