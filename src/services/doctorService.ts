@@ -1,5 +1,8 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
+import { format, addDays, isBefore, parseISO, isToday, startOfDay } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 // Create a type for the fees with examination and consultation properties
 export interface Fees {
@@ -25,6 +28,30 @@ export interface DoctorSchedule {
   day: string;
   time: string;
 }
+
+// Days of the week in both languages for reference
+const dayMappings = {
+  'السبت': 'Sat',
+  'الأحد': 'Sun',
+  'الاثنين': 'Mon',
+  'الثلاثاء': 'Tue',
+  'الأربعاء': 'Wed',
+  'الخميس': 'Thu',
+  'الجمعة': 'Fri'
+};
+
+export const arabicDayNames = {
+  'Sat': 'السبت',
+  'Sun': 'الأحد',
+  'Mon': 'الاثنين',
+  'Tue': 'الثلاثاء',
+  'Wed': 'الأربعاء',
+  'Thu': 'الخميس',
+  'Fri': 'الجمعة'
+};
+
+// Map JavaScript day index (0-6, where 0 is Sunday) to our day codes
+export const dayIndexToCode = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export async function getDoctors(): Promise<Doctor[]> {
   try {
@@ -161,6 +188,49 @@ export async function getDoctorSchedule(doctorId: number): Promise<Record<string
   } catch (error) {
     console.error('Error in getDoctorSchedule:', error);
     return {};
+  }
+}
+
+// Function to get the next 3 available appointment days for a doctor
+export async function getNextAvailableDays(doctorId: number): Promise<Array<{date: Date, dayName: string, dayCode: string, times: string[]}>> {
+  try {
+    // Get doctor schedule
+    const schedule = await getDoctorSchedule(doctorId);
+    if (Object.keys(schedule).length === 0) {
+      console.log(`No schedule found for doctor ${doctorId}`);
+      return [];
+    }
+
+    const today = startOfDay(new Date());
+    const availableDays: Array<{date: Date, dayName: string, dayCode: string, times: string[]}> = [];
+    let currentDate = today;
+    let daysChecked = 0;
+    
+    // Look up to 14 days ahead to find 3 available days
+    while (availableDays.length < 3 && daysChecked < 14) {
+      const dayIndex = currentDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const dayCode = dayIndexToCode[dayIndex];
+      
+      // Check if doctor works on this day
+      if (schedule[dayCode] && schedule[dayCode].length > 0) {
+        availableDays.push({
+          date: new Date(currentDate),
+          dayName: format(currentDate, 'EEEE', { locale: ar }),
+          dayCode,
+          times: schedule[dayCode]
+        });
+      }
+      
+      // Move to next day
+      currentDate = addDays(currentDate, 1);
+      daysChecked++;
+    }
+
+    console.log(`Found ${availableDays.length} available days for doctor ${doctorId}:`, availableDays);
+    return availableDays;
+  } catch (error) {
+    console.error('Error in getNextAvailableDays:', error);
+    return [];
   }
 }
 

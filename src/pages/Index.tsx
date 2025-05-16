@@ -52,13 +52,13 @@ const Index = () => {
     fetchData();
   }, []);
 
-  // Transform doctors data to match DoctorWithSpecialty type
+  // Transform doctors data to include specialty name from the specialties array
   const formattedDoctors = doctors.map((doctor) => {
     // Find the specialty for this doctor using the specialty_id
     const specialty = specialties.find(s => s.id === doctor.specialty_id);
     return {
       ...doctor,
-      specialty: specialty ? specialty.name : 'تخصص غير محدد',
+      specialty: specialty ? specialty.name : 'تخصص غير محدد', // Use name from fetched specialties
       schedule: doctorSchedules[doctor.id] || {}
     };
   });
