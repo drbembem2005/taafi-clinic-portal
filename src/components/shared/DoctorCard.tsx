@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -99,6 +100,24 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
       } 
     });
   };
+
+  // Get available days from doctor's schedule
+  const getAvailableDays = () => {
+    if (!doctor.schedule) return [];
+    
+    return Object.entries(doctor.schedule)
+      .filter(([_, times]) => times && times.length > 0)
+      .map(([day, _]) => {
+        // Map English day key back to Arabic
+        const arabicDay = Object.keys(dayMappings).find(
+          (key) => dayMappings[key as keyof typeof dayMappings] === day
+        );
+        return arabicDay || day;
+      });
+  };
+  
+  // Get available days for this doctor
+  const availableDays = getAvailableDays();
 
   // Completely redesigned compact doctor card
   if (compact) {
