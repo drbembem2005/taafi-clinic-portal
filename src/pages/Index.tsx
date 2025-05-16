@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HeroCarousel from '@/components/shared/HeroCarousel';
@@ -9,7 +8,7 @@ import DoctorCard from '@/components/shared/DoctorCard';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { getSpecialties, Specialty } from '@/services/specialtyService';
-import { getDoctors, Doctor, getDoctorSchedule, getAvailableDays } from '@/services/doctorService';
+import { getDoctors, Doctor, getDoctorSchedule, getNextAvailableDays } from '@/services/doctorService';
 
 const Index = () => {
   const navigate = useNavigate();
