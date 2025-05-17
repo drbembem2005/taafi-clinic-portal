@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -443,7 +442,7 @@ const BookingWizard = () => {
           >
             <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm mb-1 transition-all ${
               currentStep === step 
-                ? 'bg-brand text-white' 
+                ? 'bg-brand text-white shadow-md' 
                 : currentStep > step 
                   ? 'bg-green-50 text-green-600 border border-green-200' 
                   : 'bg-gray-100 text-gray-400'
@@ -828,17 +827,17 @@ const BookingWizard = () => {
         )}
       </div>
       
-      {/* Navigation buttons */}
+      {/* Navigation buttons - Updated UI */}
       {!bookingComplete && (
         <div className="p-4 border-t bg-gray-50 flex justify-between">
           {currentStep > 1 ? (
             <Button 
               variant="outline"
               onClick={goToPrevStep}
-              className="flex items-center"
+              className="flex items-center gap-2 px-5 py-2 text-gray-700 hover:bg-gray-100 hover:text-brand transition-colors border border-gray-300 shadow-sm"
             >
-              <ChevronRight className="ml-1 h-4 w-4" />
-              السابق
+              <ChevronRight className="h-5 w-5" />
+              <span>السابق</span>
             </Button>
           ) : (
             <div></div> // Empty div for alignment
@@ -847,10 +846,10 @@ const BookingWizard = () => {
           {currentStep < 4 ? (
             <Button 
               onClick={goToNextStep}
-              className="flex items-center bg-brand hover:bg-brand-dark text-white"
+              className="flex items-center gap-2 px-5 py-2 bg-brand hover:bg-brand-dark text-white transition-colors shadow-md"
             >
-              التالي
-              <ChevronLeft className="mr-1 h-4 w-4" />
+              <span>التالي</span>
+              <ChevronLeft className="h-5 w-5" />
             </Button>
           ) : (
             <div></div> // Empty div for alignment
