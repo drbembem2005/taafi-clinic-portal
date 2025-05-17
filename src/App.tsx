@@ -12,15 +12,6 @@ import { Toaster } from '@/components/ui/toaster';
 import { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import AdminLayout from '@/components/admin/AdminLayout';
-import AdminLogin from '@/pages/admin/AdminLogin';
-import AdminDashboard from '@/pages/admin/AdminDashboard';
-import AdminSpecialties from '@/pages/admin/AdminSpecialties';
-import AdminDoctors from '@/pages/admin/AdminDoctors';
-import AdminSchedules from '@/pages/admin/AdminSchedules';
-import AdminBlog from '@/pages/admin/AdminBlog';
-import AdminBlogEdit from '@/pages/admin/AdminBlogEdit';
-import AdminRoute from '@/components/admin/AdminRoute';
 import ScrollToTop from '@/components/utils/ScrollToTop';
 
 const App = () => {
@@ -51,7 +42,6 @@ const App = () => {
       <div className="font-cairo">
         <ScrollToTop />
         <Routes>
-          {/* Public Routes */}
           <Route path="/" element={<Layout><Index /></Layout>} />
           <Route path="/specialties" element={<Layout><Specialties /></Layout>} />
           <Route path="/doctors" element={<Layout><Doctors /></Layout>} />
@@ -60,26 +50,6 @@ const App = () => {
           <Route path="/contact" element={<Layout><Contact /></Layout>} />
           <Route path="/blog" element={<Layout><Blog /></Layout>} />
           <Route path="/blog/:slug" element={<Layout><BlogPost /></Layout>} />
-          
-          {/* Admin Routes - Hidden from normal navigation */}
-          <Route path="/management-portal" element={<AdminLogin />} />
-          <Route path="/management-portal/*" element={
-            <AdminRoute>
-              <AdminLayout>
-                <Routes>
-                  <Route path="/" element={<AdminDashboard />} />
-                  <Route path="/specialties" element={<AdminSpecialties />} />
-                  <Route path="/doctors" element={<AdminDoctors />} />
-                  <Route path="/schedules" element={<AdminSchedules />} />
-                  <Route path="/blog" element={<AdminBlog />} />
-                  <Route path="/blog/create" element={<AdminBlogEdit />} />
-                  <Route path="/blog/edit/:id" element={<AdminBlogEdit />} />
-                </Routes>
-              </AdminLayout>
-            </AdminRoute>
-          } />
-          
-          {/* Catch-all route */}
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
         <Toaster />
