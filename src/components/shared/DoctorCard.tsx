@@ -392,7 +392,19 @@ const DoctorDetails = ({
         </div>
       </div>
       
-      {/* Schedule section with two columns */}
+      {/* Bio section - updated design */}
+      <div className="border-t mx-4 pt-3 pb-2">
+        <div className="flex items-center mb-2">
+          <User className="text-brand ml-2 h-5 w-5" />
+          <h3 className="font-bold text-gray-700">نبذة عن الطبيب</h3>
+        </div>
+        
+        <p className="text-gray-700 text-sm px-1 mb-4">
+          {doctor.bio || 'طبيب متخصص ذو خبرة واسعة في مجال تخصصه. يسعى دائماً لتقديم أفضل رعاية طبية ممكنة للمرضى.'}
+        </p>
+      </div>
+      
+      {/* Schedule section in two columns */}
       <div className="border-t mx-4 pt-3 pb-4">
         <div className="flex items-center mb-3">
           <Calendar className="text-brand ml-2 h-5 w-5" />
@@ -401,7 +413,7 @@ const DoctorDetails = ({
         
         <div className="max-h-64">
           {availableDays.length > 0 ? (
-            <div className="grid md:grid-cols-2 gap-2 px-1">
+            <div className="grid grid-cols-2 gap-2 px-1">
               {availableDays.map(([englishDay, times], index) => {
                 const arabicDay = Object.keys(dayMappings).find(
                   (key) => dayMappings[key as keyof typeof dayMappings] === englishDay

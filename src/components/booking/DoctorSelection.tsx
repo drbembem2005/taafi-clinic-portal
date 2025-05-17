@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getDoctors, Doctor } from '@/services/doctorService';
-import { Users, Star, CheckCircle, Info } from 'lucide-react';
+import { Users, CheckCircle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -160,7 +160,10 @@ const DoctorSelection = ({
                       )}
                     </div>
                     
-                    <p className="text-gray-500 text-sm mb-2">{doctor.title || 'طبيب متخصص'}</p>
+                    {/* Show bio instead of title */}
+                    <p className="text-gray-500 text-sm mb-2 line-clamp-2">
+                      {doctor.bio || 'طبيب متخصص في مجال تخصصه'}
+                    </p>
                     
                     {/* Years of experience */}
                     {doctor.experience && (
@@ -169,24 +172,6 @@ const DoctorSelection = ({
                         <span>{doctor.experience} سنوات</span>
                       </div>
                     )}
-                    
-                    {/* Rating */}
-                    <div className="flex items-center">
-                      <div className="flex items-center">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star 
-                            key={star} 
-                            size={14} 
-                            fill={star <= (doctor.rating || 5) ? "#FFB800" : "none"} 
-                            stroke={star <= (doctor.rating || 5) ? "#FFB800" : "#CBD5E1"}
-                            className="mr-0.5" 
-                          />
-                        ))}
-                      </div>
-                      <span className="text-xs text-gray-500 mr-1">
-                        ({doctor.reviews_count || 0} تقييم)
-                      </span>
-                    </div>
                     
                     {/* Bio button */}
                     <Button 
@@ -249,25 +234,7 @@ const DoctorSelection = ({
                   </div>
                   <div>
                     <h3 className="text-lg font-bold">{selectedDoctor?.name}</h3>
-                    <p className="text-gray-500">{selectedDoctor?.title || 'طبيب متخصص'}</p>
-                    
-                    {/* Rating */}
-                    <div className="flex items-center mt-2">
-                      <div className="flex items-center">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star 
-                            key={star} 
-                            size={16} 
-                            fill={star <= (selectedDoctor?.rating || 5) ? "#FFB800" : "none"} 
-                            stroke={star <= (selectedDoctor?.rating || 5) ? "#FFB800" : "#CBD5E1"}
-                            className="mr-0.5" 
-                          />
-                        ))}
-                      </div>
-                      <span className="text-sm text-gray-500 mr-1">
-                        ({selectedDoctor?.reviews_count || 0} تقييم)
-                      </span>
-                    </div>
+                    <p className="text-gray-500">{selectedDoctor?.bio || 'طبيب متخصص'}</p>
                   </div>
                 </div>
                 
@@ -276,15 +243,6 @@ const DoctorSelection = ({
                   <p className="text-gray-700">
                     {selectedDoctor?.bio || 'طبيب متخصص ذو خبرة واسعة في مجال تخصصه. يسعى دائماً لتقديم أفضل رعاية طبية ممكنة للمرضى.'}
                   </p>
-                </div>
-                
-                <div className="mt-4">
-                  <h4 className="font-bold text-gray-800 mb-2">الخبرات والمؤهلات:</h4>
-                  <ul className="list-disc list-inside text-gray-700 space-y-1">
-                    <li>خبرة {selectedDoctor?.experience || '5'} سنوات في مجال التخصص</li>
-                    <li>حاصل على شهادة البورد في التخصص</li>
-                    <li>عضو في الجمعية الطبية المتخصصة</li>
-                  </ul>
                 </div>
               </div>
             </DialogDescription>

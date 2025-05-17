@@ -95,13 +95,14 @@ const SpecialtySelection = ({
   const handleSpecialtySelect = (specialty: Specialty) => {
     onSelectSpecialty(specialty);
     
-    // Auto scroll to doctors section
+    // Auto scroll to next step (doctors section)
     setTimeout(() => {
-      const doctorsSection = document.getElementById('doctors-section');
-      if (doctorsSection) {
-        doctorsSection.scrollIntoView({ behavior: 'smooth' });
+      // Auto navigate to next step by clicking the next button
+      const nextButton = document.querySelector('button[aria-label="التالي"]') as HTMLButtonElement;
+      if (nextButton) {
+        nextButton.click();
       }
-    }, 100);
+    }, 300);
   };
   
   if (loading) {

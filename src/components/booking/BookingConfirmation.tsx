@@ -31,7 +31,7 @@ const BookingConfirmation = ({
 }: BookingConfirmationProps) => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   
-  // Submit booking - now fixed to not open WhatsApp automatically
+  // Submit booking through system regardless of selected method
   const handleSubmit = async (method: 'online' | 'whatsapp' = 'online') => {
     setSubmitting(true);
     try {
@@ -71,65 +71,65 @@ const BookingConfirmation = ({
         <p className="text-gray-600">تأكد من صحة البيانات ثم قم بتأكيد الحجز</p>
       </div>
       
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden mb-6">
-        <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-          <h3 className="font-medium text-gray-800 flex items-center">
-            <CheckCircle2 className="mr-2 h-5 w-5 text-brand" />
+      <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200 shadow-sm overflow-hidden mb-6">
+        <div className="bg-blue-600 px-4 py-3 border-b border-blue-300 text-white">
+          <h3 className="font-medium flex items-center">
+            <CheckCircle2 className="mr-2 h-5 w-5" />
             تفاصيل الحجز
           </h3>
         </div>
         
         <div className="p-4">
           <ul className="space-y-4">
-            <li className="flex items-start border-b border-dashed border-gray-200 pb-3">
-              <Users className="h-5 w-5 text-brand ml-2 mt-1 flex-shrink-0" />
+            <li className="flex items-start border-b border-dashed border-blue-200 pb-3">
+              <Users className="h-5 w-5 text-blue-600 ml-2 mt-1 flex-shrink-0" />
               <div>
-                <p className="text-sm text-gray-500">الطبيب:</p>
+                <p className="text-sm text-blue-700">الطبيب:</p>
                 <p className="font-medium">{doctorName}</p>
               </div>
             </li>
-            <li className="flex items-start border-b border-dashed border-gray-200 pb-3">
-              <Users className="h-5 w-5 text-brand ml-2 mt-1 flex-shrink-0" />
+            <li className="flex items-start border-b border-dashed border-blue-200 pb-3">
+              <Users className="h-5 w-5 text-blue-600 ml-2 mt-1 flex-shrink-0" />
               <div>
-                <p className="text-sm text-gray-500">التخصص:</p>
+                <p className="text-sm text-blue-700">التخصص:</p>
                 <p className="font-medium">{specialtyName}</p>
               </div>
             </li>
-            <li className="flex items-start border-b border-dashed border-gray-200 pb-3">
-              <Calendar className="h-5 w-5 text-brand ml-2 mt-1 flex-shrink-0" />
+            <li className="flex items-start border-b border-dashed border-blue-200 pb-3">
+              <Calendar className="h-5 w-5 text-blue-600 ml-2 mt-1 flex-shrink-0" />
               <div>
-                <p className="text-sm text-gray-500">الموعد:</p>
+                <p className="text-sm text-blue-700">الموعد:</p>
                 <p className="font-medium">{formattedDate} - {formData.booking_time}</p>
               </div>
             </li>
-            <li className="flex items-start border-b border-dashed border-gray-200 pb-3">
-              <Users className="h-5 w-5 text-brand ml-2 mt-1 flex-shrink-0" />
+            <li className="flex items-start border-b border-dashed border-blue-200 pb-3">
+              <Users className="h-5 w-5 text-blue-600 ml-2 mt-1 flex-shrink-0" />
               <div>
-                <p className="text-sm text-gray-500">الاسم:</p>
+                <p className="text-sm text-blue-700">الاسم:</p>
                 <p className="font-medium">{formData.user_name}</p>
               </div>
             </li>
-            <li className="flex items-start border-b border-dashed border-gray-200 pb-3">
-              <Phone className="h-5 w-5 text-brand ml-2 mt-1 flex-shrink-0" />
+            <li className="flex items-start border-b border-dashed border-blue-200 pb-3">
+              <Phone className="h-5 w-5 text-blue-600 ml-2 mt-1 flex-shrink-0" />
               <div>
-                <p className="text-sm text-gray-500">رقم الهاتف:</p>
+                <p className="text-sm text-blue-700">رقم الهاتف:</p>
                 <p className="font-medium" dir="ltr">{formData.user_phone}</p>
               </div>
             </li>
             {formData.user_email && (
-              <li className="flex items-start border-b border-dashed border-gray-200 pb-3">
-                <Mail className="h-5 w-5 text-brand ml-2 mt-1 flex-shrink-0" />
+              <li className="flex items-start border-b border-dashed border-blue-200 pb-3">
+                <Mail className="h-5 w-5 text-blue-600 ml-2 mt-1 flex-shrink-0" />
                 <div>
-                  <p className="text-sm text-gray-500">البريد الإلكتروني:</p>
+                  <p className="text-sm text-blue-700">البريد الإلكتروني:</p>
                   <p className="font-medium">{formData.user_email}</p>
                 </div>
               </li>
             )}
             {formData.notes && (
               <li className="flex items-start">
-                <StickyNote className="h-5 w-5 text-brand ml-2 mt-1 flex-shrink-0" />
+                <StickyNote className="h-5 w-5 text-blue-600 ml-2 mt-1 flex-shrink-0" />
                 <div>
-                  <p className="text-sm text-gray-500">ملاحظات:</p>
+                  <p className="text-sm text-blue-700">ملاحظات:</p>
                   <p className="font-medium">{formData.notes}</p>
                 </div>
               </li>
