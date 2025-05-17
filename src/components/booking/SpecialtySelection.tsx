@@ -90,6 +90,19 @@ const SpecialtySelection = ({
     
     return gradients[specialtyId % gradients.length];
   };
+
+  // Handle specialty selection with auto-navigation
+  const handleSpecialtySelect = (specialty: Specialty) => {
+    onSelectSpecialty(specialty);
+    
+    // Auto scroll to doctors section
+    setTimeout(() => {
+      const doctorsSection = document.getElementById('doctors-section');
+      if (doctorsSection) {
+        doctorsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
+  };
   
   if (loading) {
     return (
@@ -120,7 +133,7 @@ const SpecialtySelection = ({
               }`}
               whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => onSelectSpecialty(specialty)}
+              onClick={() => handleSpecialtySelect(specialty)}
             >
               <div className={`h-full flex flex-col ${
                 selectedSpecialtyId === specialty.id 
@@ -159,27 +172,6 @@ const SpecialtySelection = ({
           <Stethoscope className="w-12 h-12 mx-auto text-gray-400 mb-2" />
           <p>لا توجد تخصصات متاحة حاليًا</p>
         </div>
-      )}
-
-      {selectedSpecialtyId && (
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-6 pt-4 border-t border-gray-100"
-        >
-          <div className="flex justify-between items-center">
-            <p className="text-gray-700">
-              <span className="font-medium">التخصص المحدد:</span>{' '}
-              {specialties.find(s => s.id === selectedSpecialtyId)?.name}
-            </p>
-            <button 
-              onClick={() => onSelectSpecialty(specialties.find(s => s.id === selectedSpecialtyId)!)} 
-              className="text-sm text-brand hover:underline"
-            >
-              استعراض الأطباء
-            </button>
-          </div>
-        </motion.div>
       )}
     </div>
   );

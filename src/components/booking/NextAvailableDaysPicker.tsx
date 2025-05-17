@@ -108,59 +108,62 @@ const NextAvailableDaysPicker = ({
       <h3 className="text-lg font-medium text-center mb-2">المواعيد المتاحة</h3>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {availableDays.map((dayInfo, dayIndex) => (
-          <Card 
-            key={dayIndex} 
-            className={`overflow-hidden transition-all hover:shadow-md ${
-              selectedDay === dayInfo.dayCode ? 'border-brand ring-1 ring-brand shadow-md' : ''
-            }`}
-          >
-            <div className={`p-3 flex items-center justify-center ${
-              selectedDay === dayInfo.dayCode ? 'bg-brand text-white' : 'bg-brand/5'
-            }`}>
-              <Calendar className={`h-4 w-4 ${selectedDay === dayInfo.dayCode ? 'text-white' : 'text-brand'} ml-2`} />
-              <div className="font-bold text-center">
-                {dayInfo.dayName}
-                <div className="text-sm font-normal">
+        {availableDays.map((dayInfo, dayIndex) => {
+          // Get first time from the array for this day
+          const availableTime = dayInfo.times && dayInfo.times.length > 0 ? dayInfo.times[0] : null;
+          
+          return (
+            <Card 
+              key={dayIndex} 
+              className={`overflow-hidden transition-all hover:shadow-md ${
+                selectedDay === dayInfo.dayCode ? 'border-brand ring-1 ring-brand shadow-md' : ''
+              }`}
+              onClick={() => availableTime && handleSelectDateTime(dayInfo.dayCode, availableTime, dayInfo.date)}
+            >
+              <div className={`p-4 flex flex-col items-center justify-center ${
+                selectedDay === dayInfo.dayCode ? 'bg-brand text-white' : 'bg-brand/5'
+              }`}>
+                <Calendar className={`h-6 w-6 ${selectedDay === dayInfo.dayCode ? 'text-white' : 'text-brand'} mb-2`} />
+                <div className="font-bold text-center text-lg">
+                  {dayInfo.dayName}
+                </div>
+                <div className="text-sm text-center">
                   {format(dayInfo.date, 'd MMMM yyyy', { locale: ar })}
                 </div>
               </div>
-            </div>
-            
-            <CardContent className="p-3">
-              <div className="mb-2 text-center">
-                <Badge variant="outline" className="text-xs bg-brand/5 text-brand border-brand/20">
-                  أوقات الكشف المتاحة
-                </Badge>
-              </div>
               
-              <div className="flex flex-wrap gap-1 justify-center">
-                {dayInfo.times && Array.isArray(dayInfo.times) && dayInfo.times.map((time, timeIndex) => (
-                  <Button
-                    key={timeIndex}
-                    size="sm"
-                    variant={selectedDay === dayInfo.dayCode && selectedTime === time ? "default" : "outline"}
-                    className={`text-xs py-1 px-2 h-auto ${
-                      selectedDay === dayInfo.dayCode && selectedTime === time 
-                        ? 'bg-brand hover:bg-brand/90' 
-                        : 'hover:border-brand hover:text-brand'
-                    }`}
-                    onClick={() => handleSelectDateTime(dayInfo.dayCode, time, dayInfo.date)}
-                  >
-                    <Clock className="h-3 w-3 ml-1" />
-                    {time}
-                  </Button>
-                ))}
-              </div>
-              
-              {selectedDay === dayInfo.dayCode && (
-                <div className="mt-3 text-center">
-                  <p className="text-xs text-brand">تم اختيار هذا اليوم</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+              <CardContent className="p-4 text-center">
+                {availableTime ? (
+                  <>
+                    <p className="mb-2 text-sm text-gray-500">موعد الكشف</p>
+                    <div className="flex items-center justify-center">
+                      <Button
+                        size="lg" 
+                        variant={selectedDay === dayInfo.dayCode && selectedTime === availableTime ? "default" : "outline"}
+                        className={`py-2 px-4 text-lg ${
+                          selectedDay === dayInfo.dayCode && selectedTime === availableTime 
+                            ? 'bg-brand hover:bg-brand/90' 
+                            : 'hover:border-brand hover:text-brand'
+                        }`}
+                      >
+                        <Clock className="h-5 w-5 ml-2" />
+                        {availableTime}
+                      </Button>
+                    </div>
+                    
+                    {selectedDay === dayInfo.dayCode && selectedTime === availableTime && (
+                      <Badge className="mt-3 bg-green-100 text-green-700 border-green-200 hover:bg-green-100">
+                        تم الاختيار
+                      </Badge>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-gray-500">لا توجد مواعيد متاحة</p>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
       
       {availableDays.length === 0 && !error && (

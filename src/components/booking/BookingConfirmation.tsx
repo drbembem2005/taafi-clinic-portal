@@ -31,7 +31,7 @@ const BookingConfirmation = ({
 }: BookingConfirmationProps) => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   
-  // Submit booking
+  // Submit booking - now fixed to not open WhatsApp automatically
   const handleSubmit = async (method: 'online' | 'whatsapp' = 'online') => {
     setSubmitting(true);
     try {
@@ -50,32 +50,8 @@ const BookingConfirmation = ({
         description: "سيتم التواصل معك قريبًا لتأكيد الحجز.",
       });
       
-      // Notify parent component of success
+      // Notify parent component of success with booking reference
       onBookingSuccess(response.id);
-      
-      // Open WhatsApp if that was the chosen method
-      if (method === 'whatsapp') {
-        const doctorMessage = doctorName || 'غير محدد';
-        const bookingDateMessage = `${formattedDate} - ${formData.booking_time}`;
-        
-        let message = `*طلب حجز موعد*\n`;
-        message += `الاسم: ${formData.user_name}\n`;
-        message += `الطبيب: ${doctorMessage}\n`;
-        message += `التاريخ: ${bookingDateMessage}\n`;
-        message += `رقم الهاتف: ${formData.user_phone}\n`;
-        
-        if (formData.user_email) {
-          message += `البريد الإلكتروني: ${formData.user_email}\n`;
-        }
-        
-        if (formData.notes) {
-          message += `ملاحظات: ${formData.notes}\n`;
-        }
-        
-        const encodedMessage = encodeURIComponent(message);
-        const whatsappURL = `https://wa.me/201119007403?text=${encodedMessage}`;
-        window.open(whatsappURL, '_blank');
-      }
     } catch (error) {
       console.error('Booking error:', error);
       toast({
@@ -169,7 +145,7 @@ const BookingConfirmation = ({
           </svg>
           <span>
             <span className="font-bold">ملاحظة: </span>
-            اختر طريقة تأكيد الحجز المناسبة لك. نوصي بالتأكيد عبر واتساب للتواصل المباشر مع العيادة.
+            سيتم تأكيد حجزك عبر الهاتف أو الواتساب، ويمكنك التواصل مع العيادة في أي وقت.
           </span>
         </p>
       </div>
