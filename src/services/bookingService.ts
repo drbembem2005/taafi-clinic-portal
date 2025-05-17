@@ -113,7 +113,8 @@ export function openWhatsAppWithBookingDetails(bookingDetails: {
   }
   
   if (bookingDetails.date && bookingDetails.time) {
-    message += `التاريخ: ${bookingDetails.date} - ${bookingDetails.time}\n`;
+    message += `التاريخ: ${bookingDetails.date}\n`;
+    message += `الوقت: ${bookingDetails.time}\n`;
   }
   
   if (bookingDetails.userName) {
@@ -130,6 +131,11 @@ export function openWhatsAppWithBookingDetails(bookingDetails: {
   
   if (bookingDetails.notes) {
     message += `ملاحظات: ${bookingDetails.notes}\n`;
+  }
+  
+  // Add a message if minimal info is provided (direct from doctor card)
+  if (!bookingDetails.date && !bookingDetails.time) {
+    message += `\nأرغب في حجز موعد مع هذا الطبيب، يرجى المساعدة في تحديد موعد مناسب.\n`;
   }
   
   // Encode the message for URL

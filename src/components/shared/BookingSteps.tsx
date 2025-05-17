@@ -16,24 +16,28 @@ const steps = [
     title: 'اختر التخصص',
     description: 'اختر التخصص الطبي المناسب لحالتك',
     icon: <Stethoscope className="w-6 h-6" />,
+    details: 'اختر من بين مجموعة متنوعة من التخصصات الطبية المتاحة لدينا.'
   },
   {
     id: 2,
     title: 'اختر الطبيب',
     description: 'اختر الطبيب المناسب من قائمة الأطباء المتخصصين',
     icon: <User className="w-6 h-6" />,
+    details: 'اختر طبيبك المفضل من قائمة الأطباء المتخصصين ذوي الخبرة.'
   },
   {
     id: 3,
     title: 'حدد الموعد',
     description: 'اختر اليوم والوقت المناسب لموعدك',
     icon: <CalendarDays className="w-6 h-6" />,
+    details: 'اختر موعدًا يناسب جدولك من الأوقات المتاحة.'
   },
   {
     id: 4,
     title: 'أكمل الحجز',
-    description: 'أكمل الحجز عن طريق واتساب أو ملء النموذج',
+    description: 'أكمل الحجز بسرعة عبر واتساب',
     icon: <CheckCircle className="w-6 h-6" />,
+    details: 'أكمل الحجز بسهولة عبر واتساب للحصول على تأكيد فوري.'
   },
 ];
 
@@ -50,7 +54,7 @@ const BookingSteps = () => {
           <div className="w-24 h-1 bg-brand mx-auto mt-4"></div>
         </div>
 
-        {/* Modern Card-based Steps for Desktop */}
+        {/* Desktop Card-based Steps */}
         <div className="hidden md:grid grid-cols-4 gap-6 max-w-5xl mx-auto mb-10">
           {steps.map((step, index) => (
             <motion.div
@@ -162,10 +166,7 @@ const BookingSteps = () => {
                         
                         <div>
                           <p className="text-sm text-gray-600">
-                            {index === 0 && 'اختر من بين مجموعة متنوعة من التخصصات الطبية المتاحة لدينا.'}
-                            {index === 1 && 'اختر طبيبك المفضل من قائمة الأطباء المتخصصين ذوي الخبرة.'}
-                            {index === 2 && 'اختر موعدًا يناسب جدولك من الأوقات المتاحة.'}
-                            {index === 3 && 'أكمل الحجز بسهولة عبر الإنترنت أو عن طريق واتساب.'}
+                            {step.details}
                           </p>
                         </div>
                       </div>
