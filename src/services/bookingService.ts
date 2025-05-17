@@ -96,19 +96,33 @@ export async function cancelBooking(id: string): Promise<boolean> {
 
 export function openWhatsAppWithBookingDetails(bookingDetails: {
   doctorName: string;
-  date: string;
-  time: string;
-  userName: string;
-  phone: string;
+  specialtyName?: string;
+  date?: string;
+  time?: string;
+  userName?: string;
+  phone?: string;
   email?: string | null;
   notes?: string | null;
 }): void {
-  // Format the message
+  // Format the message based on available details
   let message = `*طلب حجز موعد*\n`;
-  message += `الاسم: ${bookingDetails.userName}\n`;
   message += `الطبيب: ${bookingDetails.doctorName}\n`;
-  message += `التاريخ: ${bookingDetails.date} - ${bookingDetails.time}\n`;
-  message += `رقم الهاتف: ${bookingDetails.phone}\n`;
+  
+  if (bookingDetails.specialtyName) {
+    message += `التخصص: ${bookingDetails.specialtyName}\n`;
+  }
+  
+  if (bookingDetails.date && bookingDetails.time) {
+    message += `التاريخ: ${bookingDetails.date} - ${bookingDetails.time}\n`;
+  }
+  
+  if (bookingDetails.userName) {
+    message += `الاسم: ${bookingDetails.userName}\n`;
+  }
+  
+  if (bookingDetails.phone) {
+    message += `رقم الهاتف: ${bookingDetails.phone}\n`;
+  }
   
   if (bookingDetails.email) {
     message += `البريد الإلكتروني: ${bookingDetails.email}\n`;
