@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { format, addDays, startOfDay } from 'date-fns';
@@ -15,9 +14,13 @@ export interface Doctor {
   id: number;
   name: string;
   specialty_id: number;
-  bio?: string;
   image?: string;
-  fees: Fees;
+  bio?: string;
+  fees?: {
+    examination: number;
+    consultation: number | null;
+  };
+  old_schedule?: Record<string, unknown>;
   title?: string;
   experience?: number;
   rating?: number;

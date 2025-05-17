@@ -2,7 +2,10 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { getSpecialties, Specialty } from '@/services/specialtyService';
-import { Stethoscope, Heart, Brain, Baby, User, Microscope } from 'lucide-react';
+import { 
+  Stethoscope, Heart, Brain, Baby, User, 
+  Microscope, Sparkles, Syringe, Ear, Bone, Activity 
+} from 'lucide-react';
 
 interface SpecialtySelectionProps {
   selectedSpecialtyId: number | null;
@@ -35,32 +38,66 @@ const SpecialtySelection = ({
   
   // Get the icon based on specialty name or icon property
   const getSpecialtyIcon = (specialty: Specialty) => {
-    if (!specialty.icon) return <Stethoscope className="w-6 h-6" />;
+    if (!specialty.icon) return <Stethoscope className="w-8 h-8" />;
     
     switch(specialty.icon) {
       case 'heart':
-        return <Heart className="w-6 h-6" />;
+        return <Heart className="w-8 h-8" />;
       case 'brain':
-        return <Brain className="w-6 h-6" />;
+        return <Brain className="w-8 h-8" />;
       case 'baby':
-        return <Baby className="w-6 h-6" />;
+        return <Baby className="w-8 h-8" />;
       case 'male':
       case 'female':
-        return <User className="w-6 h-6" />;
+        return <User className="w-8 h-8" />;
       case 'microscope':
-        return <Microscope className="w-6 h-6" />;
+        return <Microscope className="w-8 h-8" />;
+      case 'sparkles':
+        return <Sparkles className="w-8 h-8" />;
+      case 'syringe':
+        return <Syringe className="w-8 h-8" />;
+      case 'ear':
+        return <Ear className="w-8 h-8" />;
+      case 'bone':
+        return <Bone className="w-8 h-8" />;
+      case 'stomach':
+      case 'heartbeat':
+        return <Activity className="w-8 h-8" />;
       default:
-        return <Stethoscope className="w-6 h-6" />;
+        return <Stethoscope className="w-8 h-8" />;
     }
+  };
+  
+  // Function to get background gradient based on specialty
+  const getSpecialtyBackground = (specialtyId: number) => {
+    // Create visually distinct gradients for different specialties
+    const gradients = [
+      'from-blue-500 to-blue-400',
+      'from-purple-500 to-purple-400',
+      'from-pink-500 to-pink-400',
+      'from-green-500 to-green-400',
+      'from-yellow-500 to-yellow-400',
+      'from-red-500 to-red-400',
+      'from-indigo-500 to-indigo-400',
+      'from-teal-500 to-teal-400',
+      'from-orange-500 to-orange-400',
+      'from-sky-500 to-sky-400',
+      'from-rose-500 to-rose-400',
+      'from-emerald-500 to-emerald-400',
+      'from-cyan-500 to-cyan-400',
+      'from-fuchsia-500 to-fuchsia-400'
+    ];
+    
+    return gradients[specialtyId % gradients.length];
   };
   
   if (loading) {
     return (
-      <div className={`${className} p-5 border rounded-lg bg-white shadow-sm`}>
-        <h2 className="text-lg font-bold mb-6">التخصصات</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div className={`${className} p-5 border rounded-xl bg-white shadow-sm`}>
+        <h2 className="text-xl font-bold mb-6">التخصصات</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="h-20 bg-gray-100 animate-pulse rounded-lg"></div>
+            <div key={i} className="h-28 bg-gray-100 animate-pulse rounded-xl"></div>
           ))}
         </div>
       </div>
@@ -68,37 +105,53 @@ const SpecialtySelection = ({
   }
   
   return (
-    <div className={`${className} p-5 border rounded-lg bg-white shadow-sm`}>
-      <h2 className="text-lg font-bold mb-6">التخصصات</h2>
+    <div className={`${className} p-5 border rounded-xl bg-white shadow-sm`}>
+      <h2 className="text-xl font-bold mb-6">التخصصات</h2>
       
       {specialties.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">
           {specialties.map((specialty) => (
-            <motion.button
+            <motion.div
               key={specialty.id}
-              className={`flex items-center p-4 rounded-lg transition-all ${
+              className={`cursor-pointer rounded-xl transition-all overflow-hidden ${
                 selectedSpecialtyId === specialty.id 
-                  ? 'bg-gradient-to-r from-brand to-brand-light text-white shadow-md' 
-                  : 'bg-gray-50 hover:bg-gray-100 text-gray-800 border border-gray-200'
+                  ? 'ring-2 ring-brand shadow-lg scale-[1.03]' 
+                  : 'hover:shadow-md'
               }`}
-              whileHover={{ scale: 1.02, boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)' }}
+              whileHover={{ scale: 1.03, y: -2 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onSelectSpecialty(specialty)}
             >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center mr-3 ${
-                selectedSpecialtyId === specialty.id ? 'bg-white/20' : 'bg-brand/10'
+              <div className={`h-full flex flex-col ${
+                selectedSpecialtyId === specialty.id 
+                  ? 'bg-gradient-to-br from-brand to-brand-light text-white' 
+                  : 'bg-gray-50 hover:bg-gray-100 text-gray-800 border border-gray-100'
               }`}>
-                {getSpecialtyIcon(specialty)}
+                <div className={`w-full flex items-center justify-center p-3 ${
+                  selectedSpecialtyId === specialty.id ? 'bg-white/10' : ''
+                }`}>
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
+                    selectedSpecialtyId === specialty.id 
+                      ? 'bg-white/20' 
+                      : `bg-gradient-to-br ${getSpecialtyBackground(specialty.id)} bg-opacity-20`
+                  }`}>
+                    <div className={selectedSpecialtyId === specialty.id ? 'text-white' : 'text-gray-700'}>
+                      {getSpecialtyIcon(specialty)}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-center p-3 flex-1 flex flex-col justify-center">
+                  <h3 className={`font-medium text-base ${
+                    selectedSpecialtyId === specialty.id ? 'text-white' : 'text-gray-800'
+                  }`}>{specialty.name}</h3>
+                </div>
+                {selectedSpecialtyId === specialty.id && (
+                  <div className="bg-white/20 p-2 text-center">
+                    <span className="text-xs">تم الاختيار</span>
+                  </div>
+                )}
               </div>
-              <div className="text-right">
-                <h3 className="font-medium text-lg">{specialty.name}</h3>
-                <p className={`text-xs ${selectedSpecialtyId === specialty.id ? 'text-white/80' : 'text-gray-500'}`}>
-                  {specialty.description.length > 50 
-                    ? specialty.description.substring(0, 50) + '...'
-                    : specialty.description}
-                </p>
-              </div>
-            </motion.button>
+            </motion.div>
           ))}
         </div>
       ) : (
@@ -106,6 +159,27 @@ const SpecialtySelection = ({
           <Stethoscope className="w-12 h-12 mx-auto text-gray-400 mb-2" />
           <p>لا توجد تخصصات متاحة حاليًا</p>
         </div>
+      )}
+
+      {selectedSpecialtyId && (
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-6 pt-4 border-t border-gray-100"
+        >
+          <div className="flex justify-between items-center">
+            <p className="text-gray-700">
+              <span className="font-medium">التخصص المحدد:</span>{' '}
+              {specialties.find(s => s.id === selectedSpecialtyId)?.name}
+            </p>
+            <button 
+              onClick={() => onSelectSpecialty(specialties.find(s => s.id === selectedSpecialtyId)!)} 
+              className="text-sm text-brand hover:underline"
+            >
+              استعراض الأطباء
+            </button>
+          </div>
+        </motion.div>
       )}
     </div>
   );
