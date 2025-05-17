@@ -18,6 +18,10 @@ export interface Doctor {
   bio?: string;
   image?: string;
   fees: Fees;
+  title?: string;
+  experience?: number;
+  rating?: number;
+  reviews_count?: number;
 }
 
 // Define the DoctorSchedule type

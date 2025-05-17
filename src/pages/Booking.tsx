@@ -45,10 +45,9 @@ const Booking = () => {
               <motion.div 
                 className="bg-white rounded-lg shadow-md p-5"
                 whileHover={{ y: -5 }}
-                transition={{ type: "spring", stiffness: 300 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
+                transition={{ type: "spring", stiffness: 300, delay: 0.3 }}
               >
                 <div className="w-16 h-16 bg-brand/10 text-brand rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -62,10 +61,9 @@ const Booking = () => {
               <motion.div 
                 className="bg-white rounded-lg shadow-md p-5"
                 whileHover={{ y: -5 }}
-                transition={{ type: "spring", stiffness: 300 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
+                transition={{ type: "spring", stiffness: 300, delay: 0.4 }}
               >
                 <div className="w-16 h-16 bg-brand/10 text-brand rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -79,10 +77,9 @@ const Booking = () => {
               <motion.div 
                 className="bg-white rounded-lg shadow-md p-5"
                 whileHover={{ y: -5 }}
-                transition={{ type: "spring", stiffness: 300 }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.5 }}
+                transition={{ type: "spring", stiffness: 300, delay: 0.5 }}
               >
                 <div className="w-16 h-16 bg-brand/10 text-brand rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
