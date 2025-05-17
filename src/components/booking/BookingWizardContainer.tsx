@@ -24,7 +24,7 @@ export interface BookingFormData {
 }
 
 const BookingWizardContainer = () => {
-  // State for wizard steps
+  // State for wizard steps - now we have 5 steps instead of 4
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [formData, setFormData] = useState<BookingFormData>({
     user_name: '',
@@ -146,8 +146,8 @@ const BookingWizardContainer = () => {
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-      {/* Progress bar and indicators */}
-      <BookingProgress currentStep={currentStep} />
+      {/* Progress bar and indicators - now with 5 steps instead of 4 */}
+      <BookingProgress currentStep={currentStep} totalSteps={5} />
       
       {/* Main content area */}
       <div className="p-4 md:p-6">
@@ -160,26 +160,36 @@ const BookingWizardContainer = () => {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="flex flex-col md:flex-row gap-6">
-                <SpecialtySelection
-                  selectedSpecialtyId={formData.specialty_id}
-                  onSelectSpecialty={handleSpecialtySelect}
-                  className="md:w-1/3 lg:w-1/4"
-                />
-                
-                <DoctorSelection
-                  specialtyId={formData.specialty_id}
-                  selectedDoctorId={formData.doctor_id}
-                  onSelectDoctor={handleDoctorSelect}
-                  className="md:w-2/3 lg:w-3/4"
-                />
-              </div>
+              {/* Full width specialty selection */}
+              <SpecialtySelection
+                selectedSpecialtyId={formData.specialty_id}
+                onSelectSpecialty={handleSpecialtySelect}
+                className="w-full"
+              />
             </motion.div>
           )}
 
           {currentStep === 2 && (
             <motion.div
               key="step2"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              {/* Doctor selection as its own step */}
+              <DoctorSelection
+                specialtyId={formData.specialty_id}
+                selectedDoctorId={formData.doctor_id}
+                onSelectDoctor={handleDoctorSelect}
+                className="w-full"
+              />
+            </motion.div>
+          )}
+
+          {currentStep === 3 && (
+            <motion.div
+              key="step3"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
@@ -196,9 +206,9 @@ const BookingWizardContainer = () => {
             </motion.div>
           )}
 
-          {currentStep === 3 && (
+          {currentStep === 4 && (
             <motion.div
-              key="step3"
+              key="step4"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
@@ -219,9 +229,9 @@ const BookingWizardContainer = () => {
             </motion.div>
           )}
 
-          {currentStep === 4 && (
+          {currentStep === 5 && (
             <motion.div
-              key="step4"
+              key="step5"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
@@ -255,20 +265,22 @@ const BookingWizardContainer = () => {
           </motion.button>
         )}
         
-        {currentStep < 4 && (
+        {currentStep < 5 && (
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             className={`px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 text-white transition-colors ${
-              (currentStep === 1 && !formData.doctor_id) || 
-              (currentStep === 2 && (!formData.booking_day || !formData.booking_time))
+              (currentStep === 1 && !formData.specialty_id) || 
+              (currentStep === 2 && !formData.doctor_id) || 
+              (currentStep === 3 && (!formData.booking_day || !formData.booking_time))
                 ? 'bg-gray-400 cursor-not-allowed'
                 : 'bg-brand hover:bg-brand-dark'
             }`}
             onClick={goToNextStep}
             disabled={
-              (currentStep === 1 && !formData.doctor_id) || 
-              (currentStep === 2 && (!formData.booking_day || !formData.booking_time))
+              (currentStep === 1 && !formData.specialty_id) || 
+              (currentStep === 2 && !formData.doctor_id) || 
+              (currentStep === 3 && (!formData.booking_day || !formData.booking_time))
             }
           >
             التالي
