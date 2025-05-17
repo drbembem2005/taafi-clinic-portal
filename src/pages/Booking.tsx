@@ -1,6 +1,6 @@
 
-import BookingWizard from '@/components/booking/BookingWizard';
 import { motion } from 'framer-motion';
+import BookingWizardContainer from '@/components/booking/BookingWizardContainer';
 
 const Booking = () => {
   return (
@@ -23,15 +23,14 @@ const Booking = () => {
       </section>
 
       {/* Booking Wizard */}
-      <section className="py-8 md:py-16 bg-white">
+      <section className="py-6 md:py-12 bg-white">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="max-w-4xl mx-auto"
+            transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <BookingWizard />
+            <BookingWizardContainer />
           </motion.div>
         </div>
       </section>
@@ -47,6 +46,9 @@ const Booking = () => {
                 className="bg-white rounded-lg shadow-md p-5"
                 whileHover={{ y: -5 }}
                 transition={{ type: "spring", stiffness: 300 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
               >
                 <div className="w-16 h-16 bg-brand/10 text-brand rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -61,6 +63,9 @@ const Booking = () => {
                 className="bg-white rounded-lg shadow-md p-5"
                 whileHover={{ y: -5 }}
                 transition={{ type: "spring", stiffness: 300 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
               >
                 <div className="w-16 h-16 bg-brand/10 text-brand rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -75,6 +80,9 @@ const Booking = () => {
                 className="bg-white rounded-lg shadow-md p-5"
                 whileHover={{ y: -5 }}
                 transition={{ type: "spring", stiffness: 300 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
               >
                 <div className="w-16 h-16 bg-brand/10 text-brand rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -1,14 +1,14 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CalendarDays, 
   User, 
   Stethoscope, 
-  CheckCircle,
-  ChevronRight
+  CheckCircle
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const steps = [
   {
@@ -38,10 +38,11 @@ const steps = [
 ];
 
 const BookingSteps = () => {
-  const [activeStep, setActiveStep] = useState(1);
+  const [activeStep, setActiveStep] = useState(0);
+  const [hoveredStep, setHoveredStep] = useState<number | null>(null);
 
   return (
-    <section className="py-16 bg-gradient-to-b from-white to-gray-50">
+    <section className="py-12 md:py-16 bg-gradient-to-b from-white to-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">خطوات الحجز السريع</h2>
@@ -49,93 +50,150 @@ const BookingSteps = () => {
           <div className="w-24 h-1 bg-brand mx-auto mt-4"></div>
         </div>
 
-        {/* Timeline Steps for Medium and Large Screens */}
-        <div className="hidden md:block mb-12">
-          <div className="relative max-w-5xl mx-auto">
-            {/* Timeline Line */}
-            <div className="absolute top-1/2 left-0 w-full h-1.5 bg-gray-200 rounded-full -translate-y-1/2 z-0"></div>
-            
-            {/* Steps */}
-            <div className="flex justify-between relative z-10">
-              {steps.map((step) => (
-                <motion.div
-                  key={step.id}
-                  className="flex flex-col items-center"
-                  initial={{ opacity: 0.7 }}
-                  whileHover={{ scale: 1.05, opacity: 1 }}
-                  onClick={() => setActiveStep(step.id)}
-                >
-                  <div 
-                    className={`w-20 h-20 rounded-full flex items-center justify-center mb-4 shadow-md transition-all ${
-                      activeStep === step.id 
-                        ? 'bg-brand text-white scale-110 shadow-brand/30 shadow-lg' 
-                        : activeStep > step.id
-                          ? 'bg-green-500 text-white'
-                          : 'bg-white text-gray-500 border-2 border-gray-200'
-                    }`}
-                  >
-                    {activeStep > step.id ? <CheckCircle className="w-9 h-9" /> : step.icon}
-                  </div>
-                  <h3 className={`text-lg font-bold mb-1 ${activeStep === step.id ? 'text-brand' : 'text-gray-800'}`}>
+        {/* Modern Card-based Steps for Desktop */}
+        <div className="hidden md:grid grid-cols-4 gap-6 max-w-5xl mx-auto mb-10">
+          {steps.map((step, index) => (
+            <motion.div
+              key={step.id}
+              className={`relative rounded-xl overflow-hidden cursor-pointer transition-all shadow-md hover:shadow-lg ${
+                activeStep === index ? 'ring-2 ring-brand' : ''
+              }`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ 
+                opacity: 1, 
+                y: 0,
+                transition: { delay: index * 0.1 }
+              }}
+              whileHover={{ 
+                y: -8,
+                transition: { duration: 0.3 } 
+              }}
+              onClick={() => setActiveStep(index)}
+              onHoverStart={() => setHoveredStep(index)}
+              onHoverEnd={() => setHoveredStep(null)}
+            >
+              <div className={`
+                h-full flex flex-col items-center text-center p-6 bg-gradient-to-br
+                ${index === 0 ? 'from-blue-50 to-blue-100' : ''}
+                ${index === 1 ? 'from-green-50 to-green-100' : ''}
+                ${index === 2 ? 'from-purple-50 to-purple-100' : ''}
+                ${index === 3 ? 'from-amber-50 to-amber-100' : ''}
+              `}>
+                <div className={`
+                  w-16 h-16 rounded-full flex items-center justify-center mb-4 
+                  ${activeStep >= index ? 'bg-brand text-white' : 'bg-white text-gray-500'}
+                  shadow-md transition-all duration-300
+                `}>
+                  {activeStep > index ? (
+                    <CheckCircle className="w-8 h-8" />
+                  ) : step.icon}
+                </div>
+                
+                <h3 className={`text-xl font-bold mb-2 ${activeStep === index ? 'text-brand' : 'text-gray-800'}`}>
+                  {step.title}
+                </h3>
+                
+                <p className="text-gray-600 text-sm">
+                  {step.description}
+                </p>
+                
+                {/* Step Number Indicator */}
+                <div className={`
+                  absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
+                  ${activeStep >= index ? 'bg-brand text-white' : 'bg-white text-gray-500 border border-gray-200'}
+                `}>
+                  {step.id}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Mobile Accordion Steps */}
+        <div className="md:hidden space-y-4 mb-8">
+          {steps.map((step, index) => (
+            <motion.div
+              key={step.id}
+              className={`rounded-lg overflow-hidden border ${
+                activeStep === index ? 'border-brand' : 'border-gray-200'
+              }`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { delay: index * 0.1 } }}
+            >
+              <div 
+                className={`flex items-center p-4 ${
+                  activeStep === index ? 'bg-brand/5' : 'bg-white'
+                } cursor-pointer`}
+                onClick={() => setActiveStep(index)}
+              >
+                <div className={`
+                  w-10 h-10 rounded-full flex items-center justify-center mr-4 flex-shrink-0
+                  ${activeStep >= index ? 'bg-brand text-white' : 'bg-gray-100 text-gray-500'}
+                  shadow-sm
+                `}>
+                  {activeStep > index ? <CheckCircle className="w-5 h-5" /> : <span>{step.id}</span>}
+                </div>
+                
+                <div className="flex-grow">
+                  <h3 className={`font-bold ${activeStep === index ? 'text-brand' : 'text-gray-800'}`}>
                     {step.title}
                   </h3>
-                  <p className="text-sm text-gray-500 max-w-[180px] text-center">
+                  
+                  <p className="text-sm text-gray-600 mt-1">
                     {step.description}
                   </p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
+                </div>
+              </div>
+              
+              <AnimatePresence>
+                {activeStep === index && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="p-4 bg-gray-50 border-t border-gray-100">
+                      <div className="flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm mr-4">
+                          {step.icon}
+                        </div>
+                        
+                        <div>
+                          <p className="text-sm text-gray-600">
+                            {index === 0 && 'اختر من بين مجموعة متنوعة من التخصصات الطبية المتاحة لدينا.'}
+                            {index === 1 && 'اختر طبيبك المفضل من قائمة الأطباء المتخصصين ذوي الخبرة.'}
+                            {index === 2 && 'اختر موعدًا يناسب جدولك من الأوقات المتاحة.'}
+                            {index === 3 && 'أكمل الحجز بسهولة عبر الإنترنت أو عن طريق واتساب.'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
         </div>
 
-        {/* Modern Vertical Steps for Mobile */}
-        <div className="md:hidden mb-8">
-          <div className="relative border-r-2 border-gray-200 pr-6 mr-4">
-            {steps.map((step) => (
-              <motion.div 
-                key={step.id}
-                className={`mb-8 last:mb-0 relative ${
-                  activeStep === step.id 
-                    ? 'opacity-100' 
-                    : 'opacity-80'
-                }`}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setActiveStep(step.id)}
-              >
-                <div 
-                  className={`absolute right-[-28px] top-0 w-12 h-12 rounded-full flex items-center justify-center ${
-                    activeStep === step.id 
-                      ? 'bg-brand text-white shadow-lg shadow-brand/30'
-                      : activeStep > step.id
-                        ? 'bg-green-500 text-white'
-                        : 'bg-white border-2 border-gray-200 text-gray-500'
-                  }`}
-                >
-                  {activeStep > step.id ? <CheckCircle className="w-6 h-6" /> : step.icon}
-                </div>
-                <div className="bg-white rounded-lg shadow-sm p-4 mr-2">
-                  <h3 className={`text-lg font-bold mb-1 ${
-                    activeStep === step.id ? 'text-brand' : 'text-gray-800'
-                  }`}>
-                    {step.title}
-                  </h3>
-                  <p className="text-sm text-gray-600">{step.description}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        <div className="text-center mt-12">
+        {/* Call to action */}
+        <div className="text-center mt-10">
           <Button
             size="lg"
             className="bg-brand hover:bg-brand-dark text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-brand/20 transition-all hover:shadow-brand/30 hover:-translate-y-1 group"
             asChild
           >
-            <a href="/booking">
+            <Link to="/booking">
               احجز موعدك الآن
-              <ChevronRight className="mr-2 h-5 w-5 inline-block transition-transform group-hover:translate-x-[-4px]" />
-            </a>
+              <motion.span
+                className="inline-block mr-2"
+                initial={{ x: 0 }}
+                animate={{ x: hoveredStep !== null ? -3 : 0 }}
+              >
+                ←
+              </motion.span>
+            </Link>
           </Button>
         </div>
       </div>
