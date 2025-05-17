@@ -7,7 +7,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { getNextAvailableDays } from '@/services/doctorService';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 
 interface NextAvailableDaysPickerProps {
   doctorId: number;
@@ -43,12 +43,13 @@ const NextAvailableDaysPicker = ({
         }
         
         const nextAvailableDays = await getNextAvailableDays(doctorId);
+        console.log("NextAvailableDaysPicker received days:", nextAvailableDays);
         
         if (nextAvailableDays.length === 0) {
           setError('لا توجد مواعيد متاحة لهذا الطبيب');
         } else {
           setAvailableDays(nextAvailableDays);
-          console.log("Available days fetched:", nextAvailableDays);
+          console.log("Available days set:", nextAvailableDays);
         }
       } catch (err) {
         console.error('Error fetching available days:', err);

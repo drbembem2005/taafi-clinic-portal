@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/components/ui/use-toast';
 import { format, addDays, startOfDay } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
@@ -18,7 +18,6 @@ export interface Doctor {
   bio?: string;
   image?: string;
   fees: Fees;
-  schedule?: Record<string, any>; // Keep for backward compatibility during transition
 }
 
 // Define the DoctorSchedule type
@@ -239,120 +238,6 @@ export async function getNextAvailableDays(doctorId: number): Promise<Array<{dat
       variant: "destructive",
     });
     return [];
-  }
-}
-
-// Function to seed the doctors data manually through JavaScript
-export async function seedDoctorsData() {
-  try {
-    // First, seed specialties
-    const specialties = [
-      {
-        name: "طب الأطفال وحديثي الولادة",
-        description: "رعاية صحية للأطفال منذ الولادة",
-        details: "تشخيص وعلاج أمراض الأطفال والرضع مع متابعة النمو والتطور",
-        icon: "baby"
-      },
-      {
-        name: "الجلدية والتجميل",
-        description: "علاج أ��راض البشرة والتجميل",
-        details: "علاج أمراض الجلد المختلفة وإجراءات التجميل غير الجراحية",
-        icon: "sparkles"
-      },
-      {
-        name: "النساء والتوليد والعقم",
-        description: "رعاية صحية للمرأة والحمل",
-        details: "متابعة صحة المرأة والحمل وعلاج مشاكل العقم",
-        icon: "baby"
-      },
-      {
-        name: "الجراحة العامة والمناظير",
-        description: "عمليات جراحية وتشخيص بالمناظير",
-        details: "إجراء العمليات الجراحية والتشخيص باستخدام المناظير الطبية",
-        icon: "scissors"
-      },
-      {
-        name: "الذكورة وتأخر الإنجاب",
-        description: "علاج مشاكل الصحة الإنجابية للرجال",
-        details: "علاج مشاكل الخصوبة وتأخر الإنجاب والصحة الجنسية للرجال",
-        icon: "male"
-      },
-      {
-        name: "الباطنة والسكري والغدد والكلى",
-        description: "علاج أمراض الباطنة والغدد الصماء",
-        details: "تشخيص وعلاج أمراض الباطنة والسكري والغدد الصماء والكلى",
-        icon: "activity"
-      }
-    ];
-
-    // Insert specialties
-    for (const specialty of specialties) {
-      const { error: specialtyError } = await supabase
-        .from('specialties')
-        .upsert([specialty], { onConflict: 'name' });
-      
-      if (specialtyError) {
-        console.error('Error inserting specialty:', specialtyError);
-      }
-    }
-
-    // Get specialty IDs for reference
-    const { data: specialtyData, error: specialtyFetchError } = await supabase
-      .from('specialties')
-      .select('id, name');
-    
-    if (specialtyFetchError) {
-      console.error('Error fetching specialty IDs:', specialtyFetchError);
-      return;
-    }
-
-    // Map specialty names to IDs
-    const specialtyMap = new Map();
-    specialtyData.forEach(s => {
-      specialtyMap.set(s.name, s.id);
-    });
-
-    // Sample doctors data
-    const doctors = [
-      {
-        name: "د. حنان زغلول",
-        specialty_id: specialtyMap.get("طب الأطفال وحديثي الولادة"),
-        fees: { examination: 400, consultation: 200 },
-        schedule: { "Sat": [], "Sun": ["18:00"], "Mon": [], "Tue": ["18:00"], "Wed": [], "Thu": ["18:00"] },
-        bio: "استشاري طب الاطفال وحديثي الولادة"
-      },
-      {
-        name: "د. سمية علي عسكر",
-        specialty_id: specialtyMap.get("طب الأطفال وحديثي الولادة"),
-        fees: { examination: 400, consultation: 100 },
-        schedule: { "Sat": ["19:00"], "Sun": [], "Mon": ["19:00"], "Tue": [], "Wed": ["19:00"], "Thu": [] },
-        bio: "استشاري طب الاطفال وحديثي الولادة"
-      },
-      {
-        name: "د. نرمين ابراهيم",
-        specialty_id: specialtyMap.get("الجلدية والتجميل"),
-        fees: { examination: 100, consultation: null },
-        schedule: { "Sat": [], "Sun": [], "Mon": ["19:30"], "Tue": [], "Wed": ["19:30"], "Thu": [] },
-        bio: "اخصائي التجميل اللاجراحي والعناية بالبشرة"
-      }
-    ];
-
-    // Insert doctors
-    for (const doctor of doctors) {
-      const { error: doctorError } = await supabase
-        .from('doctors')
-        .upsert([doctor], { onConflict: 'name' });
-      
-      if (doctorError) {
-        console.error('Error inserting doctor:', doctorError);
-      }
-    }
-
-    console.log("Doctors data has been seeded successfully.");
-    return true;
-  } catch (error) {
-    console.error("Error seeding doctors data:", error);
-    return false;
   }
 }
 
