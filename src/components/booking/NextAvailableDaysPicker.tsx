@@ -8,6 +8,7 @@ import { ar } from 'date-fns/locale';
 import { getNextAvailableDays } from '@/services/doctorService';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 interface NextAvailableDaysPickerProps {
   doctorId: number;
@@ -103,41 +104,64 @@ const NextAvailableDaysPicker = ({
   }
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-medium text-center mb-4">المواعيد المتاحة</h3>
+    <div className="space-y-6">
+      <h3 className="text-lg font-medium text-center mb-2">المواعيد المتاحة</h3>
       
-      {availableDays.map((dayInfo, dayIndex) => (
-        <Card key={dayIndex} className={`overflow-hidden transition-all ${
-          selectedDay === dayInfo.dayCode ? 'border-brand ring-1 ring-brand' : ''
-        }`}>
-          <div className="bg-brand/5 px-4 py-2 border-b flex items-center">
-            <Calendar className="h-4 w-4 text-brand ml-2" />
-            <div className="font-medium">
-              {dayInfo.dayName}, {format(dayInfo.date, 'd MMMM yyyy', { locale: ar })}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {availableDays.map((dayInfo, dayIndex) => (
+          <Card 
+            key={dayIndex} 
+            className={`overflow-hidden transition-all hover:shadow-md ${
+              selectedDay === dayInfo.dayCode ? 'border-brand ring-1 ring-brand shadow-md' : ''
+            }`}
+          >
+            <div className={`p-3 flex items-center justify-center ${
+              selectedDay === dayInfo.dayCode ? 'bg-brand text-white' : 'bg-brand/5'
+            }`}>
+              <Calendar className={`h-4 w-4 ${selectedDay === dayInfo.dayCode ? 'text-white' : 'text-brand'} ml-2`} />
+              <div className="font-bold text-center">
+                {dayInfo.dayName}
+                <div className="text-sm font-normal">
+                  {format(dayInfo.date, 'd MMMM yyyy', { locale: ar })}
+                </div>
+              </div>
             </div>
-          </div>
-          <CardContent className="p-3">
-            <div className="flex flex-wrap gap-2">
-              {dayInfo.times && Array.isArray(dayInfo.times) && dayInfo.times.map((time, timeIndex) => (
-                <Button
-                  key={timeIndex}
-                  size="sm"
-                  variant={selectedDay === dayInfo.dayCode && selectedTime === time ? "default" : "outline"}
-                  className={`flex items-center ${
-                    selectedDay === dayInfo.dayCode && selectedTime === time 
-                      ? 'bg-brand hover:bg-brand/90' 
-                      : 'hover:border-brand hover:text-brand'
-                  }`}
-                  onClick={() => handleSelectDateTime(dayInfo.dayCode, time, dayInfo.date)}
-                >
-                  <Clock className="h-3 w-3 ml-1" />
-                  {time}
-                </Button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            
+            <CardContent className="p-3">
+              <div className="mb-2 text-center">
+                <Badge variant="outline" className="text-xs bg-brand/5 text-brand border-brand/20">
+                  أوقات الكشف المتاحة
+                </Badge>
+              </div>
+              
+              <div className="flex flex-wrap gap-1 justify-center">
+                {dayInfo.times && Array.isArray(dayInfo.times) && dayInfo.times.map((time, timeIndex) => (
+                  <Button
+                    key={timeIndex}
+                    size="sm"
+                    variant={selectedDay === dayInfo.dayCode && selectedTime === time ? "default" : "outline"}
+                    className={`text-xs py-1 px-2 h-auto ${
+                      selectedDay === dayInfo.dayCode && selectedTime === time 
+                        ? 'bg-brand hover:bg-brand/90' 
+                        : 'hover:border-brand hover:text-brand'
+                    }`}
+                    onClick={() => handleSelectDateTime(dayInfo.dayCode, time, dayInfo.date)}
+                  >
+                    <Clock className="h-3 w-3 ml-1" />
+                    {time}
+                  </Button>
+                ))}
+              </div>
+              
+              {selectedDay === dayInfo.dayCode && (
+                <div className="mt-3 text-center">
+                  <p className="text-xs text-brand">تم اختيار هذا اليوم</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
       
       {availableDays.length === 0 && !error && (
         <div className="text-center p-4 bg-yellow-50 border border-yellow-200 rounded-md">
@@ -153,6 +177,15 @@ const NextAvailableDaysPicker = ({
             </svg>
             تواصل مع العيادة عبر واتساب
           </Button>
+        </div>
+      )}
+      
+      {selectedDay && selectedTime && (
+        <div className="bg-green-50 border border-green-100 rounded-lg p-4 text-center">
+          <p className="text-green-700">
+            تم اختيار موعدك: <strong>{format(availableDays.find(d => d.dayCode === selectedDay)?.date || new Date(), 'EEEE, d MMMM yyyy', { locale: ar })} - {selectedTime}</strong>
+          </p>
+          <p className="text-sm text-green-600 mt-2">يرجى إكمال بيانات الحجز في الخطوة التالية</p>
         </div>
       )}
     </div>
