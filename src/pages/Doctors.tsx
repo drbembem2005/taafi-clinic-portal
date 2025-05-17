@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { getDoctors, getDoctorsBySpecialty, Doctor, getDoctorSchedule } from '@/services/doctorService';
+import { getDoctors, getDoctorsBySpecialtyId, Doctor, getDoctorSchedule } from '@/services/doctorService';
 import { getSpecialties, Specialty } from '@/services/specialtyService';
 import DoctorCard from '@/components/shared/DoctorCard';
 import { Label } from '@/components/ui/label';
@@ -57,7 +56,7 @@ const Doctors = () => {
           // Find specialty ID by name
           const specialty = specialties.find(s => s.name === selectedSpecialty);
           if (specialty) {
-            fetchedDoctors = await getDoctorsBySpecialty(specialty.id);
+            fetchedDoctors = await getDoctorsBySpecialtyId(specialty.id);
             console.log(`Fetched doctors by specialty (${specialty.name}):`, fetchedDoctors);
           }
         } else {

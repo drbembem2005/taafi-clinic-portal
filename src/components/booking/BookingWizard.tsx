@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { getSpecialties, Specialty } from '@/services/specialtyService';
-import { getDoctors, Doctor } from '@/services/doctorService';
+import { getDoctors, Doctor, getDoctor } from '@/services/doctorService';
 import { createBooking } from '@/services/bookingService';
 import { toast } from '@/hooks/use-toast';
 import NextAvailableDaysPicker from './NextAvailableDaysPicker';

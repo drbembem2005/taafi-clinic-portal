@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format, addDays, startOfDay } from 'date-fns';
@@ -76,12 +77,12 @@ export async function getDoctors(): Promise<Doctor[]> {
 
     console.log('Doctors data from Supabase:', data);
 
-    // Parse fees JSON string if needed
+    // Parse fees JSON string if needed and convert to Doctor type
     return data.map(doctor => ({
       ...doctor,
       fees: typeof doctor.fees === 'string' 
         ? JSON.parse(doctor.fees) 
-        : doctor.fees
+        : (doctor.fees as unknown as Fees)
     })) as Doctor[];
   } catch (error) {
     console.error('Error in getDoctors:', error);
@@ -107,12 +108,12 @@ export async function getDoctor(id: number): Promise<Doctor | null> {
       return null;
     }
 
-    // Parse fees JSON string if needed
+    // Parse fees JSON string if needed and convert to Doctor type
     return {
       ...data,
       fees: typeof data.fees === 'string' 
         ? JSON.parse(data.fees) 
-        : data.fees
+        : (data.fees as unknown as Fees)
     } as Doctor;
   } catch (error) {
     console.error('Error in getDoctor:', error);
@@ -120,7 +121,7 @@ export async function getDoctor(id: number): Promise<Doctor | null> {
   }
 }
 
-export async function getDoctorsBySpecialty(specialtyId: number): Promise<Doctor[]> {
+export async function getDoctorsBySpecialtyId(specialtyId: number): Promise<Doctor[]> {
   try {
     const { data, error } = await supabase
       .from('doctors')
@@ -138,18 +139,21 @@ export async function getDoctorsBySpecialty(specialtyId: number): Promise<Doctor
       return [];
     }
 
-    // Parse fees JSON string if needed
+    // Parse fees JSON string if needed and convert to Doctor type
     return data.map(doctor => ({
       ...doctor,
       fees: typeof doctor.fees === 'string' 
         ? JSON.parse(doctor.fees) 
-        : doctor.fees
+        : (doctor.fees as unknown as Fees)
     })) as Doctor[];
   } catch (error) {
     console.error('Error in getDoctorsBySpecialty:', error);
     return [];
   }
 }
+
+// For backward compatibility
+export const getDoctorsBySpecialty = getDoctorsBySpecialtyId;
 
 // Enhanced function to get a doctor's schedule from the doctor_schedules table
 export async function getDoctorSchedule(doctorId: number): Promise<Record<string, string[]>> {
