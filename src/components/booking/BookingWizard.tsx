@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -22,7 +23,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { getSpecialties, Specialty } from '@/services/specialtyService';
 import { getDoctors, Doctor, getDoctor } from '@/services/doctorService';
-import { createBooking } from '@/services/bookingService';
+import { createBooking, openWhatsAppWithBookingDetails } from '@/services/bookingService';
 import { toast } from '@/hooks/use-toast';
 import NextAvailableDaysPicker from './NextAvailableDaysPicker';
 
