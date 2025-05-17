@@ -2,7 +2,17 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Check, Calendar, Users, Phone, Mail, StickyNote } from 'lucide-react';
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Check, 
+  Calendar, 
+  Users, 
+  Phone, 
+  Mail, 
+  StickyNote,
+  AlertCircle
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -151,6 +161,11 @@ const BookingWizard = () => {
     setFormattedDate(formattedDateStr);
   };
   
+  // Handle doctor selection - no auto navigation
+  const handleDoctorSelect = (doctorId: number) => {
+    setFormData(prev => ({ ...prev, doctor_id: doctorId }));
+  };
+  
   // Go to next step
   const goToNextStep = () => {
     // Validation for each step
@@ -222,16 +237,6 @@ const BookingWizard = () => {
       // Scroll to top after step change
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
-  
-  // Handle doctor selection
-  const handleDoctorSelect = (doctorId: number) => {
-    setFormData(prev => ({ ...prev, doctor_id: doctorId }));
-    
-    // Automatically go to next step after selecting doctor
-    setTimeout(() => {
-      goToNextStep();
-    }, 300);
   };
   
   // Get selected doctor name
@@ -463,11 +468,11 @@ const BookingWizard = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <h2 className="text-xl font-bold mb-4 text-center">اختر التخصص والطبيب</h2>
+            <h2 className="text-xl font-bold mb-6 text-center">اختر التخصص والطبيب</h2>
             
             {/* Specialties Selection */}
             <div className="mb-6">
-              <Label className="block mb-2">التخصص</Label>
+              <Label className="block mb-4 text-lg">التخصص</Label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {specialties.map((specialty) => (
                   <Button
@@ -488,7 +493,7 @@ const BookingWizard = () => {
             
             {/* Doctors Selection */}
             <div id="doctors-section" className="mb-6">
-              <Label className="block mb-2">الطبيب</Label>
+              <Label className="block mb-4 text-lg">الطبيب</Label>
               
               {loading ? (
                 <div className="text-center py-8">
@@ -546,6 +551,24 @@ const BookingWizard = () => {
                 </div>
               )}
             </div>
+                        
+            {formData.doctor_id && (
+              <div className="bg-brand/5 rounded-lg p-4 mb-4 flex items-center justify-between">
+                <div className="flex items-center">
+                  <Check className="h-5 w-5 text-brand ml-2" />
+                  <span>تم اختيار الطبيب: <strong>{getSelectedDoctorName()}</strong></span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-brand hover:bg-brand/10 px-3"
+                  onClick={goToNextStep}
+                >
+                  متابعة
+                  <ChevronLeft className="mr-1 h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </motion.div>
         )}
         
@@ -555,18 +578,56 @@ const BookingWizard = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <h2 className="text-xl font-bold mb-4 text-center">حدد موعدًا للكشف</h2>
+            <h2 className="text-xl font-bold mb-6 text-center">حدد موعدًا للكشف</h2>
             
             {formData.doctor_id ? (
-              <NextAvailableDaysPicker
-                doctorId={formData.doctor_id}
-                onSelectDateTime={handleDateTimeSelect}
-                selectedDay={formData.booking_day}
-                selectedTime={formData.booking_time}
-              />
+              <>
+                <div className="bg-brand/5 rounded-lg p-4 mb-6">
+                  <div className="flex items-center">
+                    <Users className="h-5 w-5 text-brand ml-2" />
+                    <div>
+                      <p className="text-sm text-gray-500">الطبيب المختار:</p>
+                      <p className="font-medium">{getSelectedDoctorName()}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <NextAvailableDaysPicker
+                  doctorId={formData.doctor_id}
+                  onSelectDateTime={handleDateTimeSelect}
+                  selectedDay={formData.booking_day}
+                  selectedTime={formData.booking_time}
+                />
+                
+                {formData.booking_day && formData.booking_time && (
+                  <div className="bg-brand/5 rounded-lg p-4 mt-4 flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Check className="h-5 w-5 text-green-500 ml-2" />
+                      <span>تم اختيار الموعد: <strong>{formattedDate} - {formData.booking_time}</strong></span>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-brand hover:bg-brand/10 px-3"
+                      onClick={goToNextStep}
+                    >
+                      متابعة
+                      <ChevronLeft className="mr-1 h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : (
-              <div className="text-center py-10 text-red-500">
-                يرجى الرجوع واختيار طبيب أولاً
+              <div className="text-center py-10">
+                <AlertCircle className="mx-auto h-10 w-10 text-red-500 mb-2" />
+                <p className="text-red-500 font-medium">يرجى الرجوع واختيار طبيب أولاً</p>
+                <Button 
+                  onClick={goToPrevStep} 
+                  variant="outline" 
+                  className="mt-4"
+                >
+                  <ChevronRight className="ml-2 h-4 w-4" /> العودة لاختيار الطبيب
+                </Button>
               </div>
             )}
           </motion.div>
@@ -579,6 +640,26 @@ const BookingWizard = () => {
             exit={{ opacity: 0 }}
           >
             <h2 className="text-xl font-bold mb-4 text-center">أدخل بياناتك</h2>
+            
+            <div className="bg-brand/5 rounded-lg p-4 mb-6">
+              <div className="flex md:items-center flex-col md:flex-row">
+                <div className="flex items-center ml-6 mb-2 md:mb-0">
+                  <Users className="h-5 w-5 text-brand ml-2" />
+                  <div>
+                    <p className="text-xs text-gray-500">الطبيب:</p>
+                    <p className="font-medium text-sm">{getSelectedDoctorName()}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center">
+                  <Calendar className="h-5 w-5 text-brand ml-2" />
+                  <div>
+                    <p className="text-xs text-gray-500">الموعد:</p>
+                    <p className="font-medium text-sm">{formattedDate} - {formData.booking_time}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             
             <div className="space-y-4">
               <div>
@@ -634,6 +715,14 @@ const BookingWizard = () => {
                   className="mt-1"
                 />
               </div>
+              
+              <Button 
+                onClick={goToNextStep} 
+                className="w-full bg-brand hover:bg-brand-dark text-white mt-2"
+              >
+                متابعة لتأكيد الحجز
+                <ChevronLeft className="mr-1 h-4 w-4" />
+              </Button>
             </div>
           </motion.div>
         )}
@@ -740,32 +829,34 @@ const BookingWizard = () => {
       </div>
       
       {/* Navigation buttons */}
-      <div className="p-4 border-t bg-gray-50 flex justify-between">
-        {currentStep > 1 ? (
-          <Button 
-            variant="outline"
-            onClick={goToPrevStep}
-            className="flex items-center"
-          >
-            <ChevronRight className="ml-1 h-4 w-4" />
-            السابق
-          </Button>
-        ) : (
-          <div></div> // Empty div for alignment
-        )}
-        
-        {currentStep < 4 ? (
-          <Button 
-            onClick={goToNextStep}
-            className="flex items-center bg-brand hover:bg-brand-dark text-white"
-          >
-            التالي
-            <ChevronLeft className="mr-1 h-4 w-4" />
-          </Button>
-        ) : (
-          <div></div> // Empty div for alignment
-        )}
-      </div>
+      {!bookingComplete && (
+        <div className="p-4 border-t bg-gray-50 flex justify-between">
+          {currentStep > 1 ? (
+            <Button 
+              variant="outline"
+              onClick={goToPrevStep}
+              className="flex items-center"
+            >
+              <ChevronRight className="ml-1 h-4 w-4" />
+              السابق
+            </Button>
+          ) : (
+            <div></div> // Empty div for alignment
+          )}
+          
+          {currentStep < 4 ? (
+            <Button 
+              onClick={goToNextStep}
+              className="flex items-center bg-brand hover:bg-brand-dark text-white"
+            >
+              التالي
+              <ChevronLeft className="mr-1 h-4 w-4" />
+            </Button>
+          ) : (
+            <div></div> // Empty div for alignment
+          )}
+        </div>
+      )}
     </div>
   );
 };

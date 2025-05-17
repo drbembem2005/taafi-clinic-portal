@@ -2,47 +2,38 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { 
+  CalendarDays, 
+  User, 
+  Stethoscope, 
+  CheckCircle,
+  ChevronRight
+} from 'lucide-react';
 
 const steps = [
   {
     id: 1,
     title: 'اختر التخصص',
     description: 'اختر التخصص الطبي المناسب لحالتك',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-      </svg>
-    ),
+    icon: <Stethoscope className="w-6 h-6" />,
   },
   {
     id: 2,
     title: 'اختر الطبيب',
     description: 'اختر الطبيب المناسب من قائمة الأطباء المتخصصين',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-      </svg>
-    ),
+    icon: <User className="w-6 h-6" />,
   },
   {
     id: 3,
     title: 'حدد الموعد',
     description: 'اختر اليوم والوقت المناسب لموعدك',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-      </svg>
-    ),
+    icon: <CalendarDays className="w-6 h-6" />,
   },
   {
     id: 4,
     title: 'أكمل الحجز',
     description: 'أكمل الحجز عن طريق واتساب أو ملء النموذج',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-8 h-8">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-      </svg>
-    ),
+    icon: <CheckCircle className="w-6 h-6" />,
   },
 ];
 
@@ -50,7 +41,7 @@ const BookingSteps = () => {
   const [activeStep, setActiveStep] = useState(1);
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">خطوات الحجز السريع</h2>
@@ -58,27 +49,77 @@ const BookingSteps = () => {
           <div className="w-24 h-1 bg-brand mx-auto mt-4"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+        {/* Timeline Steps for Medium and Large Screens */}
+        <div className="hidden md:block mb-12">
+          <div className="relative">
+            {/* Timeline Line */}
+            <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 z-0"></div>
+            
+            {/* Steps */}
+            <div className="flex justify-between relative z-10">
+              {steps.map((step) => (
+                <motion.div
+                  key={step.id}
+                  className="flex flex-col items-center"
+                  initial={{ opacity: 0.7 }}
+                  whileHover={{ scale: 1.05, opacity: 1 }}
+                  onClick={() => setActiveStep(step.id)}
+                >
+                  <div 
+                    className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-all ${
+                      activeStep === step.id 
+                        ? 'bg-brand text-white scale-110' 
+                        : activeStep > step.id
+                          ? 'bg-green-500 text-white'
+                          : 'bg-white text-gray-500 border-2 border-gray-200'
+                    }`}
+                  >
+                    {activeStep > step.id ? <CheckCircle className="w-8 h-8" /> : step.icon}
+                  </div>
+                  <h3 className={`text-lg font-bold mb-1 ${activeStep === step.id ? 'text-brand' : 'text-gray-800'}`}>
+                    {step.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 max-w-[180px] text-center">
+                    {step.description}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Vertical Steps for Mobile */}
+        <div className="md:hidden mb-8">
           {steps.map((step) => (
-            <motion.div
+            <motion.div 
               key={step.id}
-              className={`rounded-lg p-6 text-center cursor-pointer transition-all ${
-                activeStep === step.id
-                  ? 'bg-brand text-white shadow-lg shadow-brand/20'
-                  : 'bg-gray-50 hover:bg-gray-100'
+              className={`flex items-start mb-6 last:mb-0 ${
+                activeStep === step.id 
+                  ? 'opacity-100' 
+                  : 'opacity-70'
               }`}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setActiveStep(step.id)}
-              whileHover={{ y: -5 }}
             >
-              <div className={`mx-auto flex justify-center items-center w-16 h-16 rounded-full mb-4 ${
-                activeStep === step.id ? 'bg-white text-brand' : 'bg-brand text-white'
-              }`}>
-                {step.icon}
+              <div 
+                className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center mr-4 ${
+                  activeStep === step.id 
+                    ? 'bg-brand text-white'
+                    : activeStep > step.id
+                      ? 'bg-green-500 text-white'
+                      : 'bg-white border-2 border-gray-200 text-gray-500'
+                }`}
+              >
+                {activeStep > step.id ? <CheckCircle className="w-6 h-6" /> : step.icon}
               </div>
-              <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-              <p className={activeStep === step.id ? 'text-white/90' : 'text-gray-600'}>
-                {step.description}
-              </p>
+              <div>
+                <h3 className={`text-lg font-bold mb-1 ${
+                  activeStep === step.id ? 'text-brand' : 'text-gray-800'
+                }`}>
+                  {step.title}
+                </h3>
+                <p className="text-sm text-gray-600">{step.description}</p>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -86,10 +127,13 @@ const BookingSteps = () => {
         <div className="text-center mt-8">
           <Button
             size="lg"
-            className="bg-brand hover:bg-brand-dark text-white px-8 py-6 text-lg"
+            className="bg-brand hover:bg-brand-dark text-white px-8 py-6 text-lg rounded-xl group"
             asChild
           >
-            <a href="/booking">احجز موعدك الآن</a>
+            <a href="/booking">
+              احجز موعدك الآن
+              <ChevronRight className="mr-2 h-5 w-5 inline-block transition-transform group-hover:translate-x-[-4px]" />
+            </a>
           </Button>
         </div>
       </div>
