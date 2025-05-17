@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
@@ -30,6 +29,7 @@ import {
 import { Doctor, getDoctors, Fees } from '@/services/doctorService';
 import { Specialty, getSpecialties } from '@/services/specialtyService';
 import { supabase } from '@/integrations/supabase/client';
+import { Json } from '@/integrations/supabase/types';
 
 const AdminDoctors = () => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -126,7 +126,7 @@ const AdminDoctors = () => {
       }
       
       // Prepare fees object
-      const fees: Fees = {
+      const fees: Record<string, any> = {
         examination: parseInt(formData.examination_fee, 10),
         consultation: formData.consultation_fee ? parseInt(formData.consultation_fee, 10) : null
       };
@@ -140,7 +140,7 @@ const AdminDoctors = () => {
             specialty_id: parseInt(formData.specialty_id, 10),
             bio: formData.bio,
             image: formData.image,
-            fees: fees
+            fees: fees as Json
           })
           .eq('id', selectedDoctor.id);
           
@@ -158,8 +158,8 @@ const AdminDoctors = () => {
             specialty_id: parseInt(formData.specialty_id, 10),
             bio: formData.bio,
             image: formData.image,
-            fees: fees,
-            old_schedule: {}
+            fees: fees as Json,
+            old_schedule: {} as Json
           });
           
         if (error) throw error;

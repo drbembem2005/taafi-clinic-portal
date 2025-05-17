@@ -31,7 +31,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         // Check if user is admin after state update
         if (session?.user) {
           setTimeout(() => {
-            checkAdminStatus(session.user.id);
+            checkAdminStatus(session.user.email || '');
           }, 0);
         } else {
           setIsAdmin(false);
@@ -45,7 +45,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        checkAdminStatus(session.user.id);
+        checkAdminStatus(session.user.email || '');
       }
       setLoading(false);
     });
@@ -53,25 +53,15 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return () => subscription.unsubscribe();
   }, []);
   
-  const checkAdminStatus = async (userId: string) => {
+  const checkAdminStatus = async (email: string) => {
     try {
-      // Check if user has admin role in your database
-      // This is a placeholder - you would need to create this table
-      const { data, error } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-        
-      if (error) {
-        console.error('Error checking admin status:', error);
-        setIsAdmin(false);
-        return;
-      }
+      // For now, we'll use a hardcoded list of admin emails
+      // This should be replaced with a proper admin users table in the database
+      const adminEmails = ['admin@example.com', 'dr.bembem2005@hotmail.com'];
       
-      setIsAdmin(!!data);
+      setIsAdmin(adminEmails.includes(email.toLowerCase()));
     } catch (error) {
-      console.error('Error in admin check:', error);
+      console.error('Error checking admin status:', error);
       setIsAdmin(false);
     }
   };
@@ -95,7 +85,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       
       if (data.user) {
         // Check if the user is an admin
-        await checkAdminStatus(data.user.id);
+        await checkAdminStatus(data.user.email || '');
         
         if (!isAdmin) {
           // If not admin, sign them out
