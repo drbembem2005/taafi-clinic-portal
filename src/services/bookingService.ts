@@ -93,3 +93,35 @@ export async function cancelBooking(id: string): Promise<boolean> {
     return false;
   }
 }
+
+export function openWhatsAppWithBookingDetails(bookingDetails: {
+  doctorName: string;
+  date: string;
+  time: string;
+  userName: string;
+  phone: string;
+  email?: string | null;
+  notes?: string | null;
+}): void {
+  // Format the message
+  let message = `*طلب حجز موعد*\n`;
+  message += `الاسم: ${bookingDetails.userName}\n`;
+  message += `الطبيب: ${bookingDetails.doctorName}\n`;
+  message += `التاريخ: ${bookingDetails.date} - ${bookingDetails.time}\n`;
+  message += `رقم الهاتف: ${bookingDetails.phone}\n`;
+  
+  if (bookingDetails.email) {
+    message += `البريد الإلكتروني: ${bookingDetails.email}\n`;
+  }
+  
+  if (bookingDetails.notes) {
+    message += `ملاحظات: ${bookingDetails.notes}\n`;
+  }
+  
+  // Encode the message for URL
+  const encodedMessage = encodeURIComponent(message);
+  
+  // Open WhatsApp with the clinic's number and pre-filled message
+  const whatsappURL = `https://wa.me/201119007403?text=${encodedMessage}`;
+  window.open(whatsappURL, '_blank');
+}

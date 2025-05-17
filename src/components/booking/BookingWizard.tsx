@@ -254,21 +254,7 @@ const BookingWizard = () => {
   const handleWhatsAppBooking = () => {
     try {
       const doctorName = getSelectedDoctorName();
-      const bookingDate = `${formattedDate} - ${formData.booking_time}`;
-      
-      let message = `*طلب حجز موعد*\n`;
-      message += `الاسم: ${formData.user_name}\n`;
-      message += `الطبيب: ${doctorName}\n`;
-      message += `التاريخ: ${bookingDate}\n`;
-      message += `رقم الهاتف: ${formData.user_phone}\n`;
-      
-      if (formData.user_email) {
-        message += `البريد الإلكتروني: ${formData.user_email}\n`;
-      }
-      
-      if (formData.notes) {
-        message += `ملاحظات: ${formData.notes}\n`;
-      }
+      const bookingDate = formattedDate;
       
       // Create booking in database first
       setFormData(prev => ({
@@ -276,8 +262,8 @@ const BookingWizard = () => {
         booking_method: 'whatsapp'
       }));
       
-      // Submit booking to database then open WhatsApp
-      handleSubmit('whatsapp', message);
+      // Submit booking to database
+      handleSubmit('whatsapp', true);
       
     } catch (error) {
       console.error('Error creating WhatsApp message:', error);
@@ -290,7 +276,7 @@ const BookingWizard = () => {
   };
   
   // Submit booking
-  const handleSubmit = async (method: 'online' | 'whatsapp' = 'online', whatsappMessage?: string) => {
+  const handleSubmit = async (method: 'online' | 'whatsapp' = 'online', openWhatsApp: boolean = false) => {
     setSubmitting(true);
     try {
       // Set booking method
@@ -310,13 +296,24 @@ const BookingWizard = () => {
       
       // Set booking reference for success screen
       setBookingReference(response.id);
-      setBookingComplete(true);
       
       // If WhatsApp booking, open WhatsApp after successful database entry
-      if (method === 'whatsapp' && whatsappMessage) {
-        const encodedMessage = encodeURIComponent(whatsappMessage);
-        const whatsappURL = `https://wa.me/201119007403?text=${encodedMessage}`;
-        window.open(whatsappURL, '_blank');
+      if (method === 'whatsapp' && openWhatsApp) {
+        // Use the openWhatsAppWithBookingDetails function
+        openWhatsAppWithBookingDetails({
+          doctorName: getSelectedDoctorName(),
+          date: formattedDate,
+          time: formData.booking_time,
+          userName: formData.user_name,
+          phone: formData.user_phone,
+          email: formData.user_email,
+          notes: formData.notes
+        });
+      }
+      
+      // Only set booking complete if not WhatsApp
+      if (!openWhatsApp) {
+        setBookingComplete(true);
       }
       
     } catch (error) {
