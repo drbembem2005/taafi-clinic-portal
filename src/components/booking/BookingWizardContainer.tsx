@@ -1,7 +1,6 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useParams, useSearchParams } from 'react-router-dom';
 import SpecialtySelection from './SpecialtySelection';
 import DoctorSelection from './DoctorSelection';
 import AppointmentSelection from './AppointmentSelection';
@@ -10,7 +9,7 @@ import BookingConfirmation from './BookingConfirmation';
 import BookingSuccess from './BookingSuccess';
 import BookingProgress from './BookingProgress';
 import { Specialty } from '@/services/specialtyService';
-import { Doctor, getDoctor } from '@/services/doctorService';
+import { Doctor } from '@/services/doctorService';
 
 export interface BookingFormData {
   user_name: string;
@@ -25,10 +24,6 @@ export interface BookingFormData {
 }
 
 const BookingWizardContainer = () => {
-  // Get doctor_id from query params if available
-  const [searchParams] = useSearchParams();
-  const preselectedDoctorId = searchParams.get('doctor_id');
-  
   // State for wizard steps - now we have 5 steps instead of 4
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [formData, setFormData] = useState<BookingFormData>({
@@ -47,29 +42,6 @@ const BookingWizardContainer = () => {
   const [bookingComplete, setBookingComplete] = useState<boolean>(false);
   const [bookingReference, setBookingReference] = useState<string>('');
   const [formattedDate, setFormattedDate] = useState<string>('');
-
-  // Load preselected doctor if applicable
-  useEffect(() => {
-    const loadPreselectedDoctor = async () => {
-      if (preselectedDoctorId) {
-        const doctorId = parseInt(preselectedDoctorId);
-        if (!isNaN(doctorId)) {
-          try {
-            const doctor = await getDoctor(doctorId);
-            if (doctor) {
-              handleDoctorSelect(doctor);
-              // Automatically move to step 2 (appointment selection)
-              setCurrentStep(2);
-            }
-          } catch (error) {
-            console.error('Error loading preselected doctor:', error);
-          }
-        }
-      }
-    };
-    
-    loadPreselectedDoctor();
-  }, [preselectedDoctorId]);
 
   // Navigation methods
   const goToNextStep = () => {
@@ -100,8 +72,7 @@ const BookingWizardContainer = () => {
     setSelectedDoctor(doctor);
     setFormData(prev => ({
       ...prev,
-      doctor_id: doctor.id,
-      specialty_id: doctor.specialty_id // Also set the specialty
+      doctor_id: doctor.id
     }));
   };
 
@@ -156,21 +127,6 @@ const BookingWizardContainer = () => {
     setCurrentStep(1);
     setBookingReference('');
     setFormattedDate('');
-  };
-
-  // Open WhatsApp with booking details - now separate from database saving
-  const handleOpenWhatsApp = () => {
-    import('@/services/bookingService').then(({ openWhatsAppWithBookingDetails }) => {
-      openWhatsAppWithBookingDetails({
-        doctorName: selectedDoctor?.name || '',
-        date: formattedDate,
-        time: formData.booking_time,
-        userName: formData.user_name,
-        phone: formData.user_phone,
-        email: formData.user_email,
-        notes: formData.notes
-      });
-    });
   };
 
   // If booking is complete, show success screen
@@ -287,7 +243,6 @@ const BookingWizardContainer = () => {
                 specialtyName={selectedSpecialty?.name || ''}
                 formattedDate={formattedDate}
                 onBookingSuccess={handleBookingSuccess}
-                onWhatsAppBooking={handleOpenWhatsApp}
               />
             </motion.div>
           )}
