@@ -255,7 +255,6 @@ const BookingWizard = () => {
   const handleWhatsAppBooking = () => {
     try {
       const doctorName = getSelectedDoctorName();
-      const bookingDate = formattedDate;
       
       // Create booking in database first
       setFormData(prev => ({
@@ -351,6 +350,400 @@ const BookingWizard = () => {
     return (currentStep / 4) * 100;
   };
   
+  // Safely get a selected date object from available days
+  const getSafeSelectedDate = () => {
+    try {
+      if (formData.booking_day && availableDays && availableDays.length > 0) {
+        const selectedDayInfo = availableDays.find(d => d.dayCode === formData.booking_day);
+        if (selectedDayInfo && selectedDayInfo.date instanceof Date && !isNaN(selectedDayInfo.date.getTime())) {
+          return selectedDayInfo.date;
+        }
+      }
+      // Return null if no valid date is found
+      return null;
+    } catch (error) {
+      console.error("Error getting selected date:", error);
+      return null;
+    }
+  }
+
+  // Helper function to render step content safely, avoiding invalid date issues
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <h2 className="text-xl font-bold mb-6 text-center">اختر التخصص والطبيب</h2>
+            
+            {/* Specialties Selection */}
+            <div className="mb-6">
+              <Label className="block mb-4 text-lg">التخصص</Label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {specialties.map((specialty) => (
+                  <Button
+                    key={specialty.id}
+                    variant={formData.specialty_id === specialty.id ? "default" : "outline"}
+                    className={`justify-start h-auto py-2 ${
+                      formData.specialty_id === specialty.id 
+                        ? 'bg-brand hover:bg-brand/90' 
+                        : 'hover:border-brand hover:text-brand'
+                    }`}
+                    onClick={() => handleSpecialtyChange(specialty.id)}
+                  >
+                    <span className="truncate">{specialty.name}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Doctors Selection */}
+            <div id="doctors-section" className="mb-6">
+              <Label className="block mb-4 text-lg">الطبيب</Label>
+              
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-brand motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+                  <p className="mt-2 text-sm text-gray-500">جاري تحميل بيانات الأطباء...</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {doctors.length > 0 ? (
+                    doctors
+                      .filter(doctor => !formData.specialty_id || doctor.specialty_id === formData.specialty_id)
+                      .map((doctor) => {
+                        // Find the specialty for this doctor
+                        const doctorSpecialty = specialties.find(s => s.id === doctor.specialty_id);
+                        const specialtyName = doctorSpecialty ? doctorSpecialty.name : 'تخصص غير محدد';
+                        
+                        return (
+                          <Card 
+                            key={doctor.id} 
+                            className={`cursor-pointer transition-all hover:border-brand ${
+                              formData.doctor_id === doctor.id ? 'border-brand ring-1 ring-brand' : ''
+                            }`}
+                            onClick={() => handleDoctorSelect(doctor.id)}
+                          >
+                            <CardContent className="p-3 flex items-center">
+                              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center ml-3 flex-shrink-0">
+                                {doctor.image ? (
+                                  <img 
+                                    src={doctor.image} 
+                                    alt={doctor.name} 
+                                    className="w-full h-full rounded-full object-cover" 
+                                  />
+                                ) : (
+                                  <Users className="h-6 w-6 text-gray-400" />
+                                )}
+                              </div>
+                              <div className="flex-grow">
+                                <div className="text-sm font-medium">{doctor.name}</div>
+                                <div className="text-xs text-gray-500">{specialtyName}</div>
+                              </div>
+                              {formData.doctor_id === doctor.id && (
+                                <div className="w-6 h-6 bg-brand rounded-full flex items-center justify-center flex-shrink-0">
+                                  <Check className="h-4 w-4 text-white" />
+                                </div>
+                              )}
+                            </CardContent>
+                          </Card>
+                        );
+                      })
+                  ) : (
+                    <div className="text-center py-4 col-span-2 border border-dashed rounded-md p-8">
+                      <p className="text-gray-500">يرجى اختيار تخصص لعرض الأطباء المتاحين</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+                        
+            {formData.doctor_id && (
+              <div className="bg-brand/5 rounded-lg p-4 mb-4 flex items-center justify-between">
+                <div className="flex items-center">
+                  <Check className="h-5 w-5 text-brand ml-2" />
+                  <span>تم اختيار الطبيب: <strong>{getSelectedDoctorName()}</strong></span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-brand hover:bg-brand/10 px-3"
+                  onClick={goToNextStep}
+                >
+                  متابعة
+                  <ChevronLeft className="mr-1 h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </motion.div>
+        );
+      
+      case 2:
+        return (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <h2 className="text-xl font-bold mb-6 text-center">حدد موعدًا للكشف</h2>
+            
+            {formData.doctor_id ? (
+              <>
+                <div className="bg-brand/5 rounded-lg p-4 mb-6">
+                  <div className="flex items-center">
+                    <Users className="h-5 w-5 text-brand ml-2" />
+                    <div>
+                      <p className="text-sm text-gray-500">الطبيب المختار:</p>
+                      <p className="font-medium">{getSelectedDoctorName()}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <NextAvailableDaysPicker
+                  doctorId={formData.doctor_id}
+                  onSelectDateTime={handleDateTimeSelect}
+                  selectedDay={formData.booking_day}
+                  selectedTime={formData.booking_time}
+                />
+                
+                {formData.booking_day && formData.booking_time && (
+                  <div className="bg-brand/5 rounded-lg p-4 mt-4 flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Check className="h-5 w-5 text-green-500 ml-2" />
+                      <span>تم اختيار الموعد: <strong>{formattedDate} - {formData.booking_time}</strong></span>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-brand hover:bg-brand/10 px-3"
+                      onClick={goToNextStep}
+                    >
+                      متابعة
+                      <ChevronLeft className="mr-1 h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-10">
+                <AlertCircle className="mx-auto h-10 w-10 text-red-500 mb-2" />
+                <p className="text-red-500 font-medium">يرجى الرجوع واختيار طبيب أولاً</p>
+                <Button 
+                  onClick={goToPrevStep} 
+                  variant="outline" 
+                  className="mt-4"
+                >
+                  <ChevronRight className="ml-2 h-4 w-4" /> العودة لاختيار الطبيب
+                </Button>
+              </div>
+            )}
+          </motion.div>
+        );
+      
+      case 3:
+        return (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <h2 className="text-xl font-bold mb-4 text-center">أدخل بياناتك</h2>
+            
+            <div className="bg-brand/5 rounded-lg p-4 mb-6">
+              <div className="flex md:items-center flex-col md:flex-row">
+                <div className="flex items-center ml-6 mb-2 md:mb-0">
+                  <Users className="h-5 w-5 text-brand ml-2" />
+                  <div>
+                    <p className="text-xs text-gray-500">الطبيب:</p>
+                    <p className="font-medium text-sm">{getSelectedDoctorName()}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center">
+                  <Calendar className="h-5 w-5 text-brand ml-2" />
+                  <div>
+                    <p className="text-xs text-gray-500">الموعد:</p>
+                    <p className="font-medium text-sm">{formattedDate} - {formData.booking_time}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">الاسم بالكامل</Label>
+                <Input 
+                  id="name"
+                  value={formData.user_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, user_name: e.target.value }))}
+                  placeholder="أدخل اسمك هنا"
+                  className="mt-1"
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="phone">رقم الهاتف</Label>
+                <Input 
+                  id="phone"
+                  value={formData.user_phone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, user_phone: e.target.value }))}
+                  placeholder="01xxxxxxxxx"
+                  className="mt-1 text-left"
+                  dir="ltr"
+                  required
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="email">البريد الإلكتروني (اختياري)</Label>
+                <Input 
+                  id="email"
+                  value={formData.user_email || ''}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    user_email: e.target.value || null 
+                  }))}
+                  placeholder="example@example.com"
+                  className="mt-1 text-left"
+                  dir="ltr"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="notes">ملاحظات إضافية (اختياري)</Label>
+                <Textarea 
+                  id="notes"
+                  value={formData.notes || ''}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    notes: e.target.value || null 
+                  }))}
+                  placeholder="أي معلومات إضافية ترغب بإضافتها للحجز"
+                  className="mt-1"
+                />
+              </div>
+              
+              <Button 
+                onClick={goToNextStep} 
+                className="w-full bg-brand hover:bg-brand-dark text-white mt-2"
+              >
+                متابعة لتأكيد الحجز
+                <ChevronLeft className="mr-1 h-4 w-4" />
+              </Button>
+            </div>
+          </motion.div>
+        );
+      
+      case 4:
+        return (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <h2 className="text-xl font-bold mb-4 text-center">تأكيد الحجز</h2>
+            
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <h3 className="text-lg font-medium mb-3">تفاصيل الحجز:</h3>
+              <ul className="space-y-3">
+                <li className="flex">
+                  <Users className="h-5 w-5 text-brand ml-2 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-gray-500">الطبيب:</p>
+                    <p className="font-medium">{getSelectedDoctorName()}</p>
+                  </div>
+                </li>
+                <li className="flex">
+                  <Users className="h-5 w-5 text-brand ml-2 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-gray-500">التخصص:</p>
+                    <p className="font-medium">{getSelectedSpecialtyName()}</p>
+                  </div>
+                </li>
+                <li className="flex">
+                  <Calendar className="h-5 w-5 text-brand ml-2 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-gray-500">الموعد:</p>
+                    <p className="font-medium">{formattedDate} - {formData.booking_time}</p>
+                  </div>
+                </li>
+                <li className="flex">
+                  <Phone className="h-5 w-5 text-brand ml-2 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm text-gray-500">رقم الهاتف:</p>
+                    <p className="font-medium" dir="ltr">{formData.user_phone}</p>
+                  </div>
+                </li>
+                {formData.user_email && (
+                  <li className="flex">
+                    <Mail className="h-5 w-5 text-brand ml-2 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm text-gray-500">البريد الإلكتروني:</p>
+                      <p className="font-medium">{formData.user_email}</p>
+                    </div>
+                  </li>
+                )}
+                {formData.notes && (
+                  <li className="flex">
+                    <StickyNote className="h-5 w-5 text-brand ml-2 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm text-gray-500">ملاحظات:</p>
+                      <p className="font-medium">{formData.notes}</p>
+                    </div>
+                  </li>
+                )}
+              </ul>
+            </div>
+            
+            <div className="bg-yellow-50 border border-yellow-100 p-3 rounded-md mb-6">
+              <p className="text-sm text-yellow-800">
+                اختر طريقة تأكيد الحجز المناسبة لك:
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <Button 
+                onClick={() => handleSubmit('online')} 
+                className="bg-brand hover:bg-brand-dark text-white py-3"
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <>
+                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-e-transparent align-[-0.125em] ml-2"></span>
+                    جاري إرسال طلب الحجز...
+                  </>
+                ) : (
+                  'تأكيد الحجز عبر الموقع'
+                )}
+              </Button>
+              
+              <Button 
+                onClick={handleWhatsAppBooking} 
+                className="bg-green-600 hover:bg-green-700 text-white py-3 flex items-center justify-center gap-2"
+                disabled={submitting}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                </svg>
+                تأكيد الحجز عبر واتساب
+              </Button>
+            </div>
+            
+            <p className="text-center text-sm text-gray-500 mt-2">
+              نوصي بالتأكيد عبر واتساب للتواصل المباشر مع العيادة
+            </p>
+          </motion.div>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
   // If booking is complete, show success screen
   if (bookingComplete) {
     return (
@@ -459,370 +852,7 @@ const BookingWizard = () => {
       
       {/* Main content */}
       <div className="p-6">
-        {currentStep === 1 && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <h2 className="text-xl font-bold mb-6 text-center">اختر التخصص والطبيب</h2>
-            
-            {/* Specialties Selection */}
-            <div className="mb-6">
-              <Label className="block mb-4 text-lg">التخصص</Label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {specialties.map((specialty) => (
-                  <Button
-                    key={specialty.id}
-                    variant={formData.specialty_id === specialty.id ? "default" : "outline"}
-                    className={`justify-start h-auto py-2 ${
-                      formData.specialty_id === specialty.id 
-                        ? 'bg-brand hover:bg-brand/90' 
-                        : 'hover:border-brand hover:text-brand'
-                    }`}
-                    onClick={() => handleSpecialtyChange(specialty.id)}
-                  >
-                    <span className="truncate">{specialty.name}</span>
-                  </Button>
-                ))}
-              </div>
-            </div>
-            
-            {/* Doctors Selection */}
-            <div id="doctors-section" className="mb-6">
-              <Label className="block mb-4 text-lg">الطبيب</Label>
-              
-              {loading ? (
-                <div className="text-center py-8">
-                  <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-brand motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-                  <p className="mt-2 text-sm text-gray-500">جاري تحميل بيانات الأطباء...</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {doctors.length > 0 ? (
-                    doctors
-                      .filter(doctor => !formData.specialty_id || doctor.specialty_id === formData.specialty_id)
-                      .map((doctor) => {
-                        // Find the specialty for this doctor
-                        const doctorSpecialty = specialties.find(s => s.id === doctor.specialty_id);
-                        const specialtyName = doctorSpecialty ? doctorSpecialty.name : 'تخصص غير محدد';
-                        
-                        return (
-                          <Card 
-                            key={doctor.id} 
-                            className={`cursor-pointer transition-all hover:border-brand ${
-                              formData.doctor_id === doctor.id ? 'border-brand ring-1 ring-brand' : ''
-                            }`}
-                            onClick={() => handleDoctorSelect(doctor.id)}
-                          >
-                            <CardContent className="p-3 flex items-center">
-                              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center ml-3 flex-shrink-0">
-                                {doctor.image ? (
-                                  <img 
-                                    src={doctor.image} 
-                                    alt={doctor.name} 
-                                    className="w-full h-full rounded-full object-cover" 
-                                  />
-                                ) : (
-                                  <Users className="h-6 w-6 text-gray-400" />
-                                )}
-                              </div>
-                              <div className="flex-grow">
-                                <div className="text-sm font-medium">{doctor.name}</div>
-                                <div className="text-xs text-gray-500">{specialtyName}</div>
-                              </div>
-                              {formData.doctor_id === doctor.id && (
-                                <div className="w-6 h-6 bg-brand rounded-full flex items-center justify-center flex-shrink-0">
-                                  <Check className="h-4 w-4 text-white" />
-                                </div>
-                              )}
-                            </CardContent>
-                          </Card>
-                        );
-                      })
-                  ) : (
-                    <div className="text-center py-4 col-span-2 border border-dashed rounded-md p-8">
-                      <p className="text-gray-500">يرجى اختيار تخصص لعرض الأطباء المتاحين</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-                        
-            {formData.doctor_id && (
-              <div className="bg-brand/5 rounded-lg p-4 mb-4 flex items-center justify-between">
-                <div className="flex items-center">
-                  <Check className="h-5 w-5 text-brand ml-2" />
-                  <span>تم اختيار الطبيب: <strong>{getSelectedDoctorName()}</strong></span>
-                </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-brand hover:bg-brand/10 px-3"
-                  onClick={goToNextStep}
-                >
-                  متابعة
-                  <ChevronLeft className="mr-1 h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </motion.div>
-        )}
-        
-        {currentStep === 2 && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <h2 className="text-xl font-bold mb-6 text-center">حدد موعدًا للكشف</h2>
-            
-            {formData.doctor_id ? (
-              <>
-                <div className="bg-brand/5 rounded-lg p-4 mb-6">
-                  <div className="flex items-center">
-                    <Users className="h-5 w-5 text-brand ml-2" />
-                    <div>
-                      <p className="text-sm text-gray-500">الطبيب المختار:</p>
-                      <p className="font-medium">{getSelectedDoctorName()}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <NextAvailableDaysPicker
-                  doctorId={formData.doctor_id}
-                  onSelectDateTime={handleDateTimeSelect}
-                  selectedDay={formData.booking_day}
-                  selectedTime={formData.booking_time}
-                />
-                
-                {formData.booking_day && formData.booking_time && (
-                  <div className="bg-brand/5 rounded-lg p-4 mt-4 flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Check className="h-5 w-5 text-green-500 ml-2" />
-                      <span>تم اختيار الموعد: <strong>{formattedDate} - {formData.booking_time}</strong></span>
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-brand hover:bg-brand/10 px-3"
-                      onClick={goToNextStep}
-                    >
-                      متابعة
-                      <ChevronLeft className="mr-1 h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="text-center py-10">
-                <AlertCircle className="mx-auto h-10 w-10 text-red-500 mb-2" />
-                <p className="text-red-500 font-medium">يرجى الرجوع واختيار طبيب أولاً</p>
-                <Button 
-                  onClick={goToPrevStep} 
-                  variant="outline" 
-                  className="mt-4"
-                >
-                  <ChevronRight className="ml-2 h-4 w-4" /> العودة لاختيار الطبيب
-                </Button>
-              </div>
-            )}
-          </motion.div>
-        )}
-        
-        {currentStep === 3 && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <h2 className="text-xl font-bold mb-4 text-center">أدخل بياناتك</h2>
-            
-            <div className="bg-brand/5 rounded-lg p-4 mb-6">
-              <div className="flex md:items-center flex-col md:flex-row">
-                <div className="flex items-center ml-6 mb-2 md:mb-0">
-                  <Users className="h-5 w-5 text-brand ml-2" />
-                  <div>
-                    <p className="text-xs text-gray-500">الطبيب:</p>
-                    <p className="font-medium text-sm">{getSelectedDoctorName()}</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center">
-                  <Calendar className="h-5 w-5 text-brand ml-2" />
-                  <div>
-                    <p className="text-xs text-gray-500">الموعد:</p>
-                    <p className="font-medium text-sm">{formattedDate} - {formData.booking_time}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="name">الاسم بالكامل</Label>
-                <Input 
-                  id="name"
-                  value={formData.user_name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, user_name: e.target.value }))}
-                  placeholder="أدخل اسمك هنا"
-                  className="mt-1"
-                  required
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="phone">رقم الهاتف</Label>
-                <Input 
-                  id="phone"
-                  value={formData.user_phone}
-                  onChange={(e) => setFormData(prev => ({ ...prev, user_phone: e.target.value }))}
-                  placeholder="01xxxxxxxxx"
-                  className="mt-1 text-left"
-                  dir="ltr"
-                  required
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="email">البريد الإلكتروني (اختياري)</Label>
-                <Input 
-                  id="email"
-                  value={formData.user_email || ''}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    user_email: e.target.value || null 
-                  }))}
-                  placeholder="example@example.com"
-                  className="mt-1 text-left"
-                  dir="ltr"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="notes">ملاحظات إضافية (اختياري)</Label>
-                <Textarea 
-                  id="notes"
-                  value={formData.notes || ''}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    notes: e.target.value || null 
-                  }))}
-                  placeholder="أي معلومات إضافية ترغب بإضافتها للحجز"
-                  className="mt-1"
-                />
-              </div>
-              
-              <Button 
-                onClick={goToNextStep} 
-                className="w-full bg-brand hover:bg-brand-dark text-white mt-2"
-              >
-                متابعة لتأكيد الحجز
-                <ChevronLeft className="mr-1 h-4 w-4" />
-              </Button>
-            </div>
-          </motion.div>
-        )}
-        
-        {currentStep === 4 && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <h2 className="text-xl font-bold mb-4 text-center">تأكيد الحجز</h2>
-            
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <h3 className="text-lg font-medium mb-3">تفاصيل الحجز:</h3>
-              <ul className="space-y-3">
-                <li className="flex">
-                  <Users className="h-5 w-5 text-brand ml-2 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm text-gray-500">الطبيب:</p>
-                    <p className="font-medium">{getSelectedDoctorName()}</p>
-                  </div>
-                </li>
-                <li className="flex">
-                  <Users className="h-5 w-5 text-brand ml-2 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm text-gray-500">التخصص:</p>
-                    <p className="font-medium">{getSelectedSpecialtyName()}</p>
-                  </div>
-                </li>
-                <li className="flex">
-                  <Calendar className="h-5 w-5 text-brand ml-2 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm text-gray-500">الموعد:</p>
-                    <p className="font-medium">{formattedDate} - {formData.booking_time}</p>
-                  </div>
-                </li>
-                <li className="flex">
-                  <Phone className="h-5 w-5 text-brand ml-2 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm text-gray-500">رقم الهاتف:</p>
-                    <p className="font-medium" dir="ltr">{formData.user_phone}</p>
-                  </div>
-                </li>
-                {formData.user_email && (
-                  <li className="flex">
-                    <Mail className="h-5 w-5 text-brand ml-2 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm text-gray-500">البريد الإلكتروني:</p>
-                      <p className="font-medium">{formData.user_email}</p>
-                    </div>
-                  </li>
-                )}
-                {formData.notes && (
-                  <li className="flex">
-                    <StickyNote className="h-5 w-5 text-brand ml-2 flex-shrink-0" />
-                    <div>
-                      <p className="text-sm text-gray-500">ملاحظات:</p>
-                      <p className="font-medium">{formData.notes}</p>
-                    </div>
-                  </li>
-                )}
-              </ul>
-            </div>
-            
-            <div className="bg-yellow-50 border border-yellow-100 p-3 rounded-md mb-6">
-              <p className="text-sm text-yellow-800">
-                اختر طريقة تأكيد الحجز المناسبة لك:
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <Button 
-                onClick={() => handleSubmit('online')} 
-                className="bg-brand hover:bg-brand-dark text-white py-3"
-                disabled={submitting}
-              >
-                {submitting ? (
-                  <>
-                    <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-e-transparent align-[-0.125em] ml-2"></span>
-                    جاري إرسال طلب الحجز...
-                  </>
-                ) : (
-                  'تأكيد الحجز عبر الموقع'
-                )}
-              </Button>
-              
-              <Button 
-                onClick={handleWhatsAppBooking} 
-                className="bg-green-600 hover:bg-green-700 text-white py-3 flex items-center justify-center gap-2"
-                disabled={submitting}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
-                </svg>
-                تأكيد الحجز عبر واتساب
-              </Button>
-            </div>
-            
-            <p className="text-center text-sm text-gray-500 mt-2">
-              نوصي بالتأكيد عبر واتساب للتواصل المباشر مع العيادة
-            </p>
-          </motion.div>
-        )}
+        {renderStepContent()}
       </div>
       
       {/* Navigation buttons - Updated UI */}

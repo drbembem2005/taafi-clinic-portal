@@ -17,6 +17,14 @@ interface NextAvailableDaysPickerProps {
   selectedTime?: string;
 }
 
+// Define the interface for the day info
+interface DayInfo {
+  date: Date;
+  dayName: string;
+  dayCode: string;
+  times: string[];
+}
+
 const NextAvailableDaysPicker = ({ 
   doctorId,
   onSelectDateTime,
@@ -24,12 +32,7 @@ const NextAvailableDaysPicker = ({
   selectedTime
 }: NextAvailableDaysPickerProps) => {
   const [loading, setLoading] = useState(true);
-  const [availableDays, setAvailableDays] = useState<Array<{
-    date: Date;
-    dayName: string;
-    dayCode: string;
-    times: string[];
-  }>>([]);
+  const [availableDays, setAvailableDays] = useState<DayInfo[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -49,8 +52,21 @@ const NextAvailableDaysPicker = ({
         if (nextAvailableDays.length === 0) {
           setError('لا توجد مواعيد متاحة لهذا الطبيب');
         } else {
-          setAvailableDays(nextAvailableDays);
-          console.log("Available days set:", nextAvailableDays);
+          // Ensure we're working with valid Date objects
+          const validatedDays = nextAvailableDays.map(day => {
+            // Make sure the date is a valid Date object
+            const validDate = day.date instanceof Date && !isNaN(day.date.getTime()) 
+              ? day.date 
+              : new Date(); // Default to current date if invalid
+              
+            return {
+              ...day,
+              date: validDate
+            };
+          });
+          
+          setAvailableDays(validatedDays);
+          console.log("Available days set:", validatedDays);
         }
       } catch (err) {
         console.error('Error fetching available days:', err);
@@ -70,8 +86,26 @@ const NextAvailableDaysPicker = ({
 
   const handleSelectDateTime = (dayCode: string, time: string, date: Date) => {
     // Format the date in a user-friendly way
-    const formattedDate = format(date, 'EEEE, d MMMM yyyy', { locale: ar });
-    onSelectDateTime(dayCode, time, formattedDate);
+    try {
+      if (date instanceof Date && !isNaN(date.getTime())) {
+        const formattedDate = format(date, 'EEEE, d MMMM yyyy', { locale: ar });
+        onSelectDateTime(dayCode, time, formattedDate);
+      } else {
+        console.error("Invalid date object:", date);
+        toast({
+          title: "خطأ",
+          description: "تاريخ غير صالح، يرجى المحاولة مرة أخرى",
+          variant: "destructive",
+        });
+      }
+    } catch (err) {
+      console.error("Error handling date selection:", err);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء اختيار التاريخ",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
@@ -112,13 +146,16 @@ const NextAvailableDaysPicker = ({
           // Get first time from the array for this day
           const availableTime = dayInfo.times && dayInfo.times.length > 0 ? dayInfo.times[0] : null;
           
+          // Make sure we have a valid date
+          const isValidDate = dayInfo.date instanceof Date && !isNaN(dayInfo.date.getTime());
+          
           return (
             <Card 
               key={dayIndex} 
               className={`overflow-hidden transition-all hover:shadow-md ${
                 selectedDay === dayInfo.dayCode ? 'border-brand ring-1 ring-brand shadow-md' : ''
               }`}
-              onClick={() => availableTime && handleSelectDateTime(dayInfo.dayCode, availableTime, dayInfo.date)}
+              onClick={() => availableTime && isValidDate && handleSelectDateTime(dayInfo.dayCode, availableTime, dayInfo.date)}
             >
               <div className={`p-4 flex flex-col items-center justify-center ${
                 selectedDay === dayInfo.dayCode ? 'bg-brand text-white' : 'bg-brand/5'
@@ -128,7 +165,7 @@ const NextAvailableDaysPicker = ({
                   {dayInfo.dayName}
                 </div>
                 <div className="text-sm text-center">
-                  {format(dayInfo.date, 'd MMMM yyyy', { locale: ar })}
+                  {isValidDate ? format(dayInfo.date, 'd MMMM yyyy', { locale: ar }) : 'تاريخ غير صالح'}
                 </div>
               </div>
               
@@ -186,7 +223,31 @@ const NextAvailableDaysPicker = ({
       {selectedDay && selectedTime && (
         <div className="bg-green-50 border border-green-100 rounded-lg p-4 text-center">
           <p className="text-green-700">
-            تم اختيار موعدك: <strong>{format(availableDays.find(d => d.dayCode === selectedDay)?.date || new Date(), 'EEEE, d MMMM yyyy', { locale: ar })} - {selectedTime}</strong>
+            {(() => {
+              try {
+                const selectedDayInfo = availableDays.find(d => d.dayCode === selectedDay);
+                if (selectedDayInfo && selectedDayInfo.date instanceof Date && !isNaN(selectedDayInfo.date.getTime())) {
+                  return (
+                    <>
+                      تم اختيار موعدك: <strong>{format(selectedDayInfo.date, 'EEEE, d MMMM yyyy', { locale: ar })} - {selectedTime}</strong>
+                    </>
+                  );
+                } else {
+                  return (
+                    <>
+                      تم اختيار موعدك: <strong>{selectedTime}</strong>
+                    </>
+                  );
+                }
+              } catch (err) {
+                console.error("Error formatting selected date:", err);
+                return (
+                  <>
+                    تم اختيار الموعد: <strong>{selectedTime}</strong>
+                  </>
+                );
+              }
+            })()}
           </p>
           <p className="text-sm text-green-600 mt-2">يرجى إكمال بيانات الحجز في الخطوة التالية</p>
         </div>
