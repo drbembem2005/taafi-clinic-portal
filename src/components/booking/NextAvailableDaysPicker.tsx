@@ -31,7 +31,6 @@ const NextAvailableDaysPicker = ({
     times: string[];
   }>>([]);
   const [error, setError] = useState<string | null>(null);
-  const [selectedFormattedDate, setSelectedFormattedDate] = useState<string>('');
 
   useEffect(() => {
     const fetchAvailableDays = async () => {
@@ -50,65 +49,8 @@ const NextAvailableDaysPicker = ({
         if (nextAvailableDays.length === 0) {
           setError('لا توجد مواعيد متاحة لهذا الطبيب');
         } else {
-          // Create an array to store the processed days with valid date objects
-          const processedDays = [];
-          
-          for (const day of nextAvailableDays) {
-            try {
-              // Ensure we create a valid date object from whatever format we receive
-              let validDate: Date;
-              
-              if (day.date instanceof Date) {
-                validDate = day.date;
-              } else if (typeof day.date === 'string') {
-                validDate = new Date(day.date);
-              } else if (typeof day.date === 'object' && day.date !== null) {
-                // Handle complex date object (like from an API)
-                const dateObj = day.date as any;
-                
-                if (dateObj.iso) {
-                  validDate = new Date(dateObj.iso);
-                } else if (dateObj.local) {
-                  validDate = new Date(dateObj.local);
-                } else if (dateObj._type === 'Date' && dateObj.value) {
-                  // Handle special date format from our API
-                  if (typeof dateObj.value === 'object' && dateObj.value.iso) {
-                    validDate = new Date(dateObj.value.iso);
-                  } else if (typeof dateObj.value === 'number') {
-                    validDate = new Date(dateObj.value);
-                  } else {
-                    validDate = new Date(String(dateObj.value));
-                  }
-                } else {
-                  validDate = new Date();
-                }
-              } else {
-                // Default fallback to current date
-                validDate = new Date();
-                console.warn("Unexpected date format, using current date");
-              }
-              
-              // Validate the created date
-              if (isNaN(validDate.getTime())) {
-                console.error("Invalid date created:", validDate);
-                continue; // Skip this day if the date is invalid
-              }
-              
-              // Add to processed days
-              processedDays.push({
-                date: validDate,
-                dayName: day.dayName,
-                dayCode: day.dayCode,
-                times: day.times
-              });
-            } catch (err) {
-              console.error("Error processing day data:", err);
-              // Skip this day if there's an error
-            }
-          }
-          
-          setAvailableDays(processedDays);
-          console.log("Available days set:", processedDays);
+          setAvailableDays(nextAvailableDays);
+          console.log("Available days set:", nextAvailableDays);
         }
       } catch (err) {
         console.error('Error fetching available days:', err);
@@ -127,30 +69,9 @@ const NextAvailableDaysPicker = ({
   }, [doctorId]);
 
   const handleSelectDateTime = (dayCode: string, time: string, date: Date) => {
-    try {
-      // Ensure the date is valid before formatting
-      if (!(date instanceof Date) || isNaN(date.getTime())) {
-        console.error("Invalid date object:", date);
-        toast({
-          title: "خطأ",
-          description: "تاريخ غير صحيح، يرجى المحاولة مرة أخرى",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Format the date in a user-friendly way
-      const formattedDate = format(date, 'EEEE, d MMMM yyyy', { locale: ar });
-      setSelectedFormattedDate(formattedDate);
-      onSelectDateTime(dayCode, time, formattedDate);
-    } catch (err) {
-      console.error("Error handling date selection:", err);
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ أثناء تحديد الموعد",
-        variant: "destructive",
-      });
-    }
+    // Format the date in a user-friendly way
+    const formattedDate = format(date, 'EEEE, d MMMM yyyy', { locale: ar });
+    onSelectDateTime(dayCode, time, formattedDate);
   };
 
   if (loading) {
@@ -265,7 +186,7 @@ const NextAvailableDaysPicker = ({
       {selectedDay && selectedTime && (
         <div className="bg-green-50 border border-green-100 rounded-lg p-4 text-center">
           <p className="text-green-700">
-            تم اختيار موعدك: <strong>{selectedFormattedDate}</strong>
+            تم اختيار موعدك: <strong>{format(availableDays.find(d => d.dayCode === selectedDay)?.date || new Date(), 'EEEE, d MMMM yyyy', { locale: ar })} - {selectedTime}</strong>
           </p>
           <p className="text-sm text-green-600 mt-2">يرجى إكمال بيانات الحجز في الخطوة التالية</p>
         </div>

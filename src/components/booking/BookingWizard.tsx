@@ -18,17 +18,15 @@ interface BookingWizardProps {
   selectedDoctor: Doctor | null;
   selectedDate: Date | null;
   selectedTime: string | null;
-  formattedDate: string;
   patientInfo: {
     name: string;
     phone: string;
     email: string;
     notes: string;
   };
-  bookingReference: string | null;
   onSpecialtySelect: (specialty: Specialty) => void;
   onDoctorSelect: (doctor: Doctor) => void;
-  onDateSelect: (date: Date | null) => void;
+  onDateSelect: (date: Date) => void;
   onTimeSelect: (time: string) => void;
   onPatientInfoChange: (info: {
     name: string;
@@ -36,13 +34,10 @@ interface BookingWizardProps {
     email: string;
     notes: string;
   }) => void;
-  onUpdateFormattedDate: (date: string) => void;
-  onBookingSuccess: (reference: string) => void;
-  onResetBooking: () => void;
   onNext: () => void;
   onPrevious: () => void;
-  onSpecialtyStepComplete?: () => void;
-  doctorSectionRef?: React.RefObject<HTMLDivElement>;
+  onSpecialtyStepComplete?: () => void; // New prop for auto navigation
+  doctorSectionRef?: React.RefObject<HTMLDivElement>; // New ref for scrolling
 }
 
 const BookingWizard = ({
@@ -51,21 +46,16 @@ const BookingWizard = ({
   selectedDoctor,
   selectedDate,
   selectedTime,
-  formattedDate,
   patientInfo,
-  bookingReference,
   onSpecialtySelect,
   onDoctorSelect,
   onDateSelect,
   onTimeSelect,
   onPatientInfoChange,
-  onUpdateFormattedDate,
-  onBookingSuccess,
-  onResetBooking,
   onNext,
   onPrevious,
-  onSpecialtyStepComplete,
-  doctorSectionRef
+  onSpecialtyStepComplete, // Add the new callback
+  doctorSectionRef // Add the ref
 }: BookingWizardProps) => {
   // Steps for the booking process
   const steps = [
@@ -101,12 +91,12 @@ const BookingWizard = ({
             <SpecialtySelection
               selectedSpecialtyId={selectedSpecialty?.id || null}
               onSelectSpecialty={onSpecialtySelect}
-              onStepComplete={onSpecialtyStepComplete}
+              onStepComplete={onSpecialtyStepComplete} // Pass the callback
             />
           </TabsContent>
           
           <TabsContent value="step-1">
-            <div ref={doctorSectionRef}>
+            <div ref={doctorSectionRef}> {/* Add the ref here */}
               <DoctorSelection
                 specialtyId={selectedSpecialty?.id || null}
                 selectedDoctorId={selectedDoctor?.id || null}
@@ -118,62 +108,37 @@ const BookingWizard = ({
           <TabsContent value="step-2">
             <AppointmentSelection
               doctorId={selectedDoctor?.id || null}
-              doctorName={selectedDoctor?.name || ''}
-              selectedDay={selectedDate ? selectedDate.toISOString().split('T')[0] : ''}
-              selectedTime={selectedTime || ''}
-              onSelectDateTime={(day, time, formattedDate) => {
-                // Create a safe date object or null if day is empty
-                const date = day ? new Date(day + 'T00:00:00') : null;
-                onDateSelect(date);
-                onTimeSelect(time);
-                onUpdateFormattedDate(formattedDate);
-              }}
-              onUpdateFormattedDate={onUpdateFormattedDate}
+              selectedDate={selectedDate}
+              selectedTime={selectedTime}
+              onDateSelect={onDateSelect}
+              onTimeSelect={onTimeSelect}
             />
           </TabsContent>
           
           <TabsContent value="step-3">
             <ContactInfoForm
-              doctorName={selectedDoctor?.name || ''}
-              appointmentDate={formattedDate}
-              appointmentTime={selectedTime || ''}
-              initialValues={patientInfo}
-              onUpdateContactInfo={(name, phone, email, notes) => {
-                onPatientInfoChange({
-                  name,
-                  phone,
-                  email: email || '',
-                  notes: notes || ''
-                });
-              }}
+              patientInfo={patientInfo}
+              onChange={onPatientInfoChange}
             />
           </TabsContent>
           
           <TabsContent value="step-4">
             <BookingConfirmation
-              formData={{
-                booking_time: selectedTime || '',
-                user_name: patientInfo.name,
-                user_phone: patientInfo.phone,
-                user_email: patientInfo.email || null,
-                notes: patientInfo.notes || null
-              }}
-              doctorName={selectedDoctor?.name || ''}
-              specialtyName={selectedSpecialty?.name || ''}
-              formattedDate={formattedDate}
-              onBookingSuccess={onBookingSuccess}
+              doctor={selectedDoctor}
+              specialty={selectedSpecialty}
+              date={selectedDate}
+              time={selectedTime}
+              patientInfo={patientInfo}
             />
           </TabsContent>
           
           <TabsContent value="step-5">
             <BookingSuccess
-              bookingReference={bookingReference || ''}
-              doctorName={selectedDoctor?.name || ''}
-              appointmentDate={formattedDate}
-              appointmentTime={selectedTime || ''}
-              userPhone={patientInfo.phone}
-              userEmail={patientInfo.email || null}
-              onReset={onResetBooking}
+              doctor={selectedDoctor}
+              specialty={selectedSpecialty}
+              date={selectedDate}
+              time={selectedTime}
+              patientInfo={patientInfo}
             />
           </TabsContent>
         </Tabs>
@@ -205,7 +170,9 @@ const BookingWizard = ({
   return (
     <div className="bg-white rounded-xl shadow-sm border p-6">
       <BookingProgress 
-        currentStep={activeStep + 1} 
+        steps={steps} 
+        currentStep={activeStep} 
+        completedSteps={Array.from({ length: steps.length }, (_, i) => isStepCompleted(i))}
       />
       {renderStepContent()}
     </div>
