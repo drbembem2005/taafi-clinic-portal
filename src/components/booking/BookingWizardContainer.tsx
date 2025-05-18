@@ -21,6 +21,7 @@ const BookingWizardContainer = () => {
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedDayCode, setSelectedDayCode] = useState<string>('');
   const [formattedDate, setFormattedDate] = useState<string>('');
   const [patientInfo, setPatientInfo] = useState({
     name: '',
@@ -68,6 +69,10 @@ const BookingWizardContainer = () => {
     console.log('Selected time:', time);
   };
 
+  const handleDayCodeSelected = (dayCode: string) => {
+    setSelectedDayCode(dayCode);
+  };
+
   const handlePatientInfoChange = (info: typeof patientInfo) => {
     setPatientInfo(info);
     console.log('Patient info:', info);
@@ -89,6 +94,7 @@ const BookingWizardContainer = () => {
     setSelectedDoctor(null);
     setSelectedDate(null);
     setSelectedTime(null);
+    setSelectedDayCode('');
     setFormattedDate('');
     setPatientInfo({
       name: '',
@@ -118,6 +124,30 @@ const BookingWizardContainer = () => {
         doctorSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }, 100);
+  };
+
+  // Handle date and time selection
+  const handleSelectDateTime = (day: string, time: string, formattedDateStr: string) => {
+    setSelectedDayCode(day);
+    setSelectedTime(time);
+    setFormattedDate(formattedDateStr);
+    
+    // Create a Date object for the selected day if needed
+    // Note: We're mainly using the day code (e.g., 'Mon', 'Tue') for the backend
+    // and the formatted date string for display purposes
+    try {
+      if (day && time) {
+        // This is just to have a Date object if needed for other operations
+        const today = new Date();
+        const selectedDate = new Date(today);
+        setSelectedDate(selectedDate);
+      } else {
+        setSelectedDate(null);
+      }
+    } catch (err) {
+      console.error('Error creating date object:', err);
+      setSelectedDate(null);
+    }
   };
 
   return (

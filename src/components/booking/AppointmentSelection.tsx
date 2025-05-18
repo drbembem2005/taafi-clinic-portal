@@ -68,17 +68,19 @@ const AppointmentSelection = ({
         </div>
         
         <div className="p-4">
-          <NextAvailableDaysPicker
-            doctorId={doctorId}
-            onSelectDateTime={handleDateTimeSelect}
-            selectedDay={selectedDay}
-            selectedTime={selectedTime}
-          />
+          {doctorId && (
+            <NextAvailableDaysPicker
+              doctorId={doctorId}
+              onSelectDateTime={handleDateTimeSelect}
+              selectedDay={selectedDay}
+              selectedTime={selectedTime}
+            />
+          )}
         </div>
       </div>
       
       <AnimatePresence>
-        {selectedDay && selectedTime && (
+        {selectedDay && selectedTime && formattedDate && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -104,6 +106,7 @@ const AppointmentSelection = ({
                 onClick={() => {
                   onSelectDateTime('', '', '');
                   onUpdateFormattedDate('');
+                  setFormattedDate('');
                 }}
               >
                 تغيير
