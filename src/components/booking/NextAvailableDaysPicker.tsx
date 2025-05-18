@@ -65,13 +65,14 @@ const NextAvailableDaysPicker = ({
               // If it's some other object with date info, try to extract it
               // This handles special date objects from APIs or databases
               try {
-                if ('iso' in day.date) {
-                  dateObj = new Date(day.date.iso);
-                } else if ('local' in day.date) {
-                  dateObj = new Date(day.date.local);
+                const dateValue = day.date as Record<string, any>;
+                if (dateValue.iso) {
+                  dateObj = new Date(dateValue.iso);
+                } else if (dateValue.local) {
+                  dateObj = new Date(dateValue.local);
                 } else {
                   // Try to convert the object to a date using toString
-                  dateObj = new Date(day.date.toString());
+                  dateObj = new Date(String(dateValue));
                 }
               } catch (err) {
                 console.error("Failed to parse date object:", day.date);
