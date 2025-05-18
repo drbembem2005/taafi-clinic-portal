@@ -49,8 +49,22 @@ const NextAvailableDaysPicker = ({
         if (nextAvailableDays.length === 0) {
           setError('لا توجد مواعيد متاحة لهذا الطبيب');
         } else {
-          setAvailableDays(nextAvailableDays);
-          console.log("Available days set:", nextAvailableDays);
+          // Ensure all date objects are valid before setting state
+          const validDays = nextAvailableDays.map(day => {
+            // Make a proper date object
+            const dateObj = typeof day.date === 'object' && day.date !== null && 
+                           day.date._type === 'Date' && day.date.value ? 
+                           new Date(day.date.value.iso || day.date.value.local) : 
+                           new Date(day.date);
+            
+            return {
+              ...day,
+              date: dateObj
+            };
+          });
+          
+          setAvailableDays(validDays);
+          console.log("Available days set:", validDays);
         }
       } catch (err) {
         console.error('Error fetching available days:', err);
@@ -69,6 +83,17 @@ const NextAvailableDaysPicker = ({
   }, [doctorId]);
 
   const handleSelectDateTime = (dayCode: string, time: string, date: Date) => {
+    // Ensure the date is valid before formatting
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+      console.error("Invalid date object:", date);
+      toast({
+        title: "خطأ",
+        description: "تاريخ غير صحيح، يرجى المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Format the date in a user-friendly way
     const formattedDate = format(date, 'EEEE, d MMMM yyyy', { locale: ar });
     onSelectDateTime(dayCode, time, formattedDate);
@@ -111,6 +136,14 @@ const NextAvailableDaysPicker = ({
         {availableDays.map((dayInfo, dayIndex) => {
           // Get first time from the array for this day
           const availableTime = dayInfo.times && dayInfo.times.length > 0 ? dayInfo.times[0] : null;
+          
+          // Ensure dayInfo.date is a proper Date object before using it
+          const isValidDate = dayInfo.date instanceof Date && !isNaN(dayInfo.date.getTime());
+          
+          if (!isValidDate) {
+            console.error("Invalid date in availableDays array:", dayInfo.date);
+            return null;
+          }
           
           return (
             <Card 
@@ -186,7 +219,7 @@ const NextAvailableDaysPicker = ({
       {selectedDay && selectedTime && (
         <div className="bg-green-50 border border-green-100 rounded-lg p-4 text-center">
           <p className="text-green-700">
-            تم اختيار موعدك: <strong>{format(availableDays.find(d => d.dayCode === selectedDay)?.date || new Date(), 'EEEE, d MMMM yyyy', { locale: ar })} - {selectedTime}</strong>
+            تم اختيار موعدك: <strong>{formattedDate}</strong>
           </p>
           <p className="text-sm text-green-600 mt-2">يرجى إكمال بيانات الحجز في الخطوة التالية</p>
         </div>

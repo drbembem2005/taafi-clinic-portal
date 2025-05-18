@@ -28,7 +28,7 @@ interface BookingWizardProps {
   bookingReference: string | null;
   onSpecialtySelect: (specialty: Specialty) => void;
   onDoctorSelect: (doctor: Doctor) => void;
-  onDateSelect: (date: Date) => void;
+  onDateSelect: (date: Date | null) => void;
   onTimeSelect: (time: string) => void;
   onPatientInfoChange: (info: {
     name: string;
@@ -122,7 +122,8 @@ const BookingWizard = ({
               selectedDay={selectedDate ? selectedDate.toISOString().split('T')[0] : ''}
               selectedTime={selectedTime || ''}
               onSelectDateTime={(day, time, formattedDate) => {
-                const date = new Date(day + 'T00:00:00');
+                // Create a safe date object or null if day is empty
+                const date = day ? new Date(day + 'T00:00:00') : null;
                 onDateSelect(date);
                 onTimeSelect(time);
                 onUpdateFormattedDate(formattedDate);

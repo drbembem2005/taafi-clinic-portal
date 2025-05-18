@@ -58,7 +58,7 @@ const BookingWizardContainer = () => {
     console.log('Selected doctor:', doctor);
   };
 
-  const handleDateSelected = (date: Date) => {
+  const handleDateSelected = (date: Date | null) => {
     setSelectedDate(date);
     console.log('Selected date:', date);
   };
