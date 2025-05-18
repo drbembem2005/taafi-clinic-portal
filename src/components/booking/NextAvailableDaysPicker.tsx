@@ -31,6 +31,7 @@ const NextAvailableDaysPicker = ({
     times: string[];
   }>>([]);
   const [error, setError] = useState<string | null>(null);
+  const [selectedFormattedDate, setSelectedFormattedDate] = useState<string>('');
 
   useEffect(() => {
     const fetchAvailableDays = async () => {
@@ -51,11 +52,42 @@ const NextAvailableDaysPicker = ({
         } else {
           // Ensure all date objects are valid before setting state
           const validDays = nextAvailableDays.map(day => {
-            // Make a proper date object
-            const dateObj = typeof day.date === 'object' && day.date !== null && 
-                           day.date._type === 'Date' && day.date.value ? 
-                           new Date(day.date.value.iso || day.date.value.local) : 
-                           new Date(day.date);
+            // Make sure we have a proper date object
+            let dateObj: Date;
+            
+            if (typeof day.date === 'string') {
+              // If it's a string, parse it
+              dateObj = new Date(day.date);
+            } else if (day.date instanceof Date) {
+              // If it's already a Date object, use it directly
+              dateObj = day.date;
+            } else if (typeof day.date === 'object' && day.date !== null) {
+              // If it's some other object with date info, try to extract it
+              // This handles special date objects from APIs or databases
+              try {
+                if ('iso' in day.date) {
+                  dateObj = new Date(day.date.iso);
+                } else if ('local' in day.date) {
+                  dateObj = new Date(day.date.local);
+                } else {
+                  // Try to convert the object to a date using toString
+                  dateObj = new Date(day.date.toString());
+                }
+              } catch (err) {
+                console.error("Failed to parse date object:", day.date);
+                dateObj = new Date(); // Fallback to current date
+              }
+            } else {
+              // Default fallback
+              console.warn("Unexpected date format, using current date as fallback");
+              dateObj = new Date();
+            }
+            
+            // Validate the created date
+            if (isNaN(dateObj.getTime())) {
+              console.error("Invalid date created:", dateObj);
+              dateObj = new Date(); // Fallback to current date
+            }
             
             return {
               ...day,
@@ -96,6 +128,7 @@ const NextAvailableDaysPicker = ({
     
     // Format the date in a user-friendly way
     const formattedDate = format(date, 'EEEE, d MMMM yyyy', { locale: ar });
+    setSelectedFormattedDate(formattedDate);
     onSelectDateTime(dayCode, time, formattedDate);
   };
 
@@ -219,7 +252,7 @@ const NextAvailableDaysPicker = ({
       {selectedDay && selectedTime && (
         <div className="bg-green-50 border border-green-100 rounded-lg p-4 text-center">
           <p className="text-green-700">
-            تم اختيار موعدك: <strong>{formattedDate}</strong>
+            تم اختيار موعدك: <strong>{selectedFormattedDate}</strong>
           </p>
           <p className="text-sm text-green-600 mt-2">يرجى إكمال بيانات الحجز في الخطوة التالية</p>
         </div>
