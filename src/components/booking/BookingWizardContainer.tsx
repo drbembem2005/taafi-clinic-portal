@@ -1,107 +1,295 @@
 
-import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Doctor } from '@/services/doctorService';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import SpecialtySelection from './SpecialtySelection';
+import DoctorSelection from './DoctorSelection';
+import AppointmentSelection from './AppointmentSelection';
+import ContactInfoForm from './ContactInfoForm';
+import BookingConfirmation from './BookingConfirmation';
+import BookingSuccess from './BookingSuccess';
+import BookingProgress from './BookingProgress';
 import { Specialty } from '@/services/specialtyService';
-import BookingWizard from './BookingWizard';
+import { Doctor } from '@/services/doctorService';
+
+export interface BookingFormData {
+  user_name: string;
+  user_phone: string;
+  user_email: string | null;
+  notes: string | null;
+  specialty_id: number | null;
+  doctor_id: number | null;
+  booking_day: string;
+  booking_time: string;
+  booking_method: 'whatsapp' | 'phone' | 'online';
+}
 
 const BookingWizardContainer = () => {
-  const location = useLocation();
-  const [activeStep, setActiveStep] = useState(0);
+  // State for wizard steps - now we have 5 steps instead of 4
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [formData, setFormData] = useState<BookingFormData>({
+    user_name: '',
+    user_phone: '',
+    user_email: null,
+    notes: null,
+    specialty_id: null,
+    doctor_id: null,
+    booking_day: '',
+    booking_time: '',
+    booking_method: 'whatsapp'
+  });
   const [selectedSpecialty, setSelectedSpecialty] = useState<Specialty | null>(null);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [patientInfo, setPatientInfo] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    notes: '',
-  });
-  
-  // Reference for scrolling to doctor selection step
-  const doctorSectionRef = useRef<HTMLDivElement>(null);
+  const [bookingComplete, setBookingComplete] = useState<boolean>(false);
+  const [bookingReference, setBookingReference] = useState<string>('');
+  const [formattedDate, setFormattedDate] = useState<string>('');
 
-  // Handle location state for pre-selected doctor and specialty
-  useEffect(() => {
-    if (location.state) {
-      const { selectedDoctor: doctorId, selectedSpecialty: specialtyId } = location.state;
-      
-      if (doctorId) {
-        console.log('Pre-selected doctor from location state:', doctorId);
-      }
-      
-      if (specialtyId) {
-        console.log('Pre-selected specialty from location state:', specialtyId);
-      }
-    }
-  }, [location.state]);
+  // Navigation methods
+  const goToNextStep = () => {
+    setCurrentStep(prev => prev + 1);
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-  const handleSpecialtySelected = (specialty: Specialty) => {
+  const goToPrevStep = () => {
+    setCurrentStep(prev => Math.max(1, prev - 1));
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Handle specialty selection
+  const handleSpecialtySelect = (specialty: Specialty) => {
     setSelectedSpecialty(specialty);
-    console.log('Selected specialty:', specialty);
+    setFormData(prev => ({
+      ...prev,
+      specialty_id: specialty.id,
+      doctor_id: null // Reset doctor when changing specialty
+    }));
+    setSelectedDoctor(null);
   };
 
-  const handleDoctorSelected = (doctor: Doctor) => {
+  // Handle doctor selection
+  const handleDoctorSelect = (doctor: Doctor) => {
     setSelectedDoctor(doctor);
-    console.log('Selected doctor:', doctor);
+    setFormData(prev => ({
+      ...prev,
+      doctor_id: doctor.id
+    }));
   };
 
-  const handleDateSelected = (date: Date) => {
-    setSelectedDate(date);
-    console.log('Selected date:', date);
+  // Handle appointment selection
+  const handleAppointmentSelect = (day: string, time: string, formattedDateStr: string) => {
+    setFormData(prev => ({
+      ...prev,
+      booking_day: day,
+      booking_time: time
+    }));
+    setFormattedDate(formattedDateStr);
   };
 
-  const handleTimeSelected = (time: string) => {
-    setSelectedTime(time);
-    console.log('Selected time:', time);
+  // Handle contact info update
+  const handleContactInfoUpdate = (
+    name: string,
+    phone: string,
+    email: string | null,
+    notes: string | null
+  ) => {
+    setFormData(prev => ({
+      ...prev,
+      user_name: name,
+      user_phone: phone,
+      user_email: email,
+      notes: notes
+    }));
   };
 
-  const handlePatientInfoChange = (info: typeof patientInfo) => {
-    setPatientInfo(info);
-    console.log('Patient info:', info);
+  // Handle booking success
+  const handleBookingSuccess = (reference: string) => {
+    setBookingReference(reference);
+    setBookingComplete(true);
   };
 
-  const handleNextStep = () => {
-    setActiveStep(prev => prev + 1);
+  // Reset the booking process
+  const handleReset = () => {
+    setFormData({
+      user_name: '',
+      user_phone: '',
+      user_email: null,
+      notes: null,
+      specialty_id: null,
+      doctor_id: null,
+      booking_day: '',
+      booking_time: '',
+      booking_method: 'whatsapp'
+    });
+    setSelectedSpecialty(null);
+    setSelectedDoctor(null);
+    setBookingComplete(false);
+    setCurrentStep(1);
+    setBookingReference('');
+    setFormattedDate('');
   };
 
-  const handlePreviousStep = () => {
-    setActiveStep(prev => Math.max(0, prev - 1));
-  };
-
-  // Handle specialty step completion - auto navigate
-  const handleSpecialtyStepComplete = () => {
-    // Advance to the next step
-    handleNextStep();
-    
-    // Scroll to the doctor selection section after a short delay
-    setTimeout(() => {
-      if (doctorSectionRef.current) {
-        doctorSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
-  };
+  // If booking is complete, show success screen
+  if (bookingComplete) {
+    return (
+      <BookingSuccess 
+        bookingReference={bookingReference}
+        doctorName={selectedDoctor?.name || ''}
+        appointmentDate={formattedDate}
+        appointmentTime={formData.booking_time}
+        userPhone={formData.user_phone}
+        userEmail={formData.user_email}
+        onReset={handleReset}
+      />
+    );
+  }
 
   return (
-    <div>
-      <BookingWizard
-        activeStep={activeStep}
-        selectedSpecialty={selectedSpecialty}
-        selectedDoctor={selectedDoctor}
-        selectedDate={selectedDate}
-        selectedTime={selectedTime}
-        patientInfo={patientInfo}
-        onSpecialtySelect={handleSpecialtySelected}
-        onDoctorSelect={handleDoctorSelected}
-        onDateSelect={handleDateSelected}
-        onTimeSelect={handleTimeSelected}
-        onPatientInfoChange={handlePatientInfoChange}
-        onNext={handleNextStep}
-        onPrevious={handlePreviousStep}
-        onSpecialtyStepComplete={handleSpecialtyStepComplete} // Pass the new callback
-        doctorSectionRef={doctorSectionRef} // Pass the ref for scrolling
-      />
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+      {/* Progress bar and indicators - now with 5 steps instead of 4 */}
+      <BookingProgress currentStep={currentStep} totalSteps={5} />
+      
+      {/* Main content area */}
+      <div className="p-4 md:p-6">
+        <AnimatePresence mode="wait">
+          {currentStep === 1 && (
+            <motion.div
+              key="step1"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              {/* Full width specialty selection */}
+              <SpecialtySelection
+                selectedSpecialtyId={formData.specialty_id}
+                onSelectSpecialty={handleSpecialtySelect}
+                className="w-full"
+              />
+            </motion.div>
+          )}
+
+          {currentStep === 2 && (
+            <motion.div
+              key="step2"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              {/* Doctor selection as its own step */}
+              <DoctorSelection
+                specialtyId={formData.specialty_id}
+                selectedDoctorId={formData.doctor_id}
+                onSelectDoctor={handleDoctorSelect}
+                className="w-full"
+              />
+            </motion.div>
+          )}
+
+          {currentStep === 3 && (
+            <motion.div
+              key="step3"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <AppointmentSelection
+                doctorId={formData.doctor_id}
+                doctorName={selectedDoctor?.name || ''}
+                selectedDay={formData.booking_day}
+                selectedTime={formData.booking_time}
+                onSelectDateTime={handleAppointmentSelect}
+                onUpdateFormattedDate={setFormattedDate}
+              />
+            </motion.div>
+          )}
+
+          {currentStep === 4 && (
+            <motion.div
+              key="step4"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ContactInfoForm
+                doctorName={selectedDoctor?.name || ''}
+                appointmentDate={formattedDate}
+                appointmentTime={formData.booking_time}
+                initialValues={{
+                  name: formData.user_name,
+                  phone: formData.user_phone,
+                  email: formData.user_email || '',
+                  notes: formData.notes || ''
+                }}
+                onUpdateContactInfo={handleContactInfoUpdate}
+              />
+            </motion.div>
+          )}
+
+          {currentStep === 5 && (
+            <motion.div
+              key="step5"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              <BookingConfirmation
+                formData={formData}
+                doctorName={selectedDoctor?.name || ''}
+                specialtyName={selectedSpecialty?.name || ''}
+                formattedDate={formattedDate}
+                onBookingSuccess={handleBookingSuccess}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      
+      {/* Navigation buttons */}
+      <div className="p-4 border-t bg-gray-50 flex justify-between">
+        {currentStep > 1 && (
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className="px-6 py-2.5 border border-gray-300 rounded-lg flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-100 transition-colors"
+            onClick={goToPrevStep}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 rtl:transform rtl:rotate-180" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            السابق
+          </motion.button>
+        )}
+        
+        {currentStep < 5 && (
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className={`px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 text-white transition-colors ${
+              (currentStep === 1 && !formData.specialty_id) || 
+              (currentStep === 2 && !formData.doctor_id) || 
+              (currentStep === 3 && (!formData.booking_day || !formData.booking_time))
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-brand hover:bg-brand-dark'
+            }`}
+            onClick={goToNextStep}
+            disabled={
+              (currentStep === 1 && !formData.specialty_id) || 
+              (currentStep === 2 && !formData.doctor_id) || 
+              (currentStep === 3 && (!formData.booking_day || !formData.booking_time))
+            }
+          >
+            التالي
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 rtl:transform rtl:rotate-180" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+            </svg>
+          </motion.button>
+        )}
+      </div>
     </div>
   );
 };

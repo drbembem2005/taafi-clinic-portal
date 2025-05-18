@@ -198,7 +198,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
         </div>
         
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DialogContent hideCloseButton className="p-0 sm:max-w-lg mx-auto rounded-lg overflow-hidden">
+          <DialogContent className="p-0 sm:max-w-lg mx-auto rounded-lg overflow-hidden">
             <DoctorDetails 
               doctor={doctor} 
               onBookingWizard={redirectToBookingWizard} 
@@ -304,7 +304,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
       </div>
       
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent hideCloseButton className="p-0 max-w-[95%] sm:max-w-md md:max-w-lg mx-auto rounded-lg overflow-hidden">
+        <DialogContent className="p-0 max-w-[95%] sm:max-w-md md:max-w-lg mx-auto rounded-lg overflow-hidden">
           <DoctorDetails 
             doctor={doctor} 
             onBookingWizard={redirectToBookingWizard} 
@@ -351,6 +351,16 @@ const DoctorDetails = ({
     <div className="bg-white overflow-hidden max-h-[85vh] flex flex-col">
       {/* Header with gradient background and doctor info */}
       <div className="relative bg-gradient-to-r from-brand to-blue-600 p-4 md:p-6 text-white">
+        <button 
+          onClick={onClose} 
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30"
+          aria-label="إغلاق"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
+
         <div className="flex items-center">
           {/* Doctor avatar */}
           <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-white/30 overflow-hidden flex-shrink-0 bg-white/10 ml-4">
@@ -415,18 +425,25 @@ const DoctorDetails = ({
           <h3 className="font-bold text-gray-700">جدول المواعيد</h3>
         </div>
         
-        <div className="overflow-y-auto max-h-40">
+        <div className="overflow-y-auto max-h-48">
           {availableDays.length > 0 ? (
-            <div className="flex flex-wrap gap-2 px-1">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-2 px-1">
               {availableDays.map(([englishDay, times], index) => {
                 const arabicDay = Object.keys(dayMappings).find(
                   (key) => dayMappings[key as keyof typeof dayMappings] === englishDay
                 ) || englishDay;
                 
                 return (
-                  <Badge key={index} variant="outline" className="bg-brand/10 text-brand px-2 py-0.5 text-xs">
-                    {arabicDay}: {Array.isArray(times) && times.length > 0 ? times[0] : ''}
-                  </Badge>
+                  <div key={index} className="flex items-center">
+                    <span className="font-medium text-sm ml-2">{arabicDay}:</span>
+                    <div className="flex flex-wrap gap-1">
+                      {Array.isArray(times) && times.map((time: string, timeIndex: number) => (
+                        <Badge key={timeIndex} variant="outline" className="bg-brand/10 text-brand px-2 py-0.5 text-xs">
+                          {time}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
                 );
               })}
             </div>

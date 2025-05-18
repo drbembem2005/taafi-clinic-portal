@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { getDoctors, getDoctorsBySpecialtyId, Doctor, getDoctorSchedule } from '@/services/doctorService';
 import { getSpecialties, Specialty } from '@/services/specialtyService';
 import DoctorCard from '@/components/shared/DoctorCard';
@@ -9,11 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
 
 const Doctors = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [doctorSchedules, setDoctorSchedules] = useState<Record<number, Record<string, string[]>>>({});
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
@@ -101,10 +98,6 @@ const Doctors = () => {
     setSelectedSpecialty(value);
   };
 
-  const handleBookingClick = () => {
-    navigate('/booking');
-  };
-
   // Format doctors with their specialties for display
   const formattedDoctors = doctors.map(doctor => {
     const doctorSpecialty = specialties.find(s => s.id === doctor.specialty_id);
@@ -127,13 +120,6 @@ const Doctors = () => {
         <p className="text-gray-600 max-w-2xl mx-auto">
           نخبة من الأطباء الاستشاريين والأخصائيين لتقديم أفضل رعاية طبية لك ولعائلتك
         </p>
-
-        <Button 
-          onClick={handleBookingClick}
-          className="mt-4 bg-brand hover:bg-brand-dark text-white"
-        >
-          احجز موعدك الآن
-        </Button>
       </motion.div>
       
       <motion.div 

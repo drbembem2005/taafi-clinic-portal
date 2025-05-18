@@ -11,14 +11,12 @@ interface SpecialtySelectionProps {
   selectedSpecialtyId: number | null;
   onSelectSpecialty: (specialty: Specialty) => void;
   className?: string;
-  onStepComplete?: () => void; // Added for auto-navigation
 }
 
 const SpecialtySelection = ({ 
   selectedSpecialtyId, 
   onSelectSpecialty,
-  className = '',
-  onStepComplete // Added for auto-navigation
+  className = ''
 }: SpecialtySelectionProps) => {
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [loading, setLoading] = useState(true);
@@ -97,12 +95,14 @@ const SpecialtySelection = ({
   const handleSpecialtySelect = (specialty: Specialty) => {
     onSelectSpecialty(specialty);
     
-    // Auto navigate to next step after a short delay
-    if (onStepComplete) {
-      setTimeout(() => {
-        onStepComplete();
-      }, 300);
-    }
+    // Auto scroll to next step (doctors section)
+    setTimeout(() => {
+      // Auto navigate to next step by clicking the next button
+      const nextButton = document.querySelector('button[aria-label="التالي"]') as HTMLButtonElement;
+      if (nextButton) {
+        nextButton.click();
+      }
+    }, 300);
   };
   
   if (loading) {
