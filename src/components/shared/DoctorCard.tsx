@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useNavigate } from 'react-router-dom';
 import { openWhatsAppWithBookingDetails } from '@/services/bookingService';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DoctorWithSpecialty extends ServiceDoctor {
   specialty: string;
@@ -76,6 +77,7 @@ const getSpecialtyColorClass = (specialty: string) => {
 const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
   const [showDialog, setShowDialog] = useState(false);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   // Get specialty colors
   const specialtyColors = getSpecialtyColorClass(doctor.specialty);
@@ -104,18 +106,21 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
     });
   };
 
-  // Get available days from doctor's schedule
+  // Get available days from doctor's schedule in a more compact format
   const getAvailableDays = () => {
     if (!doctor.schedule) return [];
     
     return Object.entries(doctor.schedule)
       .filter(([_, times]) => times && times.length > 0)
-      .map(([day, _]) => {
+      .map(([day, times]) => {
         // Map English day key back to Arabic
         const arabicDay = Object.keys(dayMappings).find(
           (key) => dayMappings[key as keyof typeof dayMappings] === day
         );
-        return arabicDay || day;
+        return { 
+          day: arabicDay || day, 
+          times: Array.isArray(times) ? times : [] 
+        };
       });
   };
   
@@ -214,19 +219,19 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
       transition={{ duration: 0.2 }}
     >
       <div className="flex flex-col md:flex-row">
-        <div className="md:w-1/3 bg-gradient-to-br from-brand/5 to-brand/10 p-6 flex items-center justify-center">
-          <div className="w-32 h-32 rounded-full bg-white shadow p-1.5 flex items-center justify-center overflow-hidden">
+        <div className={`${isMobile ? 'py-4' : 'md:w-1/3'} bg-gradient-to-br from-brand/5 to-brand/10 p-6 flex items-center justify-center`}>
+          <div className={`${isMobile ? 'w-24 h-24' : 'w-32 h-32'} rounded-full bg-white shadow p-1.5 flex items-center justify-center overflow-hidden`}>
             {doctor.image ? (
               <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover rounded-full" />
             ) : (
               <div className="w-full h-full rounded-full bg-brand/10 flex items-center justify-center">
-                <User className="h-16 w-16 text-brand/40" />
+                <User className={`${isMobile ? 'h-12 w-12' : 'h-16 w-16'} text-brand/40`} />
               </div>
             )}
           </div>
         </div>
         
-        <div className="md:w-2/3 p-6">
+        <div className={`${isMobile ? 'w-full' : 'md:w-2/3'} p-4`}>
           <div className="mb-2">
             <Badge 
               variant="outline" 
@@ -234,42 +239,43 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
             >
               {doctor.specialty}
             </Badge>
-            <h3 className="text-2xl font-bold text-gray-800">{doctor.name}</h3>
+            <h3 className="text-xl md:text-2xl font-bold text-gray-800">{doctor.name}</h3>
           </div>
           
-          {doctor.bio && (
+          {doctor.bio && !isMobile && (
             <p className="text-gray-600 mb-4 line-clamp-2">{doctor.bio}</p>
           )}
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+          <div className="grid grid-cols-2 gap-2 mb-3">
             <div className="bg-gray-50 rounded p-2 flex items-center">
-              <Calendar className="h-4 w-4 text-brand ml-2" />
+              <Clock className="h-4 w-4 text-brand ml-2" />
               <div>
                 <span className="text-xs text-gray-500">رسوم الكشف</span>
-                <p className="font-semibold">{formatFee(doctor.fees.examination)}</p>
+                <p className="font-semibold text-sm">{formatFee(doctor.fees.examination)}</p>
               </div>
             </div>
             
             <div className="bg-gray-50 rounded p-2 flex items-center">
               <Calendar className="h-4 w-4 text-brand ml-2" />
               <div>
-                <span className="text-xs text-gray-500">رسوم الاستشارة</span>
-                <p className="font-semibold">{formatFee(doctor.fees.consultation || 'غير متاح')}</p>
+                <span className="text-xs text-gray-500">الاستشارة</span>
+                <p className="font-semibold text-sm">{formatFee(doctor.fees.consultation || 'غير متاح')}</p>
               </div>
             </div>
           </div>
 
-          <div className="mb-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">أيام العمل:</h4>
+          {/* Mobile-optimized schedule display */}
+          <div className="mb-3">
+            <h4 className="text-sm font-medium text-gray-700 mb-1">أيام العمل:</h4>
             <div className="flex flex-wrap gap-1">
               {availableDays.length > 0 ? (
-                availableDays.map((day, index) => (
-                  <span key={index} className="bg-blue-50 text-brand px-2 py-0.5 rounded-full text-xs">
-                    {day}
-                  </span>
+                availableDays.map((dayInfo, index) => (
+                  <Badge key={index} variant="outline" className="bg-blue-50 text-xs text-brand border-blue-100 py-0.5">
+                    {dayInfo.day} {dayInfo.times[0]}
+                  </Badge>
                 ))
               ) : (
-                <span className="text-gray-500 text-sm">يرجى الاتصال لمعرفة المواعيد</span>
+                <span className="text-xs text-gray-500">يرجى الاتصال لمعرفة المواعيد</span>
               )}
             </div>
           </div>
@@ -277,6 +283,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
           <div className="flex flex-wrap gap-2">
             <Button 
               variant="outline"
+              size={isMobile ? "sm" : "default"}
               className="border-brand/20 text-brand hover:bg-brand/5"
               onClick={() => setShowDialog(true)}
             >
@@ -284,6 +291,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
             </Button>
             <Button 
               className="bg-green-600 hover:bg-green-700 text-white"
+              size={isMobile ? "sm" : "default"}
               onClick={openWhatsApp}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-2" fill="currentColor" viewBox="0 0 24 24">
@@ -322,6 +330,7 @@ const DoctorDetails = ({
   onClose: () => void;
 }) => {
   const specialtyColors = getSpecialtyColorClass(doctor.specialty);
+  const isMobile = useIsMobile();
 
   const formatFee = (fee: number | string | null) => {
     if (fee === null) return 'غير متاح';
@@ -341,7 +350,7 @@ const DoctorDetails = ({
   return (
     <div className="bg-white overflow-hidden max-h-[85vh] flex flex-col">
       {/* Header with gradient background and doctor info */}
-      <div className="relative bg-gradient-to-r from-brand to-blue-600 p-6 text-white">
+      <div className="relative bg-gradient-to-r from-brand to-blue-600 p-4 md:p-6 text-white">
         <button 
           onClick={onClose} 
           className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30"
@@ -354,12 +363,12 @@ const DoctorDetails = ({
 
         <div className="flex items-center">
           {/* Doctor avatar */}
-          <div className="w-20 h-20 rounded-full border-2 border-white/30 overflow-hidden flex-shrink-0 bg-white/10 ml-4">
+          <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-white/30 overflow-hidden flex-shrink-0 bg-white/10 ml-4">
             {doctor.image ? (
               <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
-                <User className="h-10 w-10 text-white/70" />
+                <User className="h-8 w-8 md:h-10 md:w-10 text-white/70" />
               </div>
             )}
           </div>
@@ -372,9 +381,9 @@ const DoctorDetails = ({
             >
               {doctor.specialty}
             </Badge>
-            <h2 className="text-xl font-bold">{doctor.name}</h2>
+            <h2 className="text-lg md:text-xl font-bold">{doctor.name}</h2>
             {doctor.bio && (
-              <p className="text-sm mt-1 text-white/90 line-clamp-2">{doctor.bio}</p>
+              <p className="text-xs md:text-sm mt-1 text-white/90 line-clamp-2">{doctor.bio}</p>
             )}
           </div>
         </div>
@@ -409,29 +418,29 @@ const DoctorDetails = ({
         </p>
       </div>
       
-      {/* Schedule section in two columns */}
+      {/* Schedule section in more compact format */}
       <div className="border-t mx-4 pt-3 pb-4">
         <div className="flex items-center mb-3">
           <Calendar className="text-brand ml-2 h-5 w-5" />
           <h3 className="font-bold text-gray-700">جدول المواعيد</h3>
         </div>
         
-        <div className="max-h-64">
+        <div className="overflow-y-auto max-h-48">
           {availableDays.length > 0 ? (
-            <div className="grid grid-cols-2 gap-2 px-1">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-2 px-1">
               {availableDays.map(([englishDay, times], index) => {
                 const arabicDay = Object.keys(dayMappings).find(
                   (key) => dayMappings[key as keyof typeof dayMappings] === englishDay
                 ) || englishDay;
                 
                 return (
-                  <div key={index} className="border border-gray-100 rounded-md p-2">
-                    <div className="font-medium text-gray-700">{arabicDay}:</div>
-                    <div className="flex flex-wrap gap-1 mt-1">
+                  <div key={index} className="flex items-center">
+                    <span className="font-medium text-sm ml-2">{arabicDay}:</span>
+                    <div className="flex flex-wrap gap-1">
                       {Array.isArray(times) && times.map((time: string, timeIndex: number) => (
-                        <span key={timeIndex} className="bg-brand/10 text-brand px-2 py-0.5 rounded-full text-xs">
+                        <Badge key={timeIndex} variant="outline" className="bg-brand/10 text-brand px-2 py-0.5 text-xs">
                           {time}
-                        </span>
+                        </Badge>
                       ))}
                     </div>
                   </div>
