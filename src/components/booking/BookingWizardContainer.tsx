@@ -5,6 +5,15 @@ import { Doctor } from '@/services/doctorService';
 import { Specialty } from '@/services/specialtyService';
 import BookingWizard from './BookingWizard';
 
+// Define and export the BookingFormData type
+export interface BookingFormData {
+  booking_time: string;
+  user_name: string;
+  user_phone: string;
+  user_email: string | null;
+  notes: string | null;
+}
+
 const BookingWizardContainer = () => {
   const location = useLocation();
   const [activeStep, setActiveStep] = useState(0);
@@ -12,12 +21,14 @@ const BookingWizardContainer = () => {
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [formattedDate, setFormattedDate] = useState<string>('');
   const [patientInfo, setPatientInfo] = useState({
     name: '',
     phone: '',
     email: '',
     notes: '',
   });
+  const [bookingReference, setBookingReference] = useState<string | null>(null);
   
   // Reference for scrolling to doctor selection step
   const doctorSectionRef = useRef<HTMLDivElement>(null);
@@ -61,6 +72,32 @@ const BookingWizardContainer = () => {
     setPatientInfo(info);
     console.log('Patient info:', info);
   };
+  
+  const handleUpdateFormattedDate = (date: string) => {
+    setFormattedDate(date);
+  };
+  
+  const handleBookingSuccess = (reference: string) => {
+    setBookingReference(reference);
+    // Move to success step
+    setActiveStep(5);
+  };
+  
+  const handleResetBooking = () => {
+    setActiveStep(0);
+    setSelectedSpecialty(null);
+    setSelectedDoctor(null);
+    setSelectedDate(null);
+    setSelectedTime(null);
+    setFormattedDate('');
+    setPatientInfo({
+      name: '',
+      phone: '',
+      email: '',
+      notes: '',
+    });
+    setBookingReference(null);
+  };
 
   const handleNextStep = () => {
     setActiveStep(prev => prev + 1);
@@ -91,7 +128,9 @@ const BookingWizardContainer = () => {
         selectedDoctor={selectedDoctor}
         selectedDate={selectedDate}
         selectedTime={selectedTime}
+        formattedDate={formattedDate}
         patientInfo={patientInfo}
+        bookingReference={bookingReference}
         onSpecialtySelect={handleSpecialtySelected}
         onDoctorSelect={handleDoctorSelected}
         onDateSelect={handleDateSelected}
@@ -99,8 +138,11 @@ const BookingWizardContainer = () => {
         onPatientInfoChange={handlePatientInfoChange}
         onNext={handleNextStep}
         onPrevious={handlePreviousStep}
-        onSpecialtyStepComplete={handleSpecialtyStepComplete} // Pass the new callback
-        doctorSectionRef={doctorSectionRef} // Pass the ref for scrolling
+        onSpecialtyStepComplete={handleSpecialtyStepComplete}
+        onUpdateFormattedDate={handleUpdateFormattedDate}
+        onBookingSuccess={handleBookingSuccess}
+        onResetBooking={handleResetBooking}
+        doctorSectionRef={doctorSectionRef}
       />
     </div>
   );
