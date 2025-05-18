@@ -1,11 +1,12 @@
 
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { motion } from 'framer-motion';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const navItems = [
     { name: 'الرئيسية', path: '/' },
@@ -23,6 +24,10 @@ const Header = () => {
         ? 'text-brand-dark font-bold border-b-2 border-brand'
         : 'text-gray-700 hover:text-brand hover:bg-blue-50'
     }`;
+  };
+
+  const handleBookingClick = () => {
+    navigate('/booking');
   };
 
   return (
@@ -85,7 +90,11 @@ const Header = () => {
                 {item.name}
               </NavLink>
             ))}
-            <Button variant="default" className="bg-brand hover:bg-brand-dark text-white px-5 py-2 rounded-md mr-4">
+            <Button 
+              variant="default" 
+              className="bg-brand hover:bg-brand-dark text-white px-5 py-2 rounded-md mr-4"
+              onClick={handleBookingClick}
+            >
               احجز الآن
             </Button>
           </nav>
@@ -112,7 +121,14 @@ const Header = () => {
                   {item.name}
                 </NavLink>
               ))}
-              <Button variant="default" className="bg-brand hover:bg-brand-dark text-white w-full py-2 mt-4">
+              <Button 
+                variant="default" 
+                className="bg-brand hover:bg-brand-dark text-white w-full py-2 mt-4"
+                onClick={() => {
+                  setIsOpen(false);
+                  handleBookingClick();
+                }}
+              >
                 احجز الآن
               </Button>
             </div>
