@@ -8,3 +8,17 @@ build:
     interval: 30s
     timeout: 3s
     retries: 3
+  environment:
+    # Supabase connection details (already hardcoded in your app)
+    - name: SUPABASE_URL
+      value: "https://avnyubdiccodzznnbmzx.supabase.co"
+    - name: SUPABASE_ANON_KEY
+      value: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bnl1YmRpY2NvZHp6bm5ibXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxNDE3NDMsImV4cCI6MjA2MjcxNzc0M30.y556Ux2sKfssoUZ3V-xQFzNtVfDiBf_n-YOtnFYKk7o"
+    # Add application specific environment variables
+    - name: NODE_ENV
+      value: "production"
+    - name: SERVER_URL
+      value: "http://168.231.76.164:8080"
+    # Add your custom environment variables below
+    # - name: CUSTOM_VARIABLE
+    #   value: "custom_value"

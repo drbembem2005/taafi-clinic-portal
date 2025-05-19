@@ -13,7 +13,10 @@ services:
       timeout: 3s
       retries: 3
       start_period: 15s
-    # If you need environment variables, uncomment and add them here
-    # environment:
-    #   - VITE_SUPABASE_URL=your_supabase_url
-    #   - VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+    environment:
+      - NODE_ENV=production
+      - SERVER_URL=http://168.231.76.164:8080
+      - SUPABASE_URL=https://avnyubdiccodzznnbmzx.supabase.co
+      - SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF2bnl1YmRpY2NvZHp6bm5ibXp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxNDE3NDMsImV4cCI6MjA2MjcxNzc0M30.y556Ux2sKfssoUZ3V-xQFzNtVfDiBf_n-YOtnFYKk7o
+      # Add your custom environment variables below as needed
+      # - CUSTOM_VARIABLE=custom_value
