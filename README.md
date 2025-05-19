@@ -1,3 +1,4 @@
+
 # Welcome to your Lovable project
 
 ## Project info
@@ -62,7 +63,48 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/b9f3e6f7-d255-4ca5-9c38-7ccafc078662) and click on Share -> Publish.
+### Using Docker (Recommended)
+
+This project includes Docker configuration for easy deployment:
+
+1. **Build and run with Docker Compose:**
+   ```sh
+   docker-compose up -d
+   ```
+
+2. **Or build and run manually:**
+   ```sh
+   # Build the Docker image
+   docker build -t clinic-booking-app .
+
+   # Run the container
+   docker run -p 80:80 clinic-booking-app
+   ```
+
+3. **Access the application:**
+   Open your browser and navigate to `http://localhost`
+
+### Environment Variables
+
+If your app needs environment variables, you can:
+- Add them to the `docker-compose.yml` file
+- Pass them when running the Docker container: 
+  ```sh
+  docker run -p 80:80 -e VITE_SUPABASE_URL=your_url -e VITE_SUPABASE_ANON_KEY=your_key clinic-booking-app
+  ```
+
+### Traditional Deployment
+
+You can also deploy without Docker:
+
+1. **Build the project:**
+   ```sh
+   npm run build
+   ```
+
+2. **Deploy the files:**
+   - Upload the contents of the `dist` folder to your web server
+   - Or use Lovable's built-in deployment: open [Lovable](https://lovable.dev/projects/b9f3e6f7-d255-4ca5-9c38-7ccafc078662) and click on Share -> Publish.
 
 ## Can I connect a custom domain to my Lovable project?
 

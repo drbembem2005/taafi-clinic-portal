@@ -1,0 +1,13 @@
+
+version: '3.8'
+
+services:
+  webapp:
+    build: .
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    # If you need environment variables, uncomment and add them here
+    # environment:
+    #   - VITE_SUPABASE_URL=your_supabase_url
+    #   - VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
