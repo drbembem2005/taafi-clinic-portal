@@ -23,14 +23,15 @@ FROM nginx:alpine
 # Copy the build output to replace the default nginx contents
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy custom nginx config if needed
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy custom nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 80
-EXPOSE 3000
+EXPOSE 80
 
-# Set environment variables if needed
-# ENV API_URL=https://api.example.com
+# Add health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
+  CMD wget -q --spider http://localhost:80/ || exit 1
 
 # Start Nginx server
 CMD ["nginx", "-g", "daemon off;"]

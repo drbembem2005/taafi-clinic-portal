@@ -84,6 +84,26 @@ This project includes Docker configuration for easy deployment:
 3. **Access the application:**
    Open your browser and navigate to `http://localhost`
 
+### Deploying with Dokploy
+
+This project is configured to work with Dokploy:
+
+1. **Push your repository to a Git provider supported by Dokploy** (GitHub, GitLab, etc.)
+
+2. **Connect your repository in Dokploy** and use the following settings:
+   - **Platform**: Docker (Containerized)
+   - **Build Command**: Not needed (handled by Dockerfile)
+   - **Port**: 80
+
+3. **Environment Variables (if needed)**:
+   If your app requires environment variables, add them in the Dokploy dashboard under the project settings.
+
+4. **Deploy**:
+   Once configured, Dokploy will automatically build and deploy your application using the Docker configuration.
+
+5. **Custom Domain**:
+   If you want to use a custom domain, configure it in the Dokploy dashboard and update your DNS settings as instructed.
+
 ### Environment Variables
 
 If your app needs environment variables, you can:
@@ -92,6 +112,7 @@ If your app needs environment variables, you can:
   ```sh
   docker run -p 80:80 -e VITE_SUPABASE_URL=your_url -e VITE_SUPABASE_ANON_KEY=your_key clinic-booking-app
   ```
+- Configure them in Dokploy's environment variable section
 
 ### Traditional Deployment
 
