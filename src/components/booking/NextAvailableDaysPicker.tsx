@@ -10,19 +10,19 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 
-interface NextAvailableDaysPickerProps {
-  doctorId: number;
-  onSelectDateTime: (day: string, time: string, formattedDate: string) => void;
-  selectedDay?: string;
-  selectedTime?: string;
-}
-
 // Define the interface for the day info
-interface DayInfo {
+export interface DayInfo {
   date: Date;
   dayName: string;
   dayCode: string;
   times: string[];
+}
+
+interface NextAvailableDaysPickerProps {
+  doctorId: number;
+  onSelectDateTime: (day: string, time: string, formattedDate: string, availableDays: DayInfo[]) => void;
+  selectedDay?: string;
+  selectedTime?: string;
 }
 
 const NextAvailableDaysPicker = ({ 
@@ -89,7 +89,7 @@ const NextAvailableDaysPicker = ({
     try {
       if (date instanceof Date && !isNaN(date.getTime())) {
         const formattedDate = format(date, 'EEEE, d MMMM yyyy', { locale: ar });
-        onSelectDateTime(dayCode, time, formattedDate);
+        onSelectDateTime(dayCode, time, formattedDate, availableDays);
       } else {
         console.error("Invalid date object:", date);
         toast({

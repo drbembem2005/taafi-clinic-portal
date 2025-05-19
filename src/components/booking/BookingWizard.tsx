@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -26,6 +25,14 @@ import { getDoctors, Doctor, getDoctor } from '@/services/doctorService';
 import { createBooking, openWhatsAppWithBookingDetails } from '@/services/bookingService';
 import { toast } from '@/hooks/use-toast';
 import NextAvailableDaysPicker from './NextAvailableDaysPicker';
+
+// Define the day info interface
+interface DayInfo {
+  date: Date;
+  dayName: string;
+  dayCode: string;
+  times: string[];
+}
 
 interface BookingFormData {
   user_name: string;
@@ -60,6 +67,8 @@ const BookingWizard = () => {
   const [bookingComplete, setBookingComplete] = useState<boolean>(false);
   const [bookingReference, setBookingReference] = useState<string>('');
   const [formattedDate, setFormattedDate] = useState<string>('');
+  // Add the missing availableDays state
+  const [availableDays, setAvailableDays] = useState<DayInfo[]>([]);
   
   const location = useLocation();
   
@@ -152,13 +161,14 @@ const BookingWizard = () => {
   };
   
   // Handle date and time selection
-  const handleDateTimeSelect = (day: string, time: string, formattedDateStr: string) => {
+  const handleDateTimeSelect = (day: string, time: string, formattedDateStr: string, dayInfoList: DayInfo[]) => {
     setFormData(prev => ({
       ...prev,
       booking_day: day,
       booking_time: time
     }));
     setFormattedDate(formattedDateStr);
+    setAvailableDays(dayInfoList);
   };
   
   // Handle doctor selection - no auto navigation
