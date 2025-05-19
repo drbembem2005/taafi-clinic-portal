@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 // Add https:// protocol to the URL if it's missing
-const SUPABASE_URL = "https://taafeclinics-supabase-369909-168-231-76-164.traefik.me";
+const SUPABASE_URL = "https://supabase.taafe-clinics.com/";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzQxNTAwMDAwLAogICJleHAiOiAxODk5MjY2NDAwCn0.muKe0Nrvkf5bMyLoFqAuFypRu3jHAcTYU08SYKrgRQo";
 
 // Import the supabase client like this:
