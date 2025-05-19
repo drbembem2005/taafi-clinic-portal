@@ -32,12 +32,12 @@ RUN mkdir -p /var/log/nginx && \
     touch /var/log/nginx/access.log && \
     chmod -R 755 /var/log/nginx
 
-# Expose port 80
-EXPOSE 80
+# Expose port 3000 instead of 80
+EXPOSE 3000
 
 # Add health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
-  CMD wget -q --spider http://localhost:80/ || exit 1
+  CMD wget -q --spider http://localhost:3000/ || exit 1
 
 # Start Nginx server
 CMD ["nginx", "-g", "daemon off;"]

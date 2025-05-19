@@ -1,0 +1,10 @@
+
+version: "1"
+build:
+  provider: docker
+  port: 3000
+  healthcheck:
+    path: /
+    interval: 30s
+    timeout: 3s
+    retries: 3
