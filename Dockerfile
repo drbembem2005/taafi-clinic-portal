@@ -5,6 +5,14 @@ FROM node:20-alpine AS builder
 # Set working directory
 WORKDIR /app
 
+# Add build arguments for environment variables
+ARG SUPABASE_URL
+ARG SUPABASE_ANON_KEY
+
+# Set environment variables for build
+ENV SUPABASE_URL=$SUPABASE_URL
+ENV SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
+
 # Copy package.json and package-lock.json files
 COPY package.json package-lock.json ./
 
