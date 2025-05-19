@@ -5,10 +5,10 @@ services:
   webapp:
     build: .
     ports:
-      - "3000:3000"
+      - "8080:8080"
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/"]
       interval: 30s
       timeout: 3s
       retries: 3

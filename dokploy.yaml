@@ -2,7 +2,7 @@
 version: "1"
 build:
   provider: docker
-  port: 3000
+  port: 8080
   healthcheck:
     path: /
     interval: 30s
