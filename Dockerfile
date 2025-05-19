@@ -26,6 +26,12 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Create directory for nginx logs
+RUN mkdir -p /var/log/nginx && \
+    touch /var/log/nginx/error.log && \
+    touch /var/log/nginx/access.log && \
+    chmod -R 755 /var/log/nginx
+
 # Expose port 80
 EXPOSE 80
 
