@@ -6,7 +6,8 @@ import {
   CalendarDays, 
   User, 
   Stethoscope, 
-  CheckCircle
+  CheckCircle, 
+  FileText 
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -34,8 +35,15 @@ const steps = [
   },
   {
     id: 4,
+    title: 'أدخل بياناتك',
+    description: 'أدخل بياناتك الشخصية لإتمام الحجز',
+    icon: <FileText className="w-6 h-6" />,
+    color: 'pink'
+  },
+  {
+    id: 5,
     title: 'أكمل الحجز',
-    description: 'أكمل الحجز عن طريق واتساب أو ملء النموذج',
+    description: 'أكد حجزك عبر الموقع أو واتساب',
     icon: <CheckCircle className="w-6 h-6" />,
     color: 'amber'
   },
@@ -52,6 +60,7 @@ const BookingSteps = () => {
       blue: 'from-blue-50 to-blue-100 hover:shadow-blue-100',
       green: 'from-green-50 to-green-100 hover:shadow-green-100',
       purple: 'from-purple-50 to-purple-100 hover:shadow-purple-100',
+      pink: 'from-pink-50 to-pink-100 hover:shadow-pink-100',
       amber: 'from-amber-50 to-amber-100 hover:shadow-amber-100'
     };
 
@@ -64,16 +73,16 @@ const BookingSteps = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">خطوات الحجز البسيطة</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">احجز موعدك بكل سهولة في أربع خطوات فقط</p>
+          <p className="text-gray-600 max-w-2xl mx-auto">احجز موعدك بكل سهولة في خمس خطوات فقط</p>
           <div className="w-24 h-1 bg-brand mx-auto mt-4"></div>
         </div>
 
         {/* Modern Card-based Steps for Desktop */}
-        <div className="hidden md:flex flex-wrap justify-center gap-6 max-w-5xl mx-auto mb-10">
+        <div className="hidden md:flex flex-wrap justify-center gap-4 max-w-5xl mx-auto mb-10">
           {steps.map((step, index) => (
             <motion.div
               key={step.id}
-              className={`relative flex-grow max-w-[300px] rounded-xl overflow-hidden cursor-pointer transition-all shadow-md hover:shadow-lg ${
+              className={`relative flex-grow max-w-[230px] rounded-xl overflow-hidden cursor-pointer transition-all shadow-md hover:shadow-lg ${
                 activeStep === index ? 'ring-2 ring-brand' : ''
               }`}
               initial={{ opacity: 0, y: 20 }}
@@ -92,30 +101,30 @@ const BookingSteps = () => {
               onHoverEnd={() => setHoveredStep(null)}
             >
               <div className={`
-                h-full flex flex-col items-center text-center p-6 bg-gradient-to-br
+                h-full flex flex-col items-center text-center p-4 bg-gradient-to-br
                 ${getStepCardStyles(index)}
               `}>
                 <div className={`
-                  w-16 h-16 rounded-full flex items-center justify-center mb-4 
+                  w-14 h-14 rounded-full flex items-center justify-center mb-3 
                   ${activeStep >= index ? 'bg-brand text-white' : 'bg-white text-gray-500'}
                   shadow-md transition-all duration-300
                 `}>
                   {activeStep > index ? (
-                    <CheckCircle className="w-8 h-8" />
+                    <CheckCircle className="w-7 h-7" />
                   ) : step.icon}
                 </div>
                 
-                <h3 className={`text-xl font-bold mb-2 ${activeStep === index ? 'text-brand' : 'text-gray-800'}`}>
+                <h3 className={`text-lg font-bold mb-1 ${activeStep === index ? 'text-brand' : 'text-gray-800'}`}>
                   {step.title}
                 </h3>
                 
-                <p className="text-gray-600 text-sm">
+                <p className="text-gray-600 text-xs">
                   {step.description}
                 </p>
                 
                 {/* Step Number Indicator */}
                 <div className={`
-                  absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold
+                  absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
                   ${activeStep >= index ? 'bg-brand text-white' : 'bg-white text-gray-500 border border-gray-200'}
                 `}>
                   {step.id}
@@ -125,26 +134,26 @@ const BookingSteps = () => {
           ))}
         </div>
 
-        {/* Mobile Timeline Steps */}
-        <div className="md:hidden space-y-4 mb-8">
+        {/* Mobile Timeline Steps - Modernized */}
+        <div className="md:hidden space-y-3 mb-8">
           {steps.map((step, index) => (
             <motion.div
               key={step.id}
               className={`rounded-lg overflow-hidden border ${
-                activeStep === index ? 'border-brand' : 'border-gray-200'
+                activeStep === index ? 'border-brand shadow-md' : 'border-gray-200'
               }`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, transition: { delay: index * 0.1 } }}
               whileTap={{ scale: 0.98 }}
             >
               <div 
-                className={`flex items-center p-4 ${
+                className={`flex items-center p-3 ${
                   activeStep === index ? 'bg-brand/5' : 'bg-white'
                 } cursor-pointer`}
                 onClick={() => setActiveStep(index)}
               >
                 <div className={`
-                  w-11 h-11 rounded-full flex items-center justify-center mr-4 flex-shrink-0
+                  w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0
                   ${activeStep >= index ? 'bg-brand text-white' : 'bg-gray-100 text-gray-500'}
                   shadow-sm
                 `}>
@@ -152,17 +161,17 @@ const BookingSteps = () => {
                 </div>
                 
                 <div className="flex-grow">
-                  <h3 className={`font-bold ${activeStep === index ? 'text-brand' : 'text-gray-800'}`}>
+                  <h3 className={`font-bold text-sm ${activeStep === index ? 'text-brand' : 'text-gray-800'}`}>
                     {step.title}
                   </h3>
                   
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-xs text-gray-600">
                     {step.description}
                   </p>
                 </div>
 
                 <div className={`
-                  w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mx-2
+                  w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mx-2
                   ${activeStep >= index ? 'bg-brand text-white' : 'bg-gray-100 text-gray-500'}
                 `}>
                   {step.id}
@@ -178,19 +187,18 @@ const BookingSteps = () => {
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
-                    <div className={`p-4 bg-${step.color}-50 border-t border-${step.color}-100`}>
+                    <div className={`p-3 bg-${step.color}-50 border-t border-${step.color}-100`}>
                       <div className="flex items-center justify-center">
-                        <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm mr-4">
+                        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm mr-3">
                           {step.icon}
                         </div>
                         
-                        <div>
-                          <p className="text-sm text-gray-600">
-                            {index === 0 && 'اختر من بين مجموعة متنوعة من التخصصات الطبية المتاحة لدينا.'}
-                            {index === 1 && 'اختر طبيبك المفضل من قائمة الأطباء المتخصصين ذوي الخبرة.'}
-                            {index === 2 && 'اختر موعدًا يناسب جدولك من الأوقات المتاحة.'}
-                            {index === 3 && 'أكمل الحجز بسهولة عبر الإنترنت أو عن طريق واتساب.'}
-                          </p>
+                        <div className="text-xs text-gray-600">
+                          {index === 0 && 'اختر من بين مجموعة متنوعة من التخصصات الطبية المتاحة لدينا.'}
+                          {index === 1 && 'اختر طبيبك المفضل من قائمة الأطباء المتخصصين ذوي الخبرة.'}
+                          {index === 2 && 'اختر موعدًا يناسب جدولك من الأوقات المتاحة.'}
+                          {index === 3 && 'أدخل بياناتك الشخصية لإتمام حجزك.'}
+                          {index === 4 && 'أكد حجزك إما عبر الموقع أو من خلال واتساب.'}
                         </div>
                       </div>
                     </div>
@@ -202,7 +210,7 @@ const BookingSteps = () => {
         </div>
 
         {/* Improved call to action */}
-        <div className="text-center mt-10">
+        <div className="text-center mt-8">
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -211,7 +219,7 @@ const BookingSteps = () => {
           >
             <Button
               size="lg"
-              className="bg-brand hover:bg-brand-dark text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-brand/20 transition-all hover:shadow-brand/30"
+              className="bg-gradient-to-r from-brand to-brand-light hover:opacity-95 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-brand/20 transition-all hover:shadow-brand/30"
               asChild
             >
               <Link to="/booking">

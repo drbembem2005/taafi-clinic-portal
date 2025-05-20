@@ -67,11 +67,24 @@ const BookingConfirmation = ({
     }
   };
   
-  // Handle WhatsApp booking - fixed to ensure WhatsApp actually opens
+  // Handle WhatsApp booking - modified to ensure WhatsApp opens regardless of database status
   const handleWhatsAppBooking = async () => {
     setSubmitting(true);
+    
+    // Always open WhatsApp with booking details first
+    openWhatsAppWithBookingDetails({
+      doctorName,
+      specialtyName,
+      date: formattedDate,
+      time: formData.booking_time,
+      userName: formData.user_name,
+      phone: formData.user_phone,
+      email: formData.user_email,
+      notes: formData.notes
+    });
+    
     try {
-      // Set booking method
+      // Then try to save to database in the background
       const bookingData = {
         ...formData,
         booking_method: 'whatsapp' as 'phone' | 'whatsapp' | 'online'
@@ -86,26 +99,17 @@ const BookingConfirmation = ({
       // Notify parent component of success with booking reference
       onBookingSuccess(referenceId);
       
-      // Open WhatsApp after successful database insertion
-      // Using setTimeout to ensure the state updates before opening a new window
-      setTimeout(() => {
-        openWhatsAppWithBookingDetails({
-          doctorName,
-          specialtyName,
-          date: formattedDate,
-          time: formData.booking_time,
-          userName: formData.user_name,
-          phone: formData.user_phone,
-          email: formData.user_email,
-          notes: formData.notes
-        });
-      }, 300);
-    } catch (error) {
-      console.error('WhatsApp booking error:', error);
+      // Success toast
       toast({
-        title: "فشل الحجز",
-        description: "حدث خطأ أثناء إرسال طلب الحجز. يرجى المحاولة مرة أخرى.",
-        variant: "destructive",
+        title: "تم إرسال طلب الحجز",
+        description: "تم فتح الواتساب وحفظ بيانات الحجز بنجاح.",
+      });
+    } catch (error) {
+      console.error('WhatsApp booking database error:', error);
+      toast({
+        title: "تنبيه",
+        description: "تم فتح الواتساب، لكن هناك مشكلة في حفظ البيانات. لا تقلق، يمكنك متابعة الحجز عبر الواتساب.",
+        variant: "warning",
       });
     } finally {
       setSubmitting(false);

@@ -91,16 +91,22 @@ const SpecialtySelection = ({
     return gradients[specialtyId % gradients.length];
   };
 
-  // Handle specialty selection with auto-navigation
+  // Handle specialty selection with auto-navigation - now improved to be more reliable
   const handleSpecialtySelect = (specialty: Specialty) => {
     onSelectSpecialty(specialty);
     
-    // Auto scroll to next step (doctors section)
+    // Auto navigate to next step immediately after selecting specialty
     setTimeout(() => {
-      // Auto navigate to next step by clicking the next button
-      const nextButton = document.querySelector('button[aria-label="التالي"]') as HTMLButtonElement;
+      const nextButton = document.querySelector('button[aria-label="التالي"]') || 
+                         document.querySelector('button[aria-label="التالي"]') ||
+                         document.querySelector('button:contains("التالي")') ||
+                         document.querySelector('button.next-step-button'); // Backup class
+      
       if (nextButton) {
-        nextButton.click();
+        // Using click() to follow the natural flow of the application
+        (nextButton as HTMLButtonElement).click();
+      } else {
+        console.log("Navigation button not found - please check selector");
       }
     }, 300);
   };

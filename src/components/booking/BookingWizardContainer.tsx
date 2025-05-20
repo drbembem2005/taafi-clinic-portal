@@ -10,6 +10,8 @@ import BookingSuccess from './BookingSuccess';
 import BookingProgress from './BookingProgress';
 import { Specialty } from '@/services/specialtyService';
 import { Doctor } from '@/services/doctorService';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export interface BookingFormData {
   user_name: string;
@@ -144,12 +146,59 @@ const BookingWizardContainer = () => {
     );
   }
 
+  // More modern and compact container design
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-      {/* Progress bar and indicators - now with 5 steps instead of 4 */}
-      <BookingProgress currentStep={currentStep} totalSteps={5} />
+    <div className="bg-gradient-to-b from-white to-gray-50 rounded-xl shadow-md overflow-hidden border border-gray-100">
+      {/* Progress bar with enhanced visuals */}
+      <div className="relative h-1 bg-gray-200">
+        <motion.div 
+          className="h-full bg-gradient-to-r from-brand to-brand-light"
+          initial={{ width: 0 }}
+          animate={{ width: `${(currentStep / 5) * 100}%` }}
+          transition={{ duration: 0.3 }}
+        />
+      </div>
       
-      {/* Main content area */}
+      {/* Step indicators with improved styling */}
+      <div className="flex justify-between px-4 pt-4 pb-1">
+        {[1, 2, 3, 4, 5].map((step) => (
+          <div 
+            key={step} 
+            className={`flex flex-col items-center ${currentStep >= step ? 'text-brand' : 'text-gray-400'}`}
+          >
+            <motion.div 
+              className={`h-7 w-7 rounded-full flex items-center justify-center text-xs mb-1 transition-colors ${
+                currentStep === step 
+                  ? 'bg-gradient-to-r from-brand to-brand-light text-white' 
+                  : currentStep > step 
+                    ? 'bg-green-50 text-green-600 border border-green-200' 
+                    : 'bg-gray-100 text-gray-400'
+              }`}
+              animate={{
+                scale: currentStep === step ? [1, 1.1, 1] : 1,
+                transition: { duration: 0.3, repeat: currentStep === step ? Infinity : 0, repeatDelay: 3 }
+              }}
+            >
+              {currentStep > step ? (
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                step
+              )}
+            </motion.div>
+            <span className="text-[10px] hidden md:block">
+              {step === 1 && 'التخصص'}
+              {step === 2 && 'الطبيب'}
+              {step === 3 && 'الموعد'}
+              {step === 4 && 'البيانات'}
+              {step === 5 && 'التأكيد'}
+            </span>
+          </div>
+        ))}
+      </div>
+      
+      {/* Main content area with smoother transitions */}
       <div className="p-4 md:p-6">
         <AnimatePresence mode="wait">
           {currentStep === 1 && (
@@ -159,8 +208,9 @@ const BookingWizardContainer = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
+              className="min-h-[300px]"
             >
-              {/* Full width specialty selection */}
+              {/* Specialty selection */}
               <SpecialtySelection
                 selectedSpecialtyId={formData.specialty_id}
                 onSelectSpecialty={handleSpecialtySelect}
@@ -176,8 +226,9 @@ const BookingWizardContainer = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
+              className="min-h-[300px]"
             >
-              {/* Doctor selection as its own step */}
+              {/* Doctor selection */}
               <DoctorSelection
                 specialtyId={formData.specialty_id}
                 selectedDoctorId={formData.doctor_id}
@@ -194,6 +245,7 @@ const BookingWizardContainer = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
+              className="min-h-[300px]"
             >
               <AppointmentSelection
                 doctorId={formData.doctor_id}
@@ -213,6 +265,7 @@ const BookingWizardContainer = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
+              className="min-h-[300px]"
             >
               <ContactInfoForm
                 doctorName={selectedDoctor?.name || ''}
@@ -236,6 +289,7 @@ const BookingWizardContainer = () => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
+              className="min-h-[300px]"
             >
               <BookingConfirmation
                 formData={formData}
@@ -249,32 +303,33 @@ const BookingWizardContainer = () => {
         </AnimatePresence>
       </div>
       
-      {/* Navigation buttons */}
-      <div className="p-4 border-t bg-gray-50 flex justify-between">
-        {currentStep > 1 && (
+      {/* Navigation buttons with enhanced design */}
+      <div className="p-4 border-t bg-gradient-to-b from-gray-50 to-gray-100 flex justify-between">
+        {currentStep > 1 ? (
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className="px-6 py-2.5 border border-gray-300 rounded-lg flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-100 transition-colors"
+            className="px-6 py-2.5 border border-gray-300 rounded-lg flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-100 transition-colors shadow-sm"
             onClick={goToPrevStep}
+            aria-label="السابق"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 rtl:transform rtl:rotate-180" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
+            <ChevronRight className="h-5 w-5 rtl:transform rtl:rotate-180" />
             السابق
           </motion.button>
+        ) : (
+          <div></div> // Empty div for layout
         )}
         
         {currentStep < 5 && (
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className={`px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 text-white transition-colors ${
+            className={`px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 text-white transition-colors shadow-sm next-step-button ${
               (currentStep === 1 && !formData.specialty_id) || 
               (currentStep === 2 && !formData.doctor_id) || 
               (currentStep === 3 && (!formData.booking_day || !formData.booking_time))
                 ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-brand hover:bg-brand-dark'
+                : 'bg-gradient-to-r from-brand to-brand-light hover:opacity-90'
             }`}
             onClick={goToNextStep}
             disabled={
@@ -282,13 +337,21 @@ const BookingWizardContainer = () => {
               (currentStep === 2 && !formData.doctor_id) || 
               (currentStep === 3 && (!formData.booking_day || !formData.booking_time))
             }
+            aria-label="التالي"
           >
             التالي
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 rtl:transform rtl:rotate-180" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-            </svg>
+            <ChevronLeft className="h-5 w-5 rtl:transform rtl:rotate-180" />
           </motion.button>
         )}
+      </div>
+      
+      {/* Step summary - helps users understand where they are */}
+      <div className="bg-gray-50 p-3 border-t border-gray-200 text-center text-sm text-gray-500">
+        {currentStep === 1 && 'اختر التخصص المناسب لك من القائمة أعلاه'}
+        {currentStep === 2 && 'اختر الطبيب الذي تريد حجز موعد معه'}
+        {currentStep === 3 && 'حدد اليوم والوقت المناسب لموعدك'}
+        {currentStep === 4 && 'أدخل بياناتك الشخصية لإتمام الحجز'}
+        {currentStep === 5 && 'تأكد من بيانات الحجز وأكد الحجز'}
       </div>
     </div>
   );
