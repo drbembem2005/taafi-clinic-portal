@@ -1,4 +1,5 @@
 
+import React, { useEffect, useState } from 'react';
 import Index from '@/pages/Index';
 import About from '@/pages/About';
 import Booking from '@/pages/Booking';
@@ -9,7 +10,6 @@ import Specialties from '@/pages/Specialties';
 import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
 import { Toaster } from '@/components/ui/toaster';
-import { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import ScrollToTop from '@/components/utils/ScrollToTop';

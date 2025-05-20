@@ -38,7 +38,7 @@ const BookingConfirmation = ({
       // Set booking method
       const bookingData = {
         ...formData,
-        booking_method: 'online' as 'phone' | 'whatsapp' | 'online'
+        booking_method: 'online' as 'online' | 'whatsapp' | 'phone'
       };
       
       // Make API call to create booking
@@ -87,7 +87,7 @@ const BookingConfirmation = ({
       // Then try to save to database in the background
       const bookingData = {
         ...formData,
-        booking_method: 'whatsapp' as 'phone' | 'whatsapp' | 'online'
+        booking_method: 'whatsapp' as 'online' | 'whatsapp' | 'phone'
       };
       
       // Make API call to create booking
