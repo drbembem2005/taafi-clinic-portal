@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SpecialtySelection from './SpecialtySelection';
 import DoctorSelection from './DoctorSelection';
@@ -7,26 +7,11 @@ import AppointmentSelection from './AppointmentSelection';
 import ContactInfoForm from './ContactInfoForm';
 import BookingConfirmation from './BookingConfirmation';
 import BookingSuccess from './BookingSuccess';
+import BookingProgress from './BookingProgress';
 import { Specialty } from '@/services/specialtyService';
 import { Doctor } from '@/services/doctorService';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Check, 
-  UserCircle, 
-  CalendarClock, 
-  ClipboardPen, 
-  CheckCircle,
-  Info
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 
 export interface BookingFormData {
   user_name: string;
@@ -41,7 +26,7 @@ export interface BookingFormData {
 }
 
 const BookingWizardContainer = () => {
-  // State for wizard steps
+  // State for wizard steps - now we have 5 steps instead of 4
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [formData, setFormData] = useState<BookingFormData>({
     user_name: '',
@@ -59,40 +44,18 @@ const BookingWizardContainer = () => {
   const [bookingComplete, setBookingComplete] = useState<boolean>(false);
   const [bookingReference, setBookingReference] = useState<string>('');
   const [formattedDate, setFormattedDate] = useState<string>('');
-  const [stepTransition, setStepTransition] = useState<'next' | 'prev'>('next');
-
-  // Refs for scroll behavior
-  const wizardContainerRef = useRef<HTMLDivElement>(null);
-  
-  // Scroll to top when step changes
-  useEffect(() => {
-    if (wizardContainerRef.current) {
-      wizardContainerRef.current.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start'
-      });
-    }
-  }, [currentStep]);
 
   // Navigation methods
   const goToNextStep = () => {
-    setStepTransition('next');
     setCurrentStep(prev => prev + 1);
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const goToPrevStep = () => {
-    setStepTransition('prev');
     setCurrentStep(prev => Math.max(1, prev - 1));
-  };
-
-  // Go to a specific step
-  const goToStep = (step: number) => {
-    if (step < currentStep) {
-      setStepTransition('prev');
-    } else {
-      setStepTransition('next');
-    }
-    setCurrentStep(step);
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Handle specialty selection
@@ -104,7 +67,6 @@ const BookingWizardContainer = () => {
       doctor_id: null // Reset doctor when changing specialty
     }));
     setSelectedDoctor(null);
-    // Auto-navigation is handled inside SpecialtySelection component
   };
 
   // Handle doctor selection
@@ -169,46 +131,6 @@ const BookingWizardContainer = () => {
     setFormattedDate('');
   };
 
-  // Check if we can proceed to the next step
-  const canProceed = () => {
-    switch(currentStep) {
-      case 1:
-        return !!formData.specialty_id;
-      case 2:
-        return !!formData.doctor_id;
-      case 3:
-        return !!formData.booking_day && !!formData.booking_time;
-      case 4:
-        return !!formData.user_name && !!formData.user_phone;
-      default:
-        return true;
-    }
-  };
-
-  // Get step title
-  const getStepTitle = (step: number) => {
-    switch(step) {
-      case 1: return 'اختيار التخصص';
-      case 2: return 'اختيار الطبيب';
-      case 3: return 'تحديد الموعد';
-      case 4: return 'بيانات المريض';
-      case 5: return 'تأكيد الحجز';
-      default: return '';
-    }
-  };
-
-  // Get step icon
-  const getStepIcon = (step: number) => {
-    switch(step) {
-      case 1: return <UserCircle className="w-5 h-5" />;
-      case 2: return <UserCircle className="w-5 h-5" />;
-      case 3: return <CalendarClock className="w-5 h-5" />;
-      case 4: return <ClipboardPen className="w-5 h-5" />;
-      case 5: return <CheckCircle className="w-5 h-5" />;
-      default: return null;
-    }
-  };
-
   // If booking is complete, show success screen
   if (bookingComplete) {
     return (
@@ -224,319 +146,213 @@ const BookingWizardContainer = () => {
     );
   }
 
-  // Transition variants for the main content
-  const contentVariants = {
-    hidden: (direction: string) => ({
-      x: direction === 'next' ? 50 : -50,
-      opacity: 0
-    }),
-    visible: {
-      x: 0,
-      opacity: 1,
-      transition: { duration: 0.3 }
-    },
-    exit: (direction: string) => ({
-      x: direction === 'next' ? -50 : 50,
-      opacity: 0,
-      transition: { duration: 0.3 }
-    })
-  };
-
+  // More modern and compact container design
   return (
-    <div ref={wizardContainerRef} className="mt-4 mb-12">
-      {/* Booking Summary */}
-      {(selectedSpecialty || selectedDoctor || formData.booking_day) && (
+    <div className="bg-gradient-to-b from-white to-gray-50 rounded-xl shadow-md overflow-hidden border border-gray-100">
+      {/* Progress bar with enhanced visuals */}
+      <div className="relative h-1 bg-gray-200">
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-6"
-        >
-          <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 border-0 rounded-xl overflow-hidden shadow-md">
-            <CardContent className="p-4">
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 rounded-full bg-brand/10 text-brand flex items-center justify-center">
-                    <Info className="w-4 h-4" />
-                  </div>
-                  <span className="ml-2 text-sm font-medium text-gray-700">ملخص الحجز:</span>
-                </div>
-                
-                {selectedSpecialty && (
-                  <div className="bg-white/80 px-3 py-1.5 rounded-full text-sm shadow-sm border border-gray-100">
-                    <span className="text-gray-500 ml-1">التخصص:</span>
-                    <span className="font-medium text-gray-800">{selectedSpecialty.name}</span>
-                  </div>
-                )}
-                
-                {selectedDoctor && (
-                  <div className="bg-white/80 px-3 py-1.5 rounded-full text-sm shadow-sm border border-gray-100">
-                    <span className="text-gray-500 ml-1">الطبيب:</span>
-                    <span className="font-medium text-gray-800">{selectedDoctor.name}</span>
-                  </div>
-                )}
-                
-                {formData.booking_day && formattedDate && (
-                  <div className="bg-white/80 px-3 py-1.5 rounded-full text-sm shadow-sm border border-gray-100">
-                    <span className="text-gray-500 ml-1">الموعد:</span>
-                    <span className="font-medium text-gray-800">
-                      {formattedDate} - {formData.booking_time}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      )}
-      
-      {/* Modern Step Indicator */}
-      <div className="mb-8">
-        <div className="hidden md:flex justify-between items-center relative">
-          {/* Progress bar */}
-          <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 -translate-y-1/2 z-0">
-            <motion.div 
-              className="h-full bg-brand rounded-full"
-              initial={{ width: 0 }}
-              animate={{ 
-                width: `${((currentStep - 1) / 4) * 100}%`
-              }}
-              transition={{ duration: 0.5 }}
-            />
-          </div>
-          
-          {/* Step indicators */}
-          {[1, 2, 3, 4, 5].map((step) => (
-            <TooltipProvider key={step} delayDuration={300}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <motion.button
-                    type="button"
-                    onClick={() => step < currentStep && goToStep(step)}
-                    className={`
-                      relative z-10 w-10 h-10 rounded-full flex items-center justify-center
-                      transition-all duration-300
-                      ${step < currentStep 
-                        ? 'bg-brand text-white cursor-pointer hover:shadow-md' 
-                        : step === currentStep
-                          ? 'bg-brand text-white ring-4 ring-brand/20' 
-                          : 'bg-white border-2 border-gray-300 text-gray-400'}
-                    `}
-                    whileHover={step < currentStep ? { scale: 1.1 } : {}}
-                    whileTap={step < currentStep ? { scale: 0.95 } : {}}
-                  >
-                    {step < currentStep ? (
-                      <Check className="w-5 h-5" />
-                    ) : (
-                      <span>{step}</span>
-                    )}
-                    
-                    <motion.div
-                      initial={{ scale: 1 }}
-                      animate={step === currentStep ? { 
-                        scale: [1, 1.2, 1], 
-                        transition: { 
-                          repeat: Infinity, 
-                          repeatType: 'loop', 
-                          duration: 2,
-                          repeatDelay: 1
-                        } 
-                      } : { scale: 1 }}
-                      className={`
-                        absolute w-full h-full rounded-full 
-                        ${step === currentStep ? 'bg-brand/30' : 'bg-transparent'} 
-                        -z-10
-                      `}
-                    />
-                  </motion.button>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  <p className="text-xs">
-                    {getStepTitle(step)}
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ))}
-        </div>
-        
-        {/* Mobile Steps Indicator */}
-        <div className="md:hidden">
-          <div className="grid grid-cols-5 gap-1">
-            {[1, 2, 3, 4, 5].map((step) => (
-              <div 
-                key={step}
-                className={`h-1.5 rounded-full ${
-                  step <= currentStep ? 'bg-brand' : 'bg-gray-200'
-                }`}
-              />
-            ))}
-          </div>
-          <div className="flex items-center justify-between mt-3 px-2">
-            <p className="text-sm font-medium text-gray-700">الخطوة {currentStep} من 5</p>
-            <p className="text-sm text-gray-500">{getStepTitle(currentStep)}</p>
-          </div>
-        </div>
+          className="h-full bg-gradient-to-r from-brand to-brand-light"
+          initial={{ width: 0 }}
+          animate={{ width: `${(currentStep / 5) * 100}%` }}
+          transition={{ duration: 0.3 }}
+        />
       </div>
       
-      {/* Main content with smooth transitions */}
-      <Card className="shadow-lg border-0 rounded-xl overflow-hidden">
-        <CardContent className="p-6">
-          <AnimatePresence mode="wait" custom={stepTransition}>
-            <motion.div
-              key={currentStep}
-              custom={stepTransition}
-              variants={contentVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="min-h-[380px]"
+      {/* Step indicators with improved styling */}
+      <div className="flex justify-between px-4 pt-4 pb-1">
+        {[1, 2, 3, 4, 5].map((step) => (
+          <div 
+            key={step} 
+            className={`flex flex-col items-center ${currentStep >= step ? 'text-brand' : 'text-gray-400'}`}
+          >
+            <motion.div 
+              className={`h-7 w-7 rounded-full flex items-center justify-center text-xs mb-1 transition-colors ${
+                currentStep === step 
+                  ? 'bg-gradient-to-r from-brand to-brand-light text-white' 
+                  : currentStep > step 
+                    ? 'bg-green-50 text-green-600 border border-green-200' 
+                    : 'bg-gray-100 text-gray-400'
+              }`}
+              animate={{
+                scale: currentStep === step ? [1, 1.1, 1] : 1,
+                transition: { duration: 0.3, repeat: currentStep === step ? Infinity : 0, repeatDelay: 3 }
+              }}
             >
-              {currentStep === 1 && (
-                <>
-                  <h2 className="text-xl font-bold mb-6 flex items-center">
-                    <UserCircle className="w-6 h-6 text-brand ml-2" />
-                    اختر التخصص المناسب
-                  </h2>
-                  <SpecialtySelection
-                    selectedSpecialtyId={formData.specialty_id}
-                    onSelectSpecialty={handleSpecialtySelect}
-                    className="w-full"
-                  />
-                </>
-              )}
-
-              {currentStep === 2 && (
-                <>
-                  <h2 className="text-xl font-bold mb-6 flex items-center">
-                    <UserCircle className="w-6 h-6 text-brand ml-2" />
-                    اختر الطبيب المناسب
-                  </h2>
-                  <DoctorSelection
-                    specialtyId={formData.specialty_id}
-                    selectedDoctorId={formData.doctor_id}
-                    onSelectDoctor={handleDoctorSelect}
-                    className="w-full"
-                  />
-                </>
-              )}
-
-              {currentStep === 3 && (
-                <>
-                  <h2 className="text-xl font-bold mb-6 flex items-center">
-                    <CalendarClock className="w-6 h-6 text-brand ml-2" />
-                    اختر موعد الكشف
-                  </h2>
-                  <AppointmentSelection
-                    doctorId={formData.doctor_id}
-                    doctorName={selectedDoctor?.name || ''}
-                    selectedDay={formData.booking_day}
-                    selectedTime={formData.booking_time}
-                    onSelectDateTime={handleAppointmentSelect}
-                    onUpdateFormattedDate={setFormattedDate}
-                  />
-                </>
-              )}
-
-              {currentStep === 4 && (
-                <>
-                  <h2 className="text-xl font-bold mb-6 flex items-center">
-                    <ClipboardPen className="w-6 h-6 text-brand ml-2" />
-                    أدخل بيانات المريض
-                  </h2>
-                  <ContactInfoForm
-                    doctorName={selectedDoctor?.name || ''}
-                    appointmentDate={formattedDate}
-                    appointmentTime={formData.booking_time}
-                    initialValues={{
-                      name: formData.user_name,
-                      phone: formData.user_phone,
-                      email: formData.user_email || '',
-                      notes: formData.notes || ''
-                    }}
-                    onUpdateContactInfo={handleContactInfoUpdate}
-                  />
-                </>
-              )}
-
-              {currentStep === 5 && (
-                <>
-                  <h2 className="text-xl font-bold mb-6 flex items-center">
-                    <CheckCircle className="w-6 h-6 text-brand ml-2" />
-                    تأكيد الحجز
-                  </h2>
-                  <BookingConfirmation
-                    formData={formData}
-                    doctorName={selectedDoctor?.name || ''}
-                    specialtyName={selectedSpecialty?.name || ''}
-                    formattedDate={formattedDate}
-                    onBookingSuccess={handleBookingSuccess}
-                  />
-                </>
+              {currentStep > step ? (
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                step
               )}
             </motion.div>
-          </AnimatePresence>
-        </CardContent>
-      </Card>
-      
-      {/* Navigation buttons with improved UX */}
-      <div className="flex justify-between mt-6">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: currentStep > 1 ? 1 : 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          {currentStep > 1 && (
-            <Button
-              variant="outline"
-              onClick={goToPrevStep}
-              className="flex items-center gap-2 px-6 py-2 rounded-xl border-2 border-gray-300 text-gray-700 hover:bg-gray-50"
-            >
-              <ChevronRight className="h-5 w-5" />
-              السابق
-            </Button>
-          )}
-        </motion.div>
-        
-        <motion.div
-          whileHover={canProceed() ? { scale: 1.03 } : {}}
-          whileTap={canProceed() ? { scale: 0.97 } : {}}
-        >
-          {currentStep < 5 ? (
-            <Button
-              onClick={goToNextStep}
-              disabled={!canProceed()}
-              className={`
-                flex items-center gap-2 px-6 py-2 rounded-xl shadow-md next-step-button
-                ${canProceed() 
-                  ? 'bg-gradient-to-r from-brand to-brand-light text-white hover:opacity-90' 
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }
-              `}
-              aria-label="التالي"
-            >
-              التالي
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-          ) : null}
-        </motion.div>
+            <span className="text-[10px] hidden md:block">
+              {step === 1 && 'التخصص'}
+              {step === 2 && 'الطبيب'}
+              {step === 3 && 'الموعد'}
+              {step === 4 && 'البيانات'}
+              {step === 5 && 'التأكيد'}
+            </span>
+          </div>
+        ))}
       </div>
       
-      {/* Helper text based on current step */}
-      <motion.div 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="text-center mt-6"
-      >
-        <p className="text-sm text-gray-500">
-          {currentStep === 1 && 'اختر التخصص المناسب لحالتك الطبية'}
-          {currentStep === 2 && 'اختر الطبيب المناسب من قائمة الأطباء المتخصصين'}
-          {currentStep === 3 && 'اختر يوم وساعة الموعد المناسبة لك'}
-          {currentStep === 4 && 'أدخل بياناتك الشخصية لإكمال عملية الحجز'}
-          {currentStep === 5 && 'يمكنك الآن تأكيد الحجز إما عبر الموقع أو عبر واتساب'}
-        </p>
-      </motion.div>
+      {/* Main content area with smoother transitions */}
+      <div className="p-4 md:p-6">
+        <AnimatePresence mode="wait">
+          {currentStep === 1 && (
+            <motion.div
+              key="step1"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="min-h-[300px]"
+            >
+              {/* Specialty selection */}
+              <SpecialtySelection
+                selectedSpecialtyId={formData.specialty_id}
+                onSelectSpecialty={handleSpecialtySelect}
+                className="w-full"
+              />
+            </motion.div>
+          )}
+
+          {currentStep === 2 && (
+            <motion.div
+              key="step2"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="min-h-[300px]"
+            >
+              {/* Doctor selection */}
+              <DoctorSelection
+                specialtyId={formData.specialty_id}
+                selectedDoctorId={formData.doctor_id}
+                onSelectDoctor={handleDoctorSelect}
+                className="w-full"
+              />
+            </motion.div>
+          )}
+
+          {currentStep === 3 && (
+            <motion.div
+              key="step3"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="min-h-[300px]"
+            >
+              <AppointmentSelection
+                doctorId={formData.doctor_id}
+                doctorName={selectedDoctor?.name || ''}
+                selectedDay={formData.booking_day}
+                selectedTime={formData.booking_time}
+                onSelectDateTime={handleAppointmentSelect}
+                onUpdateFormattedDate={setFormattedDate}
+              />
+            </motion.div>
+          )}
+
+          {currentStep === 4 && (
+            <motion.div
+              key="step4"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="min-h-[300px]"
+            >
+              <ContactInfoForm
+                doctorName={selectedDoctor?.name || ''}
+                appointmentDate={formattedDate}
+                appointmentTime={formData.booking_time}
+                initialValues={{
+                  name: formData.user_name,
+                  phone: formData.user_phone,
+                  email: formData.user_email || '',
+                  notes: formData.notes || ''
+                }}
+                onUpdateContactInfo={handleContactInfoUpdate}
+              />
+            </motion.div>
+          )}
+
+          {currentStep === 5 && (
+            <motion.div
+              key="step5"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="min-h-[300px]"
+            >
+              <BookingConfirmation
+                formData={formData}
+                doctorName={selectedDoctor?.name || ''}
+                specialtyName={selectedSpecialty?.name || ''}
+                formattedDate={formattedDate}
+                onBookingSuccess={handleBookingSuccess}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+      
+      {/* Navigation buttons with enhanced design */}
+      <div className="p-4 border-t bg-gradient-to-b from-gray-50 to-gray-100 flex justify-between">
+        {currentStep > 1 ? (
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className="px-6 py-2.5 border border-gray-300 rounded-lg flex items-center justify-center gap-2 text-gray-700 hover:bg-gray-100 transition-colors shadow-sm"
+            onClick={goToPrevStep}
+            aria-label="السابق"
+          >
+            <ChevronRight className="h-5 w-5 rtl:transform rtl:rotate-180" />
+            السابق
+          </motion.button>
+        ) : (
+          <div></div> // Empty div for layout
+        )}
+        
+        {currentStep < 5 && (
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className={`px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 text-white transition-colors shadow-sm next-step-button ${
+              (currentStep === 1 && !formData.specialty_id) || 
+              (currentStep === 2 && !formData.doctor_id) || 
+              (currentStep === 3 && (!formData.booking_day || !formData.booking_time))
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-brand to-brand-light hover:opacity-90'
+            }`}
+            onClick={goToNextStep}
+            disabled={
+              (currentStep === 1 && !formData.specialty_id) || 
+              (currentStep === 2 && !formData.doctor_id) || 
+              (currentStep === 3 && (!formData.booking_day || !formData.booking_time))
+            }
+            aria-label="التالي"
+          >
+            التالي
+            <ChevronLeft className="h-5 w-5 rtl:transform rtl:rotate-180" />
+          </motion.button>
+        )}
+      </div>
+      
+      {/* Step summary - helps users understand where they are */}
+      <div className="bg-gray-50 p-3 border-t border-gray-200 text-center text-sm text-gray-500">
+        {currentStep === 1 && 'اختر التخصص المناسب لك من القائمة أعلاه'}
+        {currentStep === 2 && 'اختر الطبيب الذي تريد حجز موعد معه'}
+        {currentStep === 3 && 'حدد اليوم والوقت المناسب لموعدك'}
+        {currentStep === 4 && 'أدخل بياناتك الشخصية لإتمام الحجز'}
+        {currentStep === 5 && 'تأكد من بيانات الحجز وأكد الحجز'}
+      </div>
     </div>
   );
 };
