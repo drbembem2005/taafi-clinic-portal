@@ -7,9 +7,11 @@ import {
   User, 
   Stethoscope, 
   CheckCircle, 
-  FileText 
+  FileText,
+  ArrowRight
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
 
 const steps = [
   {
@@ -54,163 +56,129 @@ const BookingSteps = () => {
   const [hoveredStep, setHoveredStep] = useState<number | null>(null);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
 
-  // Colors for step cards
-  const getStepCardStyles = (index: number) => {
-    const colors = {
-      blue: 'from-blue-50 to-blue-100 hover:shadow-blue-100',
-      green: 'from-green-50 to-green-100 hover:shadow-green-100',
-      purple: 'from-purple-50 to-purple-100 hover:shadow-purple-100',
-      pink: 'from-pink-50 to-pink-100 hover:shadow-pink-100',
-      amber: 'from-amber-50 to-amber-100 hover:shadow-amber-100'
-    };
-
-    const currentColor = steps[index]?.color as keyof typeof colors || 'blue';
-    return colors[currentColor];
-  };
-
   return (
     <section className="py-12 md:py-16 bg-gradient-to-b from-white to-gray-50">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">خطوات الحجز البسيطة</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">احجز موعدك بكل سهولة في خمس خطوات فقط</p>
-          <div className="w-24 h-1 bg-brand mx-auto mt-4"></div>
+        <div className="text-center mb-12">
+          <motion.h2 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-3xl md:text-4xl font-bold text-gray-800 mb-4"
+          >
+            خطوات الحجز البسيطة
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-gray-600 max-w-2xl mx-auto"
+          >
+            احجز موعدك بكل سهولة في خمس خطوات فقط
+          </motion.p>
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={{ width: "5rem" }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="h-1.5 bg-gradient-to-r from-brand to-brand-light mx-auto mt-6 rounded-full"
+          />
         </div>
 
-        {/* Modern Card-based Steps for Desktop */}
-        <div className="hidden md:flex flex-wrap justify-center gap-4 max-w-5xl mx-auto mb-10">
-          {steps.map((step, index) => (
-            <motion.div
-              key={step.id}
-              className={`relative flex-grow max-w-[230px] rounded-xl overflow-hidden cursor-pointer transition-all shadow-md hover:shadow-lg ${
-                activeStep === index ? 'ring-2 ring-brand' : ''
-              }`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ 
-                opacity: 1, 
-                y: 0,
-                transition: { delay: index * 0.1 }
-              }}
-              whileHover={{ 
-                y: -8,
-                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
-                transition: { duration: 0.3 } 
-              }}
-              onClick={() => setActiveStep(index)}
-              onHoverStart={() => setHoveredStep(index)}
-              onHoverEnd={() => setHoveredStep(null)}
-            >
-              <div className={`
-                h-full flex flex-col items-center text-center p-4 bg-gradient-to-br
-                ${getStepCardStyles(index)}
-              `}>
-                <div className={`
-                  w-14 h-14 rounded-full flex items-center justify-center mb-3 
-                  ${activeStep >= index ? 'bg-brand text-white' : 'bg-white text-gray-500'}
-                  shadow-md transition-all duration-300
-                `}>
-                  {activeStep > index ? (
-                    <CheckCircle className="w-7 h-7" />
-                  ) : step.icon}
-                </div>
-                
-                <h3 className={`text-lg font-bold mb-1 ${activeStep === index ? 'text-brand' : 'text-gray-800'}`}>
-                  {step.title}
-                </h3>
-                
-                <p className="text-gray-600 text-xs">
-                  {step.description}
-                </p>
-                
-                {/* Step Number Indicator */}
-                <div className={`
-                  absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold
-                  ${activeStep >= index ? 'bg-brand text-white' : 'bg-white text-gray-500 border border-gray-200'}
-                `}>
-                  {step.id}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Mobile Timeline Steps - Modernized */}
-        <div className="md:hidden space-y-3 mb-8">
-          {steps.map((step, index) => (
-            <motion.div
-              key={step.id}
-              className={`rounded-lg overflow-hidden border ${
-                activeStep === index ? 'border-brand shadow-md' : 'border-gray-200'
-              }`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1, transition: { delay: index * 0.1 } }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <div 
-                className={`flex items-center p-3 ${
-                  activeStep === index ? 'bg-brand/5' : 'bg-white'
-                } cursor-pointer`}
-                onClick={() => setActiveStep(index)}
+        {/* Modern horizontal timeline for desktop */}
+        <div className="hidden lg:block mb-16 relative">
+          {/* Progress bar */}
+          <div className="absolute top-16 left-0 right-0 h-1 bg-gray-200">
+            <motion.div 
+              className="h-full bg-brand rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: hoveredStep !== null ? `${(hoveredStep / 4) * 100}%` : "20%" }}
+              transition={{ duration: 0.5 }}
+            />
+          </div>
+          
+          <div className="flex justify-between">
+            {steps.map((step, index) => (
+              <motion.div
+                key={step.id}
+                className="text-center relative"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.2 }}
+                onHoverStart={() => setHoveredStep(index)}
+                onHoverEnd={() => setHoveredStep(null)}
               >
-                <div className={`
-                  w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0
-                  ${activeStep >= index ? 'bg-brand text-white' : 'bg-gray-100 text-gray-500'}
-                  shadow-sm
-                `}>
-                  {activeStep > index ? <CheckCircle className="w-5 h-5" /> : step.icon}
-                </div>
+                <motion.div 
+                  className={`
+                    w-12 h-12 rounded-full mx-auto z-10 relative 
+                    flex items-center justify-center mb-3 
+                    ${hoveredStep === index ? 'bg-brand text-white' : 'bg-white text-gray-600 border-2 border-gray-200'}
+                    transition-all duration-300
+                  `}
+                  whileHover={{ scale: 1.1, boxShadow: "0px 4px 15px rgba(0, 0, 0, 0.1)" }}
+                >
+                  {step.icon}
+                </motion.div>
                 
-                <div className="flex-grow">
-                  <h3 className={`font-bold text-sm ${activeStep === index ? 'text-brand' : 'text-gray-800'}`}>
-                    {step.title}
-                  </h3>
+                <h3 className="text-lg font-bold mb-1 text-gray-800">{step.title}</h3>
+                <p className="text-sm text-gray-600 max-w-[200px] mx-auto">{step.description}</p>
+                
+                <motion.div 
+                  className={`absolute top-6 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full z-20 
+                  ${hoveredStep === index ? 'bg-brand' : 'bg-white border-2 border-gray-200'}`}
+                  animate={hoveredStep === index ? { 
+                    scale: [1, 1.2, 1], 
+                    transition: { repeat: Infinity, duration: 1.5 } 
+                  } : {}}
+                />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Card-based steps for tablets and mobile */}
+        <div className="lg:hidden space-y-4 mb-12">
+          {steps.map((step, index) => (
+            <Card 
+              key={step.id}
+              className="overflow-hidden border-0 shadow-md"
+            >
+              <CardContent className="p-0">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -3 }}
+                  className="flex items-center"
+                >
+                  <div className={`
+                    w-16 h-16 flex items-center justify-center flex-shrink-0
+                    bg-gradient-to-br from-brand to-brand-light text-white
+                  `}>
+                    {step.icon}
+                  </div>
                   
-                  <p className="text-xs text-gray-600">
-                    {step.description}
-                  </p>
-                </div>
-
-                <div className={`
-                  w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mx-2
-                  ${activeStep >= index ? 'bg-brand text-white' : 'bg-gray-100 text-gray-500'}
-                `}>
-                  {step.id}
-                </div>
-              </div>
-              
-              <AnimatePresence>
-                {activeStep === index && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="overflow-hidden"
-                  >
-                    <div className={`p-3 bg-${step.color}-50 border-t border-${step.color}-100`}>
-                      <div className="flex items-center justify-center">
-                        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm mr-3">
-                          {step.icon}
-                        </div>
-                        
-                        <div className="text-xs text-gray-600">
-                          {index === 0 && 'اختر من بين مجموعة متنوعة من التخصصات الطبية المتاحة لدينا.'}
-                          {index === 1 && 'اختر طبيبك المفضل من قائمة الأطباء المتخصصين ذوي الخبرة.'}
-                          {index === 2 && 'اختر موعدًا يناسب جدولك من الأوقات المتاحة.'}
-                          {index === 3 && 'أدخل بياناتك الشخصية لإتمام حجزك.'}
-                          {index === 4 && 'أكد حجزك إما عبر الموقع أو من خلال واتساب.'}
-                        </div>
+                  <div className="p-4 flex-grow">
+                    <div className="flex items-center mb-2">
+                      <div className="w-6 h-6 bg-brand/10 text-brand rounded-full flex items-center justify-center text-xs ml-2">
+                        {step.id}
                       </div>
+                      <h3 className="font-bold text-gray-800">{step.title}</h3>
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
+                    <p className="text-sm text-gray-600">{step.description}</p>
+                  </div>
+                </motion.div>
+              </CardContent>
+            </Card>
           ))}
         </div>
 
-        {/* Improved call to action */}
-        <div className="text-center mt-8">
+        {/* Call to action */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="text-center"
+        >
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -219,23 +187,32 @@ const BookingSteps = () => {
           >
             <Button
               size="lg"
-              className="bg-gradient-to-r from-brand to-brand-light hover:opacity-95 text-white px-8 py-6 text-lg rounded-xl shadow-lg shadow-brand/20 transition-all hover:shadow-brand/30"
+              className="bg-gradient-to-r from-brand to-brand-light hover:opacity-90 text-white px-8 py-6 text-lg rounded-xl shadow-xl hover:shadow-brand/20"
               asChild
             >
-              <Link to="/booking">
+              <Link to="/booking" className="flex items-center">
                 احجز موعدك الآن
-                <motion.span
+                <motion.div
                   className="inline-block mr-2"
                   animate={{ x: isButtonHovered ? -5 : 0 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
-                  ←
-                </motion.span>
+                  <ArrowRight className="h-5 w-5" />
+                </motion.div>
               </Link>
             </Button>
           </motion.div>
-          <p className="text-gray-500 mt-3 text-sm">لا يلزم التسجيل، احجز في أقل من دقيقتين</p>
-        </div>
+          
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+            className="text-gray-500 mt-4 text-sm flex items-center justify-center"
+          >
+            <CheckCircle className="h-4 w-4 ml-1.5 text-green-500" />
+            لا يلزم التسجيل، احجز في أقل من دقيقتين
+          </motion.p>
+        </motion.div>
       </div>
     </section>
   );
