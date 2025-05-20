@@ -67,7 +67,7 @@ const BookingConfirmation = ({
     }
   };
   
-  // Handle WhatsApp booking
+  // Handle WhatsApp booking - fixed to ensure WhatsApp actually opens
   const handleWhatsAppBooking = async () => {
     setSubmitting(true);
     try {
@@ -83,20 +83,23 @@ const BookingConfirmation = ({
       // Generate a reference ID using the booking ID
       const referenceId = `REF-${response.id.substring(0, 8)}`;
       
-      // Only open WhatsApp after successful database insertion
-      openWhatsAppWithBookingDetails({
-        doctorName,
-        specialtyName,
-        date: formattedDate,
-        time: formData.booking_time,
-        userName: formData.user_name,
-        phone: formData.user_phone,
-        email: formData.user_email,
-        notes: formData.notes
-      });
-      
       // Notify parent component of success with booking reference
       onBookingSuccess(referenceId);
+      
+      // Open WhatsApp after successful database insertion
+      // Using setTimeout to ensure the state updates before opening a new window
+      setTimeout(() => {
+        openWhatsAppWithBookingDetails({
+          doctorName,
+          specialtyName,
+          date: formattedDate,
+          time: formData.booking_time,
+          userName: formData.user_name,
+          phone: formData.user_phone,
+          email: formData.user_email,
+          notes: formData.notes
+        });
+      }, 300);
     } catch (error) {
       console.error('WhatsApp booking error:', error);
       toast({
