@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
@@ -109,7 +108,7 @@ const BookingConfirmation = ({
       toast({
         title: "تنبيه",
         description: "تم فتح الواتساب، لكن هناك مشكلة في حفظ البيانات. لا تقلق، يمكنك متابعة الحجز عبر الواتساب.",
-        variant: "warning",
+        variant: "default",
       });
     } finally {
       setSubmitting(false);
