@@ -10,7 +10,7 @@ import {
   CheckCircle2 
 } from 'lucide-react';
 import { BookingFormData } from './BookingWizardContainer';
-import { openWhatsAppWithBookingDetails } from '@/services/bookingService';
+import { createBooking, openWhatsAppWithBookingDetails } from '@/services/bookingService';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 
@@ -35,14 +35,23 @@ const BookingConfirmation = ({
   const handleDirectBooking = async () => {
     setSubmitting(true);
     try {
+      // Set booking method
+      const bookingData = {
+        ...formData,
+        booking_method: 'online' as 'phone' | 'whatsapp' | 'online'
+      };
+      
+      // Make API call to create booking
+      const response = await createBooking(bookingData);
+      
       // Show success message
       toast({
         title: "تم إرسال طلب الحجز",
         description: "سيتم التواصل معك قريبًا لتأكيد الحجز.",
       });
       
-      // Generate a reference ID
-      const referenceId = `REF-${Date.now()}`;
+      // Generate a reference ID using the booking ID
+      const referenceId = `REF-${response.id.substring(0, 8)}`;
       
       // Notify parent component of success with booking reference
       onBookingSuccess(referenceId);
@@ -59,9 +68,22 @@ const BookingConfirmation = ({
   };
   
   // Handle WhatsApp booking
-  const handleWhatsAppBooking = () => {
+  const handleWhatsAppBooking = async () => {
+    setSubmitting(true);
     try {
-      // Open WhatsApp with booking details
+      // Set booking method
+      const bookingData = {
+        ...formData,
+        booking_method: 'whatsapp' as 'phone' | 'whatsapp' | 'online'
+      };
+      
+      // Make API call to create booking
+      const response = await createBooking(bookingData);
+      
+      // Generate a reference ID using the booking ID
+      const referenceId = `REF-${response.id.substring(0, 8)}`;
+      
+      // Only open WhatsApp after successful database insertion
       openWhatsAppWithBookingDetails({
         doctorName,
         specialtyName,
@@ -73,18 +95,17 @@ const BookingConfirmation = ({
         notes: formData.notes
       });
       
-      // Generate a reference ID
-      const referenceId = `REF-${Date.now()}`;
-      
       // Notify parent component of success with booking reference
       onBookingSuccess(referenceId);
     } catch (error) {
       console.error('WhatsApp booking error:', error);
       toast({
-        title: "فشل فتح واتساب",
-        description: "حدث خطأ أثناء محاولة فتح واتساب. يرجى المحاولة مرة أخرى.",
+        title: "فشل الحجز",
+        description: "حدث خطأ أثناء إرسال طلب الحجز. يرجى المحاولة مرة أخرى.",
         variant: "destructive",
       });
+    } finally {
+      setSubmitting(false);
     }
   };
   
