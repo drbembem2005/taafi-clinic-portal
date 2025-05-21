@@ -5,7 +5,7 @@ import type { Database } from './types';
 
 // Use the URL that's configured in other parts of the application
 const SUPABASE_URL = "https://supabase.taafe-clinics.com/";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzQ3Njg4NDAwLCJleHAiOjE5MDU0NTQ4MDB9.lHxZy4405K0T0PHc6C96Z257qBUHM1Npn990gGtjX6A";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzQxNTAwMDAwLAogICJleHAiOiAxODk5MjY2NDAwCn0.muKe0Nrvkf5bMyLoFqAuFypRu3jHAcTYU08SYKrgRQo";
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
