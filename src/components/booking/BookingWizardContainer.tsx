@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SpecialtySelection from './SpecialtySelection';
@@ -15,7 +16,7 @@ import { Button } from '@/components/ui/button';
 export interface BookingFormData {
   user_name: string;
   user_phone: string;
-  user_email: null;
+  user_email: string | null;
   notes: string | null;
   specialty_id: number | null;
   doctor_id: number | null;
