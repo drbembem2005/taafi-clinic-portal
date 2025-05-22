@@ -22,13 +22,13 @@ const Booking = () => {
         </div>
       </section>
 
-      {/* Booking Wizard */}
+      {/* Booking Wizard - disable initial animation to prevent flashing */}
       <section className="py-6 md:py-12 bg-white">
         <div className="container mx-auto px-4">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 1, y: 0 }} 
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.2 }}
           >
             <BookingWizardContainer />
           </motion.div>

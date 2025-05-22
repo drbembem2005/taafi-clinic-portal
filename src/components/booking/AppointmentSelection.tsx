@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { CalendarDays, UserCheck } from 'lucide-react';
 import NextAvailableDaysPicker, { DayInfo } from './NextAvailableDaysPicker';
 
@@ -12,7 +12,8 @@ interface AppointmentSelectionProps {
   onUpdateFormattedDate: (formattedDate: string) => void;
 }
 
-const AppointmentSelection = ({
+// Using memo to prevent unnecessary re-renders
+const AppointmentSelection = memo(({
   doctorId,
   doctorName,
   selectedDay,
@@ -76,6 +77,9 @@ const AppointmentSelection = ({
       </div>
     </div>
   );
-};
+});
+
+// Display name for debugging
+AppointmentSelection.displayName = 'AppointmentSelection';
 
 export default AppointmentSelection;

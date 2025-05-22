@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, Clock } from 'lucide-react';
@@ -36,66 +36,68 @@ const NextAvailableDaysPicker = ({
   const [availableDays, setAvailableDays] = useState<DayInfo[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [selectedDayInfo, setSelectedDayInfo] = useState<DayInfo | null>(null);
-
-  useEffect(() => {
-    const fetchAvailableDays = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        if (!doctorId) {
-          setError('يرجى اختيار طبيب أولاً');
-          return;
-        }
-        
-        const nextAvailableDays = await getNextAvailableDays(doctorId);
-        console.log("NextAvailableDaysPicker received days:", nextAvailableDays);
-        
-        if (nextAvailableDays.length === 0) {
-          setError('لا توجد مواعيد متاحة لهذا الطبيب');
-        } else {
-          // Ensure we're working with valid Date objects and add uniqueId
-          const validatedDays = nextAvailableDays.map(day => {
-            // Make sure the date is a valid Date object
-            const validDate = day.date instanceof Date && !isNaN(day.date.getTime()) 
-              ? day.date 
-              : new Date(); // Default to current date if invalid
-            
-            // Create a unique ID using the date's timestamp
-            const uniqueId = `${day.dayCode}-${validDate.getTime()}`;
-              
-            return {
-              ...day,
-              date: validDate,
-              uniqueId // Add the unique ID
-            };
-          });
-          
-          setAvailableDays(validatedDays);
-          console.log("Available days set with uniqueIds:", validatedDays);
-          
-          // Find the previously selected day if it exists
-          if (selectedDay) {
-            // Now we need to match by uniqueId instead of just dayCode
-            const matchingDayInfo = validatedDays.find(d => d.uniqueId === selectedDay);
-            setSelectedDayInfo(matchingDayInfo || null);
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching available days:', err);
-        setError('حدث خطأ أثناء جلب المواعيد المتاحة');
-        toast({
-          title: "خطأ",
-          description: "حدث خطأ أثناء جلب المواعيد المتاحة",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
+  
+  // Memoize fetch function to prevent unnecessary re-renders
+  const fetchAvailableDays = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      if (!doctorId) {
+        setError('يرجى اختيار طبيب أولاً');
+        return;
       }
-    };
-
-    fetchAvailableDays();
+      
+      const nextAvailableDays = await getNextAvailableDays(doctorId);
+      console.log("NextAvailableDaysPicker received days:", nextAvailableDays);
+      
+      if (nextAvailableDays.length === 0) {
+        setError('لا توجد مواعيد متاحة لهذا الطبيب');
+      } else {
+        // Ensure we're working with valid Date objects and add uniqueId
+        const validatedDays = nextAvailableDays.map(day => {
+          // Make sure the date is a valid Date object
+          const validDate = day.date instanceof Date && !isNaN(day.date.getTime()) 
+            ? day.date 
+            : new Date(); // Default to current date if invalid
+          
+          // Create a unique ID using the date's timestamp
+          const uniqueId = `${day.dayCode}-${validDate.getTime()}`;
+            
+          return {
+            ...day,
+            date: validDate,
+            uniqueId // Add the unique ID
+          };
+        });
+        
+        setAvailableDays(validatedDays);
+        console.log("Available days set with uniqueIds:", validatedDays);
+        
+        // Find the previously selected day if it exists
+        if (selectedDay) {
+          // Now we need to match by uniqueId instead of just dayCode
+          const matchingDayInfo = validatedDays.find(d => d.uniqueId === selectedDay);
+          setSelectedDayInfo(matchingDayInfo || null);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching available days:', err);
+      setError('حدث خطأ أثناء جلب المواعيد المتاحة');
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء جلب المواعيد المتاحة",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   }, [doctorId, selectedDay]);
+
+  // Use effect with dependencies on doctorId only to prevent constant re-renders
+  useEffect(() => {
+    fetchAvailableDays();
+  }, [doctorId, fetchAvailableDays]);
 
   const handleSelectDateTime = (uniqueId: string, time: string, date: Date) => {
     // Format the date in a user-friendly way
@@ -179,7 +181,7 @@ const NextAvailableDaysPicker = ({
           
           return (
             <Card 
-              key={dayIndex} 
+              key={dayInfo.uniqueId} 
               className={`overflow-hidden transition-all hover:shadow-md cursor-pointer ${
                 isDaySelected ? 'border-brand ring-1 ring-brand shadow-md' : ''
               }`}
