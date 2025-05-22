@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -104,33 +105,56 @@ export function openWhatsAppWithBookingDetails(bookingDetails: {
   email?: string | null;
   notes?: string | null;
 }): boolean {
-  // Format the message based on available details
-  let message = `*طلب حجز موعد*\n`;
-  message += `الطبيب: ${bookingDetails.doctorName}\n`;
+  // Enhanced message format with emojis and better organization
+  let message = `🏥 *عيادات تعافي التخصصية - طلب حجز موعد* 🏥\n\n`;
+  
+  // Doctor information section
+  message += `👨‍⚕️ *معلومات الطبيب:*\n`;
+  message += `- الطبيب: ${bookingDetails.doctorName}\n`;
   
   if (bookingDetails.specialtyName) {
-    message += `التخصص: ${bookingDetails.specialtyName}\n`;
+    message += `- التخصص: ${bookingDetails.specialtyName}\n`;
   }
   
-  if (bookingDetails.date && bookingDetails.time) {
-    message += `التاريخ: ${bookingDetails.date} - ${bookingDetails.time}\n`;
+  message += `\n`;
+  
+  // Appointment details section
+  if (bookingDetails.date || bookingDetails.time) {
+    message += `🗓️ *تفاصيل الموعد:*\n`;
+    if (bookingDetails.date && bookingDetails.time) {
+      message += `- التاريخ والوقت: ${bookingDetails.date} - ${bookingDetails.time}\n`;
+    } else if (bookingDetails.date) {
+      message += `- التاريخ: ${bookingDetails.date}\n`;
+    } else if (bookingDetails.time) {
+      message += `- الوقت: ${bookingDetails.time}\n`;
+    }
+    message += `\n`;
   }
   
+  // Patient information section
+  message += `👤 *معلومات المريض:*\n`;
   if (bookingDetails.userName) {
-    message += `الاسم: ${bookingDetails.userName}\n`;
+    message += `- الاسم: ${bookingDetails.userName}\n`;
   }
   
   if (bookingDetails.phone) {
-    message += `رقم الهاتف: ${bookingDetails.phone}\n`;
+    message += `- رقم الهاتف: ${bookingDetails.phone}\n`;
   }
   
   if (bookingDetails.email) {
-    message += `البريد الإلكتروني: ${bookingDetails.email}\n`;
+    message += `- البريد الإلكتروني: ${bookingDetails.email}\n`;
   }
   
+  message += `\n`;
+  
+  // Notes section if available
   if (bookingDetails.notes) {
-    message += `ملاحظات: ${bookingDetails.notes}\n`;
+    message += `📝 *ملاحظات:*\n${bookingDetails.notes}\n\n`;
   }
+  
+  // Footer with clinic information
+  message += `------------------\n`;
+  message += `✨ نتطلع لزيارتكم! للاستفسار يرجى الاتصال على 01119007403 ✨`;
   
   // Encode the message for URL
   const encodedMessage = encodeURIComponent(message);
