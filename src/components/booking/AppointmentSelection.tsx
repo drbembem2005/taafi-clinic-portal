@@ -9,13 +9,6 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { getNextAvailableDays } from '@/services/doctorService';
 import { toast } from '@/hooks/use-toast';
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselPrevious,
-  CarouselNext
-} from '@/components/ui/carousel';
 
 export interface DayInfo {
   date: Date;
@@ -132,6 +125,14 @@ const AppointmentSelection = ({
   }
   
   // Loading state
+  if (loading) {
+    return (
+      <div className="space-y-3">
+        <div className="h-20 w-full bg-gray-100 animate-pulse rounded-lg"></div>
+        <div className="h-20 w-full bg-gray-100 animate-pulse rounded-lg"></div>
+      </div>
+    );
+  }
     
   // Error state
   if (error) {
@@ -193,22 +194,66 @@ const AppointmentSelection = ({
           <h3 className="font-medium text-gray-800 text-sm md:text-base">المواعيد المتاحة - {availableDays.length} أيام</h3>
         </div>
         
-        <div className="p-4">
-          {isMobile ? (
-            <MobileAppointmentView 
-              days={availableDays}
-              selectedDay={selectedDay}
-              selectedTime={selectedTime}
-              onSelect={handleSelectDateTime}
-            />
-          ) : (
-            <DesktopAppointmentView 
-              days={availableDays}
-              selectedDay={selectedDay}
-              selectedTime={selectedTime}
-              onSelect={handleSelectDateTime}
-            />
-          )}
+        <div className="p-3">
+          {/* Compact Day Selection Grid - Same for mobile and desktop */}
+          <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-3'} gap-2`}>
+            {availableDays.map((dayInfo) => {
+              const availableTime = dayInfo.times && dayInfo.times.length > 0 ? dayInfo.times[0] : null;
+              const isValidDate = dayInfo.date instanceof Date && !isNaN(dayInfo.date.getTime());
+              const isDaySelected = selectedDay === dayInfo.uniqueId;
+              
+              return (
+                <Card 
+                  key={dayInfo.uniqueId}
+                  className={`cursor-pointer transition-all border ${
+                    isDaySelected ? 'border-brand ring-1 ring-brand shadow-sm' : 'border-gray-200'
+                  }`}
+                  onClick={() => availableTime && handleSelectDateTime(dayInfo, availableTime)}
+                >
+                  <div className={`p-2 ${isDaySelected ? 'bg-brand text-white' : 'bg-gray-50'}`}>
+                    <div className="text-center">
+                      <p className="font-bold text-sm">{dayInfo.dayName}</p>
+                      <p className="text-xs">
+                        {isValidDate ? format(dayInfo.date, 'd MMMM', { locale: ar }) : ''}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <CardContent className="p-2 text-center">
+                    {availableTime ? (
+                      <div className="flex flex-col items-center gap-1">
+                        <p className="text-xs text-gray-500">موعد الكشف</p>
+                        <Button
+                          size="sm"
+                          variant={isDaySelected && selectedTime === availableTime ? "default" : "outline"}
+                          className={`py-0 px-3 h-7 text-xs ${
+                            isDaySelected && selectedTime === availableTime 
+                              ? 'bg-brand hover:bg-brand/90' 
+                              : 'hover:border-brand hover:text-brand'
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectDateTime(dayInfo, availableTime);
+                          }}
+                        >
+                          {availableTime}
+                        </Button>
+                        
+                        {isDaySelected && selectedTime === availableTime && (
+                          <Badge className="mt-1 text-[10px] py-0 px-1 bg-green-100 text-green-700 border-green-200">
+                            <CheckCircle2 className="h-2 w-2 mr-0.5" />
+                            تم الاختيار
+                          </Badge>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-xs">لا توجد مواعيد</p>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </div>
       </div>
       
@@ -229,200 +274,6 @@ const AppointmentSelection = ({
           </Button>
         </div>
       )}
-    </div>
-  );
-};
-
-// Mobile view with carousel
-const MobileAppointmentView = ({ 
-  days, 
-  selectedDay, 
-  selectedTime,
-  onSelect 
-}: { 
-  days: DayInfo[], 
-  selectedDay: string, 
-  selectedTime: string,
-  onSelect: (day: DayInfo, time: string) => void 
-}) => {
-  console.log("Mobile view - available days:", days);
-  console.log("Mobile view - selectedDay:", selectedDay);
-  
-  // Fix circular reference issue by ensuring we're dealing with valid day objects
-  const validDays = days.map(day => {
-    // Create a copy of the day object to avoid circular reference issues
-    const validDay = {...day};
-    
-    // Ensure times is an array
-    if (!Array.isArray(validDay.times)) {
-      validDay.times = [];
-    }
-    
-    return validDay;
-  });
-
-  return (
-    <Carousel className="w-full">
-      <CarouselContent>
-        {validDays.map((day) => {
-          const isDaySelected = selectedDay === day.uniqueId;
-          const availableTime = day.times[0] || null;
-          
-          console.log(`Day ${day.dayName}, isDaySelected:`, isDaySelected);
-          
-          return (
-            <CarouselItem key={day.uniqueId} className="md:basis-1/1">
-              <div className="p-1">
-                <Card 
-                  className={`overflow-hidden transition-all border cursor-pointer ${
-                    isDaySelected ? 'border-brand ring-1 ring-brand' : 'border-gray-200'
-                  }`}
-                  onClick={() => availableTime && onSelect(day, availableTime)}
-                >
-                  <div className={`p-3 flex items-center justify-center ${
-                    isDaySelected ? 'bg-brand text-white' : 'bg-brand/5'
-                  }`}>
-                    <div className="text-center">
-                      <p className="font-medium">{day.dayName}</p>
-                      <p className="text-sm">
-                        {day.date instanceof Date && format(day.date, 'd MMMM', { locale: ar })}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <CardContent className="p-4 text-center">
-                    {availableTime ? (
-                      <div className="flex flex-col items-center justify-center">
-                        <p className="mb-3 text-sm text-gray-500">موعد الكشف</p>
-                        <Button
-                          size="sm"
-                          variant={isDaySelected && selectedTime === availableTime ? "default" : "outline"}
-                          className={`py-2 px-6 ${
-                            isDaySelected && selectedTime === availableTime 
-                              ? 'bg-brand hover:bg-brand/90' 
-                              : 'hover:border-brand hover:text-brand'
-                          }`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onSelect(day, availableTime);
-                          }}
-                        >
-                          {availableTime}
-                        </Button>
-                        
-                        {isDaySelected && selectedTime === availableTime && (
-                          <Badge className="mt-3 text-xs bg-green-100 text-green-700 border-green-200 hover:bg-green-100">
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            تم الاختيار
-                          </Badge>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-gray-500 text-sm">لا توجد مواعيد متاحة</p>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            </CarouselItem>
-          );
-        })}
-      </CarouselContent>
-      <div className="flex items-center justify-center mt-4 gap-2">
-        <CarouselPrevious className="relative static mr-2 h-8 w-8 translate-y-0 translate-x-0" />
-        <CarouselNext className="relative static translate-y-0 translate-x-0 h-8 w-8 ml-2" />
-      </div>
-    </Carousel>
-  );
-};
-
-// Desktop view with grid
-const DesktopAppointmentView = ({ 
-  days, 
-  selectedDay, 
-  selectedTime,
-  onSelect 
-}: { 
-  days: DayInfo[], 
-  selectedDay: string, 
-  selectedTime: string,
-  onSelect: (day: DayInfo, time: string) => void 
-}) => {
-  console.log("Desktop view - available days:", days);
-  console.log("Desktop view - selectedDay:", selectedDay);
-  
-  // Fix circular reference issue by ensuring we're dealing with valid day objects
-  const validDays = days.map(day => {
-    // Create a copy of the day object to avoid circular reference issues
-    const validDay = {...day};
-    
-    // Ensure times is an array
-    if (!Array.isArray(validDay.times)) {
-      validDay.times = [];
-    }
-    
-    return validDay;
-  });
-
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {validDays.map((day) => {
-        const isDaySelected = selectedDay === day.uniqueId;
-        const availableTime = day.times[0] || null;
-        
-        console.log(`Day ${day.dayName}, isDaySelected:`, isDaySelected);
-        
-        return (
-          <Card 
-            key={day.uniqueId} 
-            className={`overflow-hidden transition-all hover:shadow-md cursor-pointer
-              ${isDaySelected ? 'border-brand ring-1 ring-brand shadow-md' : ''}`}
-            onClick={() => availableTime && onSelect(day, availableTime)}
-          >
-            <div className={`p-3 flex flex-col items-center justify-center 
-              ${isDaySelected ? 'bg-brand text-white' : 'bg-brand/5'}`}>
-              <CalendarDays className={`h-5 w-5 ${isDaySelected ? 'text-white' : 'text-brand'} mb-1`} />
-              <div className="font-bold text-center">
-                {day.dayName}
-              </div>
-              <div className="text-sm text-center">
-                {day.date instanceof Date && format(day.date, 'd MMMM', { locale: ar })}
-              </div>
-            </div>
-            
-            <CardContent className="p-4 text-center">
-              {availableTime ? (
-                <>
-                  <p className="mb-3 text-sm text-gray-500">موعد الكشف</p>
-                  <Button
-                    size="sm" 
-                    variant={isDaySelected && selectedTime === availableTime ? "default" : "outline"}
-                    className={`py-2 px-4 ${
-                      isDaySelected && selectedTime === availableTime 
-                        ? 'bg-brand hover:bg-brand/90' 
-                        : 'hover:border-brand hover:text-brand'
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onSelect(day, availableTime);
-                    }}
-                  >
-                    {availableTime}
-                  </Button>
-                  
-                  {isDaySelected && selectedTime === availableTime && (
-                    <Badge className="mt-3 text-xs bg-green-100 text-green-700 border-green-200 hover:bg-green-100">
-                      <CheckCircle2 className="h-3 w-3 mr-1" />
-                      تم الاختيار
-                    </Badge>
-                  )}
-                </>
-              ) : (
-                <p className="text-gray-500 text-sm">لا توجد مواعيد متاحة</p>
-              )}
-            </CardContent>
-          </Card>
-        );
-      })}
     </div>
   );
 };
