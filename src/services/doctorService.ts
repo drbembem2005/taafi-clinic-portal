@@ -24,9 +24,7 @@ export interface Doctor {
   old_schedule?: Record<string, unknown>;
   title?: string;
   experience?: number;
-  rating?: number;
-  reviews_count?: number;
-}
+
 
 // Define the DoctorSchedule type
 export interface DoctorSchedule {
