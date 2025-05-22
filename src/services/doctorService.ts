@@ -54,11 +54,15 @@ export const arabicDayNames = {
   'Tue': 'الثلاثاء',
   'Wed': 'الأربعاء',
   'Thu': 'الخميس',
-  'Fri': 'الجمعة'
+  'Fri': 'الجمعة',
+  'sat': 'السبت'  // Added lowercase version since it appears in the data
 };
 
 // Map JavaScript day index (0-6, where 0 is Sunday) to our day codes
 export const dayIndexToCode = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+// Standard day codes we'll use throughout the app for consistency
+export const standardDayCodes = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
 export async function getDoctors(): Promise<Doctor[]> {
   try {
@@ -187,10 +191,13 @@ export async function getDoctorSchedule(doctorId: number): Promise<Record<string
     const schedule: Record<string, string[]> = {};
     
     data.forEach((item: DoctorSchedule) => {
-      if (!schedule[item.day]) {
-        schedule[item.day] = [];
+      // Normalize day codes to standard format (first letter uppercase, rest lowercase)
+      const normalizedDay = normalizeDay(item.day);
+      
+      if (!schedule[normalizedDay]) {
+        schedule[normalizedDay] = [];
       }
-      schedule[item.day].push(item.time);
+      schedule[normalizedDay].push(item.time);
     });
 
     console.log(`Formatted schedule for doctor ${doctorId}:`, schedule);
@@ -199,6 +206,32 @@ export async function getDoctorSchedule(doctorId: number): Promise<Record<string
     console.error('Error in getDoctorSchedule:', error);
     return {};
   }
+}
+
+// Helper function to normalize day codes
+function normalizeDay(day: string): string {
+  // First check if it's already a standard day code
+  if (standardDayCodes.includes(day)) {
+    return day;
+  }
+  
+  // Convert lowercase versions to standard format
+  if (day.toLowerCase() === 'sat') return 'Sat';
+  if (day.toLowerCase() === 'sun') return 'Sun';
+  if (day.toLowerCase() === 'mon') return 'Mon';
+  if (day.toLowerCase() === 'tue') return 'Tue';
+  if (day.toLowerCase() === 'wed') return 'Wed';
+  if (day.toLowerCase() === 'thu') return 'Thu';
+  if (day.toLowerCase() === 'fri') return 'Fri';
+  
+  // If it's an Arabic day name, convert to English
+  for (const [arabic, english] of Object.entries(dayMappings)) {
+    if (day === arabic) return english;
+  }
+  
+  // If we can't normalize, return as is but log a warning
+  console.warn(`Could not normalize day code: ${day}`);
+  return day;
 }
 
 // Function to get the next 3 available appointment days for a doctor
@@ -211,6 +244,8 @@ export async function getNextAvailableDays(doctorId: number): Promise<Array<{dat
       return [];
     }
 
+    console.log("Doctor schedule for available days:", schedule);
+    
     const today = startOfDay(new Date());
     const availableDays: Array<{date: Date, dayName: string, dayCode: string, times: string[], uniqueId: string}> = [];
     let currentDate = today;
@@ -221,10 +256,14 @@ export async function getNextAvailableDays(doctorId: number): Promise<Array<{dat
       const dayIndex = currentDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
       const dayCode = dayIndexToCode[dayIndex];
       
+      console.log(`Checking day ${dayCode} for date ${currentDate.toISOString()}`);
+      
       // Check if doctor works on this day
       if (schedule[dayCode] && schedule[dayCode].length > 0) {
         // Create a unique ID that distinguishes between different dates with the same day of week
         const uniqueId = `${dayCode}-${currentDate.getTime()}`;
+        
+        console.log(`Found available day: ${dayCode} with times:`, schedule[dayCode]);
         
         availableDays.push({
           date: new Date(currentDate),

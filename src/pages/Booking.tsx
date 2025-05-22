@@ -1,8 +1,17 @@
 
 import { motion } from 'framer-motion';
 import BookingWizardContainer from '@/components/booking/BookingWizardContainer';
+import { useEffect } from 'react';
 
 const Booking = () => {
+  // Force a clean reload of the booking data when this page is visited
+  useEffect(() => {
+    // Clear any cached data from local storage
+    localStorage.removeItem('booking_selected_doctor');
+    localStorage.removeItem('booking_selected_day');
+    localStorage.removeItem('booking_selected_time');
+  }, []);
+  
   return (
     <>
       {/* Hero Section - More compact for mobile */}

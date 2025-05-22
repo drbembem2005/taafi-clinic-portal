@@ -1,6 +1,6 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { CalendarDays, UserCheck } from 'lucide-react';
+import { CalendarDays, UserCheck, CheckCircle2 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -57,7 +57,10 @@ const AppointmentSelection = ({
       setError(null);
       
       try {
+        console.log(`Fetching available days for doctor ID: ${doctorId}`);
         const days = await getNextAvailableDays(doctorId);
+        
+        console.log("Available days returned:", days);
         setAvailableDays(days);
         
         // If we have a selected day, find and update the formatted date
@@ -66,6 +69,7 @@ const AppointmentSelection = ({
           if (dayInfo && dayInfo.date instanceof Date) {
             try {
               const dateStr = format(dayInfo.date, 'EEEE, d MMMM yyyy', { locale: ar });
+              console.log(`Setting formatted date to: ${dateStr}`);
               setFormattedDate(dateStr);
               onUpdateFormattedDate(dateStr);
             } catch (err) {
@@ -98,6 +102,7 @@ const AppointmentSelection = ({
       }
       
       const dateStr = format(dayInfo.date, 'EEEE, d MMMM yyyy', { locale: ar });
+      console.log(`Selected date: ${dateStr}, time: ${time}`);
       setFormattedDate(dateStr);
       onUpdateFormattedDate(dateStr);
       onSelectDateTime(dayInfo.uniqueId, time, dateStr, dayInfo.date);
@@ -195,7 +200,7 @@ const AppointmentSelection = ({
       <div className="rounded-lg border border-gray-200 overflow-hidden">
         <div className="bg-gray-50 px-3 py-2 border-b border-gray-200 flex items-center">
           <CalendarDays className="mr-2 h-5 w-5 text-brand" />
-          <h3 className="font-medium text-gray-800 text-sm md:text-base">المواعيد المتاحة</h3>
+          <h3 className="font-medium text-gray-800 text-sm md:text-base">المواعيد المتاحة - {availableDays.length} أيام</h3>
         </div>
         
         <div className="p-4">
@@ -250,6 +255,9 @@ const MobileAppointmentView = ({
   selectedTime: string,
   onSelect: (day: DayInfo, time: string) => void 
 }) => {
+  console.log("Mobile view - available days:", days);
+  console.log("Mobile view - selectedDay:", selectedDay);
+  
   // Fix circular reference issue by ensuring we're dealing with valid day objects
   const validDays = days.map(day => {
     // Create a copy of the day object to avoid circular reference issues
@@ -270,11 +278,20 @@ const MobileAppointmentView = ({
           const isDaySelected = selectedDay === day.uniqueId;
           const availableTime = day.times[0] || null;
           
+          console.log(`Day ${day.dayName}, isDaySelected:`, isDaySelected);
+          
           return (
             <CarouselItem key={day.uniqueId} className="md:basis-1/1">
               <div className="p-1">
-                <Card className={`overflow-hidden transition-all border ${isDaySelected ? 'border-brand ring-1 ring-brand' : 'border-gray-200'}`}>
-                  <div className={`p-3 flex items-center justify-center ${isDaySelected ? 'bg-brand text-white' : 'bg-brand/5'}`}>
+                <Card 
+                  className={`overflow-hidden transition-all border cursor-pointer ${
+                    isDaySelected ? 'border-brand ring-1 ring-brand' : 'border-gray-200'
+                  }`}
+                  onClick={() => availableTime && onSelect(day, availableTime)}
+                >
+                  <div className={`p-3 flex items-center justify-center ${
+                    isDaySelected ? 'bg-brand text-white' : 'bg-brand/5'
+                  }`}>
                     <div className="text-center">
                       <p className="font-medium">{day.dayName}</p>
                       <p className="text-sm">
@@ -295,13 +312,17 @@ const MobileAppointmentView = ({
                               ? 'bg-brand hover:bg-brand/90' 
                               : 'hover:border-brand hover:text-brand'
                           }`}
-                          onClick={() => onSelect(day, availableTime)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelect(day, availableTime);
+                          }}
                         >
                           {availableTime}
                         </Button>
                         
                         {isDaySelected && selectedTime === availableTime && (
                           <Badge className="mt-3 text-xs bg-green-100 text-green-700 border-green-200 hover:bg-green-100">
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
                             تم الاختيار
                           </Badge>
                         )}
@@ -336,6 +357,9 @@ const DesktopAppointmentView = ({
   selectedTime: string,
   onSelect: (day: DayInfo, time: string) => void 
 }) => {
+  console.log("Desktop view - available days:", days);
+  console.log("Desktop view - selectedDay:", selectedDay);
+  
   // Fix circular reference issue by ensuring we're dealing with valid day objects
   const validDays = days.map(day => {
     // Create a copy of the day object to avoid circular reference issues
@@ -354,6 +378,8 @@ const DesktopAppointmentView = ({
       {validDays.map((day) => {
         const isDaySelected = selectedDay === day.uniqueId;
         const availableTime = day.times[0] || null;
+        
+        console.log(`Day ${day.dayName}, isDaySelected:`, isDaySelected);
         
         return (
           <Card 
@@ -385,13 +411,17 @@ const DesktopAppointmentView = ({
                         ? 'bg-brand hover:bg-brand/90' 
                         : 'hover:border-brand hover:text-brand'
                     }`}
-                    onClick={() => onSelect(day, availableTime)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelect(day, availableTime);
+                    }}
                   >
                     {availableTime}
                   </Button>
                   
                   {isDaySelected && selectedTime === availableTime && (
                     <Badge className="mt-3 text-xs bg-green-100 text-green-700 border-green-200 hover:bg-green-100">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
                       تم الاختيار
                     </Badge>
                   )}
