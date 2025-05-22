@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CalendarDays, Clock, UserCheck } from 'lucide-react';
-import NextAvailableDaysPicker from './NextAvailableDaysPicker';
+import NextAvailableDaysPicker, { DayInfo } from './NextAvailableDaysPicker';
 import { Button } from '@/components/ui/button';
 
 interface AppointmentSelectionProps {
@@ -10,7 +10,7 @@ interface AppointmentSelectionProps {
   doctorName: string;
   selectedDay: string;
   selectedTime: string;
-  onSelectDateTime: (day: string, time: string, formattedDate: string) => void;
+  onSelectDateTime: (day: string, time: string, formattedDate: string, selectedDate: Date) => void;
   onUpdateFormattedDate: (formattedDate: string) => void;
 }
 
@@ -25,10 +25,10 @@ const AppointmentSelection = ({
   const [formattedDate, setFormattedDate] = useState<string>('');
   
   // Handler for date and time selection
-  const handleDateTimeSelect = (day: string, time: string, formattedDateStr: string) => {
+  const handleDateTimeSelect = (day: string, time: string, formattedDateStr: string, availableDays: DayInfo[], selectedDate: Date) => {
     setFormattedDate(formattedDateStr);
     onUpdateFormattedDate(formattedDateStr);
-    onSelectDateTime(day, time, formattedDateStr);
+    onSelectDateTime(day, time, formattedDateStr, selectedDate);
   };
   
   if (!doctorId) {
@@ -77,41 +77,7 @@ const AppointmentSelection = ({
         </div>
       </div>
       
-      <AnimatePresence>
-        {selectedDay && selectedTime && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="bg-green-500 rounded-full p-1.5 mr-3">
-                  <Clock className="h-4 w-4 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 mb-1">تم تحديد الموعد</p>
-                  <p className="font-bold text-gray-800">
-                    {formattedDate} - {selectedTime}
-                  </p>
-                </div>
-              </div>
-              <Button 
-                variant="ghost"
-                size="sm" 
-                className="text-green-600 hover:text-green-700 hover:bg-green-100 mr-2"
-                onClick={() => {
-                  onSelectDateTime('', '', '');
-                  onUpdateFormattedDate('');
-                }}
-              >
-                تغيير
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Removed duplicate notification here - we'll only show it in one place */}
     </div>
   );
 };

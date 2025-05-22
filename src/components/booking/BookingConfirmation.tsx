@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
@@ -18,6 +19,7 @@ interface BookingConfirmationProps {
   doctorName: string;
   specialtyName: string;
   formattedDate: string;
+  selectedDate: Date | null;
   onBookingSuccess: (reference: string) => void;
 }
 
@@ -26,6 +28,7 @@ const BookingConfirmation = ({
   doctorName,
   specialtyName,
   formattedDate,
+  selectedDate,
   onBookingSuccess
 }: BookingConfirmationProps) => {
   const [submitting, setSubmitting] = useState<boolean>(false);
@@ -34,10 +37,11 @@ const BookingConfirmation = ({
   const handleDirectBooking = async () => {
     setSubmitting(true);
     try {
-      // Set booking method
+      // Set booking method and add the booking_date field
       const bookingData = {
         ...formData,
-        booking_method: 'online' as 'online' | 'whatsapp' | 'phone'
+        booking_method: 'online' as 'online' | 'whatsapp' | 'phone',
+        booking_date: selectedDate ? selectedDate.toISOString() : null
       };
       
       // Make API call to create booking
@@ -86,7 +90,8 @@ const BookingConfirmation = ({
       // Then try to save to database in the background
       const bookingData = {
         ...formData,
-        booking_method: 'whatsapp' as 'online' | 'whatsapp' | 'phone'
+        booking_method: 'whatsapp' as 'online' | 'whatsapp' | 'phone',
+        booking_date: selectedDate ? selectedDate.toISOString() : null
       };
       
       // Make API call to create booking

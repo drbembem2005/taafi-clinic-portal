@@ -20,7 +20,7 @@ export interface DayInfo {
 
 interface NextAvailableDaysPickerProps {
   doctorId: number;
-  onSelectDateTime: (day: string, time: string, formattedDate: string, availableDays: DayInfo[]) => void;
+  onSelectDateTime: (day: string, time: string, formattedDate: string, availableDays: DayInfo[], selectedDate: Date) => void;
   selectedDay?: string;
   selectedTime?: string;
 }
@@ -34,6 +34,7 @@ const NextAvailableDaysPicker = ({
   const [loading, setLoading] = useState(true);
   const [availableDays, setAvailableDays] = useState<DayInfo[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDayInfo, setSelectedDayInfo] = useState<DayInfo | null>(null);
 
   useEffect(() => {
     const fetchAvailableDays = async () => {
@@ -67,6 +68,12 @@ const NextAvailableDaysPicker = ({
           
           setAvailableDays(validatedDays);
           console.log("Available days set:", validatedDays);
+          
+          // Find the previously selected day if it exists
+          if (selectedDay) {
+            const matchingDayInfo = validatedDays.find(d => d.dayCode === selectedDay);
+            setSelectedDayInfo(matchingDayInfo || null);
+          }
         }
       } catch (err) {
         console.error('Error fetching available days:', err);
@@ -82,14 +89,17 @@ const NextAvailableDaysPicker = ({
     };
 
     fetchAvailableDays();
-  }, [doctorId]);
+  }, [doctorId, selectedDay]);
 
   const handleSelectDateTime = (dayCode: string, time: string, date: Date) => {
     // Format the date in a user-friendly way
     try {
       if (date instanceof Date && !isNaN(date.getTime())) {
         const formattedDate = format(date, 'EEEE, d MMMM yyyy', { locale: ar });
-        onSelectDateTime(dayCode, time, formattedDate, availableDays);
+        // Find the selected day info for later use
+        const dayInfo = availableDays.find(d => d.dayCode === dayCode);
+        setSelectedDayInfo(dayInfo || null);
+        onSelectDateTime(dayCode, time, formattedDate, availableDays, date);
       } else {
         console.error("Invalid date object:", date);
         toast({
@@ -149,18 +159,20 @@ const NextAvailableDaysPicker = ({
           // Make sure we have a valid date
           const isValidDate = dayInfo.date instanceof Date && !isNaN(dayInfo.date.getTime());
           
+          // Check if this day is selected
+          const isDaySelected = selectedDay === dayInfo.dayCode;
+          
           return (
             <Card 
               key={dayIndex} 
               className={`overflow-hidden transition-all hover:shadow-md ${
-                selectedDay === dayInfo.dayCode ? 'border-brand ring-1 ring-brand shadow-md' : ''
+                isDaySelected ? 'border-brand ring-1 ring-brand shadow-md' : ''
               }`}
-              onClick={() => availableTime && isValidDate && handleSelectDateTime(dayInfo.dayCode, availableTime, dayInfo.date)}
             >
               <div className={`p-4 flex flex-col items-center justify-center ${
-                selectedDay === dayInfo.dayCode ? 'bg-brand text-white' : 'bg-brand/5'
+                isDaySelected ? 'bg-brand text-white' : 'bg-brand/5'
               }`}>
-                <Calendar className={`h-6 w-6 ${selectedDay === dayInfo.dayCode ? 'text-white' : 'text-brand'} mb-2`} />
+                <Calendar className={`h-6 w-6 ${isDaySelected ? 'text-white' : 'text-brand'} mb-2`} />
                 <div className="font-bold text-center text-lg">
                   {dayInfo.dayName}
                 </div>
@@ -176,19 +188,20 @@ const NextAvailableDaysPicker = ({
                     <div className="flex items-center justify-center">
                       <Button
                         size="lg" 
-                        variant={selectedDay === dayInfo.dayCode && selectedTime === availableTime ? "default" : "outline"}
+                        variant={isDaySelected && selectedTime === availableTime ? "default" : "outline"}
                         className={`py-2 px-4 text-lg ${
-                          selectedDay === dayInfo.dayCode && selectedTime === availableTime 
+                          isDaySelected && selectedTime === availableTime 
                             ? 'bg-brand hover:bg-brand/90' 
                             : 'hover:border-brand hover:text-brand'
                         }`}
+                        onClick={() => isValidDate && availableTime && handleSelectDateTime(dayInfo.dayCode, availableTime, dayInfo.date)}
                       >
                         <Clock className="h-5 w-5 ml-2" />
                         {availableTime}
                       </Button>
                     </div>
                     
-                    {selectedDay === dayInfo.dayCode && selectedTime === availableTime && (
+                    {isDaySelected && selectedTime === availableTime && (
                       <Badge className="mt-3 bg-green-100 text-green-700 border-green-200 hover:bg-green-100">
                         تم الاختيار
                       </Badge>
@@ -217,39 +230,6 @@ const NextAvailableDaysPicker = ({
             </svg>
             تواصل مع العيادة عبر واتساب
           </Button>
-        </div>
-      )}
-      
-      {selectedDay && selectedTime && (
-        <div className="bg-green-50 border border-green-100 rounded-lg p-4 text-center">
-          <p className="text-green-700">
-            {(() => {
-              try {
-                const selectedDayInfo = availableDays.find(d => d.dayCode === selectedDay);
-                if (selectedDayInfo && selectedDayInfo.date instanceof Date && !isNaN(selectedDayInfo.date.getTime())) {
-                  return (
-                    <>
-                      تم اختيار موعدك: <strong>{format(selectedDayInfo.date, 'EEEE, d MMMM yyyy', { locale: ar })} - {selectedTime}</strong>
-                    </>
-                  );
-                } else {
-                  return (
-                    <>
-                      تم اختيار موعدك: <strong>{selectedTime}</strong>
-                    </>
-                  );
-                }
-              } catch (err) {
-                console.error("Error formatting selected date:", err);
-                return (
-                  <>
-                    تم اختيار الموعد: <strong>{selectedTime}</strong>
-                  </>
-                );
-              }
-            })()}
-          </p>
-          <p className="text-sm text-green-600 mt-2">يرجى إكمال بيانات الحجز في الخطوة التالية</p>
         </div>
       )}
     </div>

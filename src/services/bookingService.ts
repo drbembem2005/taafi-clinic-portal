@@ -12,6 +12,7 @@ interface BookingData {
   booking_day: string;
   booking_time: string;
   booking_method: 'whatsapp' | 'phone' | 'online';
+  booking_date?: string | null; // New field for the actual date
 }
 
 interface BookingResponse {
