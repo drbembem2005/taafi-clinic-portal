@@ -1,5 +1,4 @@
-
-import { useState, memo } from 'react';
+import { useState, memo, useCallback, useEffect } from 'react';
 import { CalendarDays, UserCheck } from 'lucide-react';
 import NextAvailableDaysPicker, { DayInfo } from './NextAvailableDaysPicker';
 
@@ -12,7 +11,7 @@ interface AppointmentSelectionProps {
   onUpdateFormattedDate: (formattedDate: string) => void;
 }
 
-// Using memo to prevent unnecessary re-renders
+// Using memo with equality check to prevent unnecessary re-renders
 const AppointmentSelection = memo(({
   doctorId,
   doctorName,
@@ -23,13 +22,14 @@ const AppointmentSelection = memo(({
 }: AppointmentSelectionProps) => {
   const [formattedDate, setFormattedDate] = useState<string>('');
   
-  // Handler for date and time selection
-  const handleDateTimeSelect = (uniqueId: string, time: string, formattedDateStr: string, availableDays: DayInfo[], selectedDate: Date) => {
+  // Memoize handler to prevent recreating on each render
+  const handleDateTimeSelect = useCallback((uniqueId: string, time: string, formattedDateStr: string, availableDays: DayInfo[], selectedDate: Date) => {
     setFormattedDate(formattedDateStr);
     onUpdateFormattedDate(formattedDateStr);
     onSelectDateTime(uniqueId, time, formattedDateStr, selectedDate);
-  };
+  }, [onUpdateFormattedDate, onSelectDateTime]);
   
+  // No doctor selected view
   if (!doctorId) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center">
@@ -43,6 +43,14 @@ const AppointmentSelection = memo(({
       </div>
     );
   }
+
+  // Keep previous value to avoid unnecessary refreshes
+  useEffect(() => {
+    if (!formattedDate && selectedDay && selectedTime) {
+      // This ensures we maintain the formatted date when component remounts
+      onUpdateFormattedDate(formattedDate);
+    }
+  }, [formattedDate, selectedDay, selectedTime, onUpdateFormattedDate]);
   
   return (
     <div>
@@ -67,7 +75,9 @@ const AppointmentSelection = memo(({
         </div>
         
         <div className="p-4">
+          {/* Key with doctorId to avoid re-rendering unless doctor changes */}
           <NextAvailableDaysPicker
+            key={`doctor-${doctorId}`}
             doctorId={doctorId}
             onSelectDateTime={handleDateTimeSelect}
             selectedDay={selectedDay}
@@ -76,6 +86,14 @@ const AppointmentSelection = memo(({
         </div>
       </div>
     </div>
+  );
+}, (prevProps, nextProps) => {
+  // Custom equality check to prevent unnecessary re-renders
+  return (
+    prevProps.doctorId === nextProps.doctorId &&
+    prevProps.selectedDay === nextProps.selectedDay &&
+    prevProps.selectedTime === nextProps.selectedTime &&
+    prevProps.doctorName === nextProps.doctorName
   );
 });
 
