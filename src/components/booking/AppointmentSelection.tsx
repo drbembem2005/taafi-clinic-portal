@@ -1,15 +1,15 @@
 
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { CalendarDays, UserCheck, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useCallback, useEffect } from 'react';
+import { CalendarDays, UserCheck } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { format, addDays } from 'date-fns';
+import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { getNextAvailableDays } from '@/services/doctorService';
 import { toast } from '@/hooks/use-toast';
-import { 
+import {
   Carousel,
   CarouselContent,
   CarouselItem,
@@ -64,9 +64,13 @@ const AppointmentSelection = ({
         if (selectedDay && days.length > 0) {
           const dayInfo = days.find(d => d.uniqueId === selectedDay);
           if (dayInfo && dayInfo.date instanceof Date) {
-            const dateStr = format(dayInfo.date, 'EEEE, d MMMM yyyy', { locale: ar });
-            setFormattedDate(dateStr);
-            onUpdateFormattedDate(dateStr);
+            try {
+              const dateStr = format(dayInfo.date, 'EEEE, d MMMM yyyy', { locale: ar });
+              setFormattedDate(dateStr);
+              onUpdateFormattedDate(dateStr);
+            } catch (err) {
+              console.error('Error formatting date:', err);
+            }
           }
         }
       } catch (err) {
@@ -87,6 +91,7 @@ const AppointmentSelection = ({
   
   const handleSelectDateTime = useCallback((dayInfo: DayInfo, time: string) => {
     try {
+      // Check if date is valid
       if (!(dayInfo.date instanceof Date) || isNaN(dayInfo.date.getTime())) {
         console.error("Invalid date:", dayInfo.date);
         return;
@@ -97,7 +102,7 @@ const AppointmentSelection = ({
       onUpdateFormattedDate(dateStr);
       onSelectDateTime(dayInfo.uniqueId, time, dateStr, dayInfo.date);
     } catch (err) {
-      console.error("Error selecting date time:", err);
+      console.error("Error selecting date time:", err, dayInfo);
       toast({
         title: "خطأ",
         description: "حدث خطأ أثناء اختيار الموعد",
@@ -225,7 +230,7 @@ const AppointmentSelection = ({
             className="flex items-center gap-2 bg-brand hover:bg-brand/90"
           >
             التالي
-            <ChevronLeft className="h-4 w-4" />
+            <CalendarDays className="h-4 w-4" />
           </Button>
         </div>
       )}
@@ -245,10 +250,23 @@ const MobileAppointmentView = ({
   selectedTime: string,
   onSelect: (day: DayInfo, time: string) => void 
 }) => {
+  // Fix circular reference issue by ensuring we're dealing with valid day objects
+  const validDays = days.map(day => {
+    // Create a copy of the day object to avoid circular reference issues
+    const validDay = {...day};
+    
+    // Ensure times is an array
+    if (!Array.isArray(validDay.times)) {
+      validDay.times = [];
+    }
+    
+    return validDay;
+  });
+
   return (
     <Carousel className="w-full">
       <CarouselContent>
-        {days.map((day) => {
+        {validDays.map((day) => {
           const isDaySelected = selectedDay === day.uniqueId;
           const availableTime = day.times[0] || null;
           
@@ -260,7 +278,7 @@ const MobileAppointmentView = ({
                     <div className="text-center">
                       <p className="font-medium">{day.dayName}</p>
                       <p className="text-sm">
-                        {day.date instanceof Date && format(day.date, 'd MMMM yyyy', { locale: ar })}
+                        {day.date instanceof Date && format(day.date, 'd MMMM', { locale: ar })}
                       </p>
                     </div>
                   </div>
@@ -318,17 +336,31 @@ const DesktopAppointmentView = ({
   selectedTime: string,
   onSelect: (day: DayInfo, time: string) => void 
 }) => {
+  // Fix circular reference issue by ensuring we're dealing with valid day objects
+  const validDays = days.map(day => {
+    // Create a copy of the day object to avoid circular reference issues
+    const validDay = {...day};
+    
+    // Ensure times is an array
+    if (!Array.isArray(validDay.times)) {
+      validDay.times = [];
+    }
+    
+    return validDay;
+  });
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {days.map((day) => {
+      {validDays.map((day) => {
         const isDaySelected = selectedDay === day.uniqueId;
         const availableTime = day.times[0] || null;
         
         return (
           <Card 
             key={day.uniqueId} 
-            className={`overflow-hidden transition-all hover:shadow-md 
+            className={`overflow-hidden transition-all hover:shadow-md cursor-pointer
               ${isDaySelected ? 'border-brand ring-1 ring-brand shadow-md' : ''}`}
+            onClick={() => availableTime && onSelect(day, availableTime)}
           >
             <div className={`p-3 flex flex-col items-center justify-center 
               ${isDaySelected ? 'bg-brand text-white' : 'bg-brand/5'}`}>
@@ -337,7 +369,7 @@ const DesktopAppointmentView = ({
                 {day.dayName}
               </div>
               <div className="text-sm text-center">
-                {day.date instanceof Date && format(day.date, 'd MMMM yyyy', { locale: ar })}
+                {day.date instanceof Date && format(day.date, 'd MMMM', { locale: ar })}
               </div>
             </div>
             
