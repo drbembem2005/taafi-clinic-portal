@@ -89,7 +89,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
   };
 
   const openWhatsApp = () => {
-    // Use the openWhatsAppWithBookingDetails function with doctor name and specialty
+    // Directly open WhatsApp without showing a notification
     openWhatsAppWithBookingDetails({
       doctorName: doctor.name,
       specialtyName: doctor.specialty
@@ -355,26 +355,11 @@ const DoctorDetails = ({
   
   const availableDays = getAvailableDays();
   
+  // Direct WhatsApp opening without notification
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    try {
-      onWhatsApp();
-      
-      // Show success toast
-      toast({
-        title: "تم فتح واتساب",
-        description: "جاري فتح تطبيق واتساب للتواصل مع العيادة",
-      });
-    } catch (error) {
-      console.error("Error opening WhatsApp:", error);
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ أثناء محاولة فتح واتساب. يرجى المحاولة مرة أخرى.",
-        variant: "destructive",
-      });
-    }
+    onWhatsApp();
   };
   
   return (

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -104,7 +103,7 @@ export function openWhatsAppWithBookingDetails(bookingDetails: {
   phone?: string;
   email?: string | null;
   notes?: string | null;
-}): void {
+}): boolean {
   // Format the message based on available details
   let message = `*طلب حجز موعد*\n`;
   message += `الطبيب: ${bookingDetails.doctorName}\n`;
@@ -139,25 +138,13 @@ export function openWhatsAppWithBookingDetails(bookingDetails: {
   // Open WhatsApp with the clinic's number and pre-filled message
   const whatsappURL = `https://wa.me/201119007403?text=${encodedMessage}`;
   
-  // Ensure window.open is called properly and in a way that works with popup blockers
   try {
-    const newWindow = window.open(whatsappURL, '_blank');
-    
-    // If the window failed to open, it might be due to popup blockers
-    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-      console.warn('WhatsApp window may have been blocked by a popup blocker.');
-      toast({
-        title: "تنبيه",
-        description: "قد يتم منع فتح نافذة واتساب. يرجى السماح بالنوافذ المنبثقة لموقعنا.",
-        variant: "default",
-      });
-      
-      // Try to directly set the location as a fallback
-      window.location.href = whatsappURL;
-    }
+    // Use window.location.href for direct navigation without popup or notification
+    window.location.href = whatsappURL;
+    return true;
   } catch (error) {
     console.error('Error opening WhatsApp:', error);
-    // Direct location change as final fallback
-    window.location.href = whatsappURL;
+    // If there's an error, return false to indicate failure
+    return false;
   }
 }
