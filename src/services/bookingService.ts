@@ -138,5 +138,26 @@ export function openWhatsAppWithBookingDetails(bookingDetails: {
   
   // Open WhatsApp with the clinic's number and pre-filled message
   const whatsappURL = `https://wa.me/201119007403?text=${encodedMessage}`;
-  window.open(whatsappURL, '_blank');
+  
+  // Ensure window.open is called properly and in a way that works with popup blockers
+  try {
+    const newWindow = window.open(whatsappURL, '_blank');
+    
+    // If the window failed to open, it might be due to popup blockers
+    if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+      console.warn('WhatsApp window may have been blocked by a popup blocker.');
+      toast({
+        title: "تنبيه",
+        description: "قد يتم منع فتح نافذة واتساب. يرجى السماح بالنوافذ المنبثقة لموقعنا.",
+        variant: "default",
+      });
+      
+      // Try to directly set the location as a fallback
+      window.location.href = whatsappURL;
+    }
+  } catch (error) {
+    console.error('Error opening WhatsApp:', error);
+    // Direct location change as final fallback
+    window.location.href = whatsappURL;
+  }
 }

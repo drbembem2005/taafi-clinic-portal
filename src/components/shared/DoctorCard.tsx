@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Doctor as ServiceDoctor } from '@/services/doctorService';
 import { weekDays, dayMappings } from '@/data/doctors';
 import { motion } from 'framer-motion';
@@ -11,6 +11,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useNavigate } from 'react-router-dom';
 import { openWhatsAppWithBookingDetails } from '@/services/bookingService';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { toast } from '@/hooks/use-toast';
 
 interface DoctorWithSpecialty extends ServiceDoctor {
   specialty: string;
@@ -354,10 +355,32 @@ const DoctorDetails = ({
   
   const availableDays = getAvailableDays();
   
+  const handleWhatsAppClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    try {
+      onWhatsApp();
+      
+      // Show success toast
+      toast({
+        title: "تم فتح واتساب",
+        description: "جاري فتح تطبيق واتساب للتواصل مع العيادة",
+      });
+    } catch (error) {
+      console.error("Error opening WhatsApp:", error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء محاولة فتح واتساب. يرجى المحاولة مرة أخرى.",
+        variant: "destructive",
+      });
+    }
+  };
+  
   return (
     <div className="bg-white overflow-hidden max-h-[85vh] flex flex-col">
       {/* Header with gradient background and doctor info */}
-      <div className="relative bg-gradient-to-r from-brand to-blue-600 p-4 md:p-6 text-white">
+      <DialogHeader className="relative bg-gradient-to-r from-brand to-blue-600 p-4 md:p-6 text-white">
         <button 
           onClick={onClose} 
           className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white hover:bg-white/30"
@@ -375,7 +398,7 @@ const DoctorDetails = ({
               <img 
                 src={doctor.image} 
                 alt={doctor.name} 
-                className="w-full h-full object-cover" 
+                className="w-full h-full rounded-full object-cover" 
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
@@ -392,13 +415,15 @@ const DoctorDetails = ({
             >
               {doctor.specialty}
             </Badge>
-            <h2 className="text-lg md:text-xl font-bold">{doctor.name}</h2>
+            <DialogTitle className="text-lg md:text-xl font-bold text-white">{doctor.name}</DialogTitle>
             {doctor.bio && (
-              <p className="text-xs md:text-sm mt-1 text-white/90 line-clamp-2">{doctor.bio}</p>
+              <DialogDescription className="text-xs md:text-sm mt-1 text-white/90 line-clamp-2">
+                {doctor.bio}
+              </DialogDescription>
             )}
           </div>
         </div>
-      </div>
+      </DialogHeader>
       
       {/* Fees section */}
       <div className="p-4 grid grid-cols-2 gap-3">
@@ -481,7 +506,7 @@ const DoctorDetails = ({
           احجز موعد
         </Button>
         <Button 
-          onClick={onWhatsApp}
+          onClick={handleWhatsAppClick}
           className="sm:flex-1 bg-green-600 hover:bg-green-700 text-white flex items-center justify-center gap-2"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="currentColor" viewBox="0 0 24 24">
