@@ -1,9 +1,7 @@
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { CalendarDays, Clock, UserCheck } from 'lucide-react';
+import { useState } from 'react';
+import { CalendarDays, UserCheck } from 'lucide-react';
 import NextAvailableDaysPicker, { DayInfo } from './NextAvailableDaysPicker';
-import { Button } from '@/components/ui/button';
 
 interface AppointmentSelectionProps {
   doctorId: number | null;
@@ -25,10 +23,10 @@ const AppointmentSelection = ({
   const [formattedDate, setFormattedDate] = useState<string>('');
   
   // Handler for date and time selection
-  const handleDateTimeSelect = (day: string, time: string, formattedDateStr: string, availableDays: DayInfo[], selectedDate: Date) => {
+  const handleDateTimeSelect = (uniqueId: string, time: string, formattedDateStr: string, availableDays: DayInfo[], selectedDate: Date) => {
     setFormattedDate(formattedDateStr);
     onUpdateFormattedDate(formattedDateStr);
-    onSelectDateTime(day, time, formattedDateStr, selectedDate);
+    onSelectDateTime(uniqueId, time, formattedDateStr, selectedDate);
   };
   
   if (!doctorId) {

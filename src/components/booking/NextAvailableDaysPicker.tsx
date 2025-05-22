@@ -16,6 +16,7 @@ export interface DayInfo {
   dayName: string;
   dayCode: string;
   times: string[];
+  uniqueId: string; // Add a unique ID for each date
 }
 
 interface NextAvailableDaysPickerProps {
@@ -53,25 +54,30 @@ const NextAvailableDaysPicker = ({
         if (nextAvailableDays.length === 0) {
           setError('لا توجد مواعيد متاحة لهذا الطبيب');
         } else {
-          // Ensure we're working with valid Date objects
+          // Ensure we're working with valid Date objects and add uniqueId
           const validatedDays = nextAvailableDays.map(day => {
             // Make sure the date is a valid Date object
             const validDate = day.date instanceof Date && !isNaN(day.date.getTime()) 
               ? day.date 
               : new Date(); // Default to current date if invalid
+            
+            // Create a unique ID using the date's timestamp
+            const uniqueId = `${day.dayCode}-${validDate.getTime()}`;
               
             return {
               ...day,
-              date: validDate
+              date: validDate,
+              uniqueId // Add the unique ID
             };
           });
           
           setAvailableDays(validatedDays);
-          console.log("Available days set:", validatedDays);
+          console.log("Available days set with uniqueIds:", validatedDays);
           
           // Find the previously selected day if it exists
           if (selectedDay) {
-            const matchingDayInfo = validatedDays.find(d => d.dayCode === selectedDay);
+            // Now we need to match by uniqueId instead of just dayCode
+            const matchingDayInfo = validatedDays.find(d => d.uniqueId === selectedDay);
             setSelectedDayInfo(matchingDayInfo || null);
           }
         }
@@ -91,15 +97,24 @@ const NextAvailableDaysPicker = ({
     fetchAvailableDays();
   }, [doctorId, selectedDay]);
 
-  const handleSelectDateTime = (dayCode: string, time: string, date: Date) => {
+  const handleSelectDateTime = (uniqueId: string, time: string, date: Date) => {
     // Format the date in a user-friendly way
     try {
       if (date instanceof Date && !isNaN(date.getTime())) {
         const formattedDate = format(date, 'EEEE, d MMMM yyyy', { locale: ar });
-        // Find the selected day info for later use
-        const dayInfo = availableDays.find(d => d.dayCode === dayCode);
-        setSelectedDayInfo(dayInfo || null);
-        onSelectDateTime(dayCode, time, formattedDate, availableDays, date);
+        
+        // Find the selected day info by uniqueId for later use
+        const dayInfo = availableDays.find(d => d.uniqueId === uniqueId);
+        if (!dayInfo) {
+          console.error("Could not find day with uniqueId:", uniqueId);
+          return;
+        }
+        
+        setSelectedDayInfo(dayInfo);
+        
+        // Pass the dayCode for backward compatibility with existing code,
+        // but use uniqueId as the primary identifier
+        onSelectDateTime(uniqueId, time, formattedDate, availableDays, date);
       } else {
         console.error("Invalid date object:", date);
         toast({
@@ -159,8 +174,8 @@ const NextAvailableDaysPicker = ({
           // Make sure we have a valid date
           const isValidDate = dayInfo.date instanceof Date && !isNaN(dayInfo.date.getTime());
           
-          // Check if this day is selected
-          const isDaySelected = selectedDay === dayInfo.dayCode;
+          // Check if this day is selected - now using uniqueId
+          const isDaySelected = selectedDay === dayInfo.uniqueId;
           
           return (
             <Card 
@@ -168,7 +183,7 @@ const NextAvailableDaysPicker = ({
               className={`overflow-hidden transition-all hover:shadow-md cursor-pointer ${
                 isDaySelected ? 'border-brand ring-1 ring-brand shadow-md' : ''
               }`}
-              onClick={() => isValidDate && availableTime && handleSelectDateTime(dayInfo.dayCode, availableTime, dayInfo.date)}
+              onClick={() => isValidDate && availableTime && handleSelectDateTime(dayInfo.uniqueId, availableTime, dayInfo.date)}
             >
               <div className={`p-4 flex flex-col items-center justify-center ${
                 isDaySelected ? 'bg-brand text-white' : 'bg-brand/5'
@@ -197,7 +212,7 @@ const NextAvailableDaysPicker = ({
                         }`}
                         onClick={(e) => {
                           e.stopPropagation(); // Prevent card onClick from firing
-                          isValidDate && availableTime && handleSelectDateTime(dayInfo.dayCode, availableTime, dayInfo.date);
+                          isValidDate && availableTime && handleSelectDateTime(dayInfo.uniqueId, availableTime, dayInfo.date);
                         }}
                       >
                         <Clock className="h-5 w-5 ml-2" />
@@ -205,6 +220,7 @@ const NextAvailableDaysPicker = ({
                       </Button>
                     </div>
                     
+                    {/* Only show the badge if THIS specific day is selected - not just any day with the same dayCode */}
                     {isDaySelected && selectedTime === availableTime && (
                       <Badge className="mt-3 bg-green-100 text-green-700 border-green-200 hover:bg-green-100">
                         تم الاختيار

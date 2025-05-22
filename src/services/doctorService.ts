@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { format, addDays, startOfDay } from 'date-fns';
@@ -201,7 +202,7 @@ export async function getDoctorSchedule(doctorId: number): Promise<Record<string
 }
 
 // Function to get the next 3 available appointment days for a doctor
-export async function getNextAvailableDays(doctorId: number): Promise<Array<{date: Date, dayName: string, dayCode: string, times: string[]}>> {
+export async function getNextAvailableDays(doctorId: number): Promise<Array<{date: Date, dayName: string, dayCode: string, times: string[], uniqueId: string}>> {
   try {
     // Get doctor schedule
     const schedule = await getDoctorSchedule(doctorId);
@@ -211,7 +212,7 @@ export async function getNextAvailableDays(doctorId: number): Promise<Array<{dat
     }
 
     const today = startOfDay(new Date());
-    const availableDays: Array<{date: Date, dayName: string, dayCode: string, times: string[]}> = [];
+    const availableDays: Array<{date: Date, dayName: string, dayCode: string, times: string[], uniqueId: string}> = [];
     let currentDate = today;
     let daysChecked = 0;
     
@@ -222,11 +223,15 @@ export async function getNextAvailableDays(doctorId: number): Promise<Array<{dat
       
       // Check if doctor works on this day
       if (schedule[dayCode] && schedule[dayCode].length > 0) {
+        // Create a unique ID that distinguishes between different dates with the same day of week
+        const uniqueId = `${dayCode}-${currentDate.getTime()}`;
+        
         availableDays.push({
           date: new Date(currentDate),
           dayName: format(currentDate, 'EEEE', { locale: ar }),
           dayCode,
-          times: schedule[dayCode]
+          times: schedule[dayCode],
+          uniqueId // Include the unique ID
         });
       }
       

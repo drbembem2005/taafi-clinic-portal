@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 export interface BookingFormData {
   user_name: string;
   user_phone: string;
-  user_email: string | null;
+  user_email: null;
   notes: string | null;
   specialty_id: number | null;
   doctor_id: number | null;
@@ -78,11 +78,11 @@ const BookingWizardContainer = () => {
     }));
   };
 
-  // Handle appointment selection - update to store the selected date object
-  const handleAppointmentSelect = (day: string, time: string, formattedDateStr: string, selectedDateObj: Date) => {
+  // Handle appointment selection - update to use uniqueId and store the selected date object
+  const handleAppointmentSelect = (uniqueId: string, time: string, formattedDateStr: string, selectedDateObj: Date) => {
     setFormData(prev => ({
       ...prev,
-      booking_day: day,
+      booking_day: uniqueId, // Now using uniqueId instead of just day code
       booking_time: time
     }));
     setFormattedDate(formattedDateStr);
