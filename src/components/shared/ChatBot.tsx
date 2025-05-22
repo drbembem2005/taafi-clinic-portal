@@ -26,7 +26,7 @@ const ChatBot = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Define responseOptions first (before it's used)
+  // Define responseOptions first before using it anywhere
   const responseOptions: Record<string, Option[]> = {
     main: [
       { id: 'specialties', text: 'التخصصات الطبية', action: 'specialties' },
@@ -50,26 +50,11 @@ const ChatBot = () => {
       { id: 'book-whatsapp', text: 'حجز موعد عبر الواتساب', action: 'book-whatsapp' },
       { id: 'book-phone', text: 'حجز موعد عبر الهاتف', action: 'book-phone' },
       { id: 'back', text: 'الرجوع للقائمة الرئيسية', action: 'back-to-main' }
-    ],
-    'back-to-main': responseOptions?.main || []
+    ]
   };
-
-  // Fix the circular reference after initialization
+  
+  // Define back-to-main separately after responseOptions is defined
   responseOptions['back-to-main'] = responseOptions.main;
-
-  // Initial welcome message with category options
-  useEffect(() => {
-    if (messages.length === 0) {
-      const welcomeMessage: Message = {
-        id: 1,
-        text: 'مرحباً بك في عيادات تعافي التخصصية! 👋\nكيف يمكنني مساعدتك اليوم؟',
-        sender: 'bot',
-        timestamp: new Date(),
-        options: responseOptions.main
-      };
-      setMessages([welcomeMessage]);
-    }
-  }, []);
 
   const botResponses: Record<string, { text: string, options?: Option[] }> = {
     'specialties': {
@@ -147,6 +132,20 @@ const ChatBot = () => {
       }
     }
   }, [messages]);
+
+  // Initial welcome message with category options
+  useEffect(() => {
+    if (messages.length === 0) {
+      const welcomeMessage: Message = {
+        id: 1,
+        text: 'مرحباً بك في عيادات تعافي التخصصية! 👋\nكيف يمكنني مساعدتك اليوم؟',
+        sender: 'bot',
+        timestamp: new Date(),
+        options: responseOptions.main
+      };
+      setMessages([welcomeMessage]);
+    }
+  }, []);
 
   // Handle text message send
   const handleSendMessage = () => {
