@@ -219,7 +219,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
   // Full sized doctor card
   return (
     <motion.div 
-      className="rounded-xxl shadow-md overflow-hidden bg-white border border-gray-100"
+      className="xl shadow-md overflow-hidden bg-white border border-gray-100"
       whileHover={{ y: -5 }}
       transition={{ duration: 0.2 }}
     >
