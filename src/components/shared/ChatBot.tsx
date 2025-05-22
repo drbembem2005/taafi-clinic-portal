@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -27,29 +26,8 @@ const ChatBot = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Initial welcome message with category options
-  useEffect(() => {
-    if (messages.length === 0) {
-      const welcomeMessage: Message = {
-        id: 1,
-        text: 'مرحباً بك في عيادات تعافي التخصصية! 👋\nكيف يمكنني مساعدتك اليوم؟',
-        sender: 'bot',
-        timestamp: new Date(),
-        options: [
-          { id: 'specialties', text: 'التخصصات الطبية', action: 'specialties' },
-          { id: 'booking', text: 'حجز موعد', action: 'booking' },
-          { id: 'hours', text: 'مواعيد العمل', action: 'hours' },
-          { id: 'location', text: 'الموقع والعنوان', action: 'location' },
-          { id: 'insurance', text: 'التأمين الطبي', action: 'insurance' },
-          { id: 'contact', text: 'معلومات الاتصال', action: 'contact' }
-        ]
-      };
-      setMessages([welcomeMessage]);
-    }
-  }, []);
-
-  // Options for each category
-  const responseOptions = {
+  // Define responseOptions first (before it's used)
+  const responseOptions: Record<string, Option[]> = {
     main: [
       { id: 'specialties', text: 'التخصصات الطبية', action: 'specialties' },
       { id: 'booking', text: 'حجز موعد', action: 'booking' },
@@ -75,6 +53,23 @@ const ChatBot = () => {
     ],
     'back-to-main': responseOptions?.main || []
   };
+
+  // Fix the circular reference after initialization
+  responseOptions['back-to-main'] = responseOptions.main;
+
+  // Initial welcome message with category options
+  useEffect(() => {
+    if (messages.length === 0) {
+      const welcomeMessage: Message = {
+        id: 1,
+        text: 'مرحباً بك في عيادات تعافي التخصصية! 👋\nكيف يمكنني مساعدتك اليوم؟',
+        sender: 'bot',
+        timestamp: new Date(),
+        options: responseOptions.main
+      };
+      setMessages([welcomeMessage]);
+    }
+  }, []);
 
   const botResponses: Record<string, { text: string, options?: Option[] }> = {
     'specialties': {
@@ -181,12 +176,12 @@ const ChatBot = () => {
     }, 500);
   };
 
-  // Handle option selection
+  // Handle option selection with proper type checking
   const handleOptionClick = (action: string) => {
     // Add user selection as a message
     const selectedOption = Object.values(responseOptions)
       .flat()
-      .find(option => option.action === action);
+      .find(option => option.action === action) as Option | undefined;
 
     if (!selectedOption) return;
 

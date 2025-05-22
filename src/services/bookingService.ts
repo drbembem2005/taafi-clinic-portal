@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -104,40 +105,40 @@ export function openWhatsAppWithBookingDetails(bookingDetails: {
   email?: string | null;
   notes?: string | null;
 }): boolean {
-  // Friendly message format with a warm tone
-  let message = `مرحباً من عيادات تعافي! 🌟\n\n`;
+  // More friendly and conversational message format
+  let message = `مرحباً! 👋 أتمنى أن تكون بخير!\n\n`;
   
-  message += `تم تأكيد حجز موعدك مع ${bookingDetails.doctorName} `;
+  message += `أود تأكيد حجز موعدك مع د. ${bookingDetails.doctorName} `;
   if (bookingDetails.specialtyName) {
     message += `(${bookingDetails.specialtyName}) `;
   }
   
   if (bookingDetails.date && bookingDetails.time) {
-    message += `يوم ${bookingDetails.date} الساعة ${bookingDetails.time}\n\n`;
+    message += `\n\nموعدك يوم ${bookingDetails.date} في تمام الساعة ${bookingDetails.time} ✨`;
   } else if (bookingDetails.date) {
-    message += `يوم ${bookingDetails.date}\n\n`;
+    message += `\n\nموعدك يوم ${bookingDetails.date} ✨`;
   } else if (bookingDetails.time) {
-    message += `الساعة ${bookingDetails.time}\n\n`;
+    message += `\n\nموعدك في تمام الساعة ${bookingDetails.time} ✨`;
   }
   
-  message += `بيانات الحجز:\n`;
+  message += `\n\nبياناتك:`;
   if (bookingDetails.userName) {
-    message += `• الاسم: ${bookingDetails.userName}\n`;
+    message += `\n• الاسم: ${bookingDetails.userName}`;
   }
   
   if (bookingDetails.phone) {
-    message += `• رقم الهاتف: ${bookingDetails.phone}\n`;
+    message += `\n• رقم الهاتف: ${bookingDetails.phone}`;
   }
   
   if (bookingDetails.email) {
-    message += `• البريد الإلكتروني: ${bookingDetails.email}\n`;
+    message += `\n• البريد الإلكتروني: ${bookingDetails.email}`;
   }
   
   if (bookingDetails.notes) {
-    message += `\nملاحظات: ${bookingDetails.notes}\n`;
+    message += `\n\n💬 ملاحظاتك: ${bookingDetails.notes}`;
   }
   
-  message += `\nنتطلع لرؤيتك! إذا احتجت لتغيير موعدك أو كان لديك أي استفسار، يمكنك التواصل معنا على 01119007403 ✨`;
+  message += `\n\nنتطلع لرؤيتك قريباً! 😊 إذا كنت ترغب في تغيير موعدك أو لديك أي استفسار، لا تتردد في التواصل معنا على الرقم 01119007403 ❤️`;
   
   // Encode the message for URL
   const encodedMessage = encodeURIComponent(message);
