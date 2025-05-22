@@ -140,7 +140,12 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
             <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16 rounded-full border-2 border-gray-100">
                 {doctor.image ? (
-                  <AvatarImage src={doctor.image} alt={doctor.name} className="object-cover" />
+                  <AvatarImage 
+                    src={doctor.image} 
+                    alt={doctor.name} 
+                    className="object-cover" 
+                    style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} 
+                  />
                 ) : (
                   <AvatarFallback className="bg-brand/10 text-brand">
                     <User className="h-6 w-6" />
@@ -222,7 +227,12 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
         <div className={`${isMobile ? 'py-4' : 'md:w-1/3'} bg-gradient-to-br from-brand/5 to-brand/10 p-6 flex items-center justify-center`}>
           <div className={`${isMobile ? 'w-24 h-24' : 'w-32 h-32'} rounded-full bg-white shadow p-1.5 flex items-center justify-center overflow-hidden`}>
             {doctor.image ? (
-              <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover rounded-full" />
+              <img 
+                src={doctor.image} 
+                alt={doctor.name} 
+                className="w-full h-full object-cover"
+                style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} 
+              />
             ) : (
               <div className="w-full h-full rounded-full bg-brand/10 flex items-center justify-center">
                 <User className={`${isMobile ? 'h-12 w-12' : 'h-16 w-16'} text-brand/40`} />
@@ -369,7 +379,7 @@ const DoctorDetails = ({
                 src={doctor.image} 
                 alt={doctor.name} 
                 className="w-full h-full object-cover" 
-                style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} 
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
