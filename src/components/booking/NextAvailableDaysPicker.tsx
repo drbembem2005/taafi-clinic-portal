@@ -165,9 +165,10 @@ const NextAvailableDaysPicker = ({
           return (
             <Card 
               key={dayIndex} 
-              className={`overflow-hidden transition-all hover:shadow-md ${
+              className={`overflow-hidden transition-all hover:shadow-md cursor-pointer ${
                 isDaySelected ? 'border-brand ring-1 ring-brand shadow-md' : ''
               }`}
+              onClick={() => isValidDate && availableTime && handleSelectDateTime(dayInfo.dayCode, availableTime, dayInfo.date)}
             >
               <div className={`p-4 flex flex-col items-center justify-center ${
                 isDaySelected ? 'bg-brand text-white' : 'bg-brand/5'
@@ -194,7 +195,10 @@ const NextAvailableDaysPicker = ({
                             ? 'bg-brand hover:bg-brand/90' 
                             : 'hover:border-brand hover:text-brand'
                         }`}
-                        onClick={() => isValidDate && availableTime && handleSelectDateTime(dayInfo.dayCode, availableTime, dayInfo.date)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent card onClick from firing
+                          isValidDate && availableTime && handleSelectDateTime(dayInfo.dayCode, availableTime, dayInfo.date);
+                        }}
                       >
                         <Clock className="h-5 w-5 ml-2" />
                         {availableTime}
