@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SpecialtySelection from './SpecialtySelection';
@@ -44,6 +43,7 @@ const BookingWizardContainer = () => {
   const [bookingComplete, setBookingComplete] = useState<boolean>(false);
   const [bookingReference, setBookingReference] = useState<string>('');
   const [formattedDate, setFormattedDate] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // Navigation methods
   const goToNextStep = () => {
@@ -78,14 +78,15 @@ const BookingWizardContainer = () => {
     }));
   };
 
-  // Handle appointment selection
-  const handleAppointmentSelect = (day: string, time: string, formattedDateStr: string) => {
+  // Handle appointment selection - update to store the selected date object
+  const handleAppointmentSelect = (day: string, time: string, formattedDateStr: string, selectedDateObj: Date) => {
     setFormData(prev => ({
       ...prev,
       booking_day: day,
       booking_time: time
     }));
     setFormattedDate(formattedDateStr);
+    setSelectedDate(selectedDateObj); // Store the selected date object
   };
 
   // Handle contact info update
@@ -129,6 +130,7 @@ const BookingWizardContainer = () => {
     setCurrentStep(1);
     setBookingReference('');
     setFormattedDate('');
+    setSelectedDate(null); // Reset selected date
   };
 
   // If booking is complete, show success screen
@@ -296,6 +298,7 @@ const BookingWizardContainer = () => {
                 doctorName={selectedDoctor?.name || ''}
                 specialtyName={selectedSpecialty?.name || ''}
                 formattedDate={formattedDate}
+                selectedDate={selectedDate} // Pass the selected date to BookingConfirmation
                 onBookingSuccess={handleBookingSuccess}
               />
             </motion.div>

@@ -76,8 +76,6 @@ const AppointmentSelection = ({
           />
         </div>
       </div>
-      
-      {/* Removed duplicate notification here - we'll only show it in one place */}
     </div>
   );
 };
