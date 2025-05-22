@@ -362,10 +362,15 @@ const DoctorDetails = ({
         </button>
 
         <div className="flex items-center">
-          {/* Doctor avatar */}
+          {/* Doctor avatar - improved to fill the container */}
           <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border-2 border-white/30 overflow-hidden flex-shrink-0 bg-white/10 ml-4">
             {doctor.image ? (
-              <img src={doctor.image} alt={doctor.name} className="w-full h-full object-cover" />
+              <img 
+                src={doctor.image} 
+                alt={doctor.name} 
+                className="w-full h-full object-cover" 
+                style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <User className="h-8 w-8 md:h-10 md:w-10 text-white/70" />
