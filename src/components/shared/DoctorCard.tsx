@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -144,7 +143,6 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
                     src={doctor.image} 
                     alt={doctor.name} 
                     className="object-cover" 
-                    style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} 
                   />
                 ) : (
                   <AvatarFallback className="bg-brand/10 text-brand">
@@ -230,8 +228,7 @@ const DoctorCard = ({ doctor, compact = false }: DoctorCardProps) => {
               <img 
                 src={doctor.image} 
                 alt={doctor.name} 
-                className="w-full h-full object-cover"
-                style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} 
+                className="w-full h-full rounded-full object-cover"
               />
             ) : (
               <div className="w-full h-full rounded-full bg-brand/10 flex items-center justify-center">
@@ -379,7 +376,6 @@ const DoctorDetails = ({
                 src={doctor.image} 
                 alt={doctor.name} 
                 className="w-full h-full object-cover" 
-                style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center" }} 
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
