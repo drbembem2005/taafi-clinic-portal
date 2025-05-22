@@ -132,17 +132,7 @@ const AppointmentSelection = ({
   }
   
   // Loading state
-  if (loading) {
-    return (
-      <div className="p-4">
-        <div className="text-center py-6">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-brand motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
-          <p className="mt-3 text-sm text-gray-500">جاري تحميل المواعيد المتاحة...</p>
-        </div>
-      </div>
-    );
-  }
-  
+    
   // Error state
   if (error) {
     return (
