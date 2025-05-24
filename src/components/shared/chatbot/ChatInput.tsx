@@ -15,7 +15,7 @@ const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
   const handleSend = () => {
     if (!message.trim() || isLoading) return;
     
-    onSendMessage(message);
+    onSendMessage(message.trim());
     setMessage('');
   };
 

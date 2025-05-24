@@ -8,6 +8,7 @@ import ChatMessages from './ChatMessages';
 import ChatInput from './ChatInput';
 import QuickActions from './QuickActions';
 import { Message, ChatBotState } from './types';
+import { chatbotService } from './chatbotService';
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -50,16 +51,59 @@ const ChatBot = () => {
     setMessages(prev => [...prev, newMessage]);
   };
 
+  const handleSendMessage = async (text: string) => {
+    // Add user message
+    addMessage({ text, sender: 'user' });
+    setIsLoading(true);
+
+    try {
+      // Get response from chatbot service
+      const response = await chatbotService.handleAction('main');
+      setTimeout(() => {
+        addMessage(response);
+        setIsLoading(false);
+      }, 800);
+    } catch (error) {
+      console.error('Error getting chatbot response:', error);
+      addMessage({
+        text: 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.',
+        sender: 'bot'
+      });
+      setIsLoading(false);
+    }
+  };
+
   const handleClose = () => {
     setIsOpen(false);
   };
 
-  const handleQuickAction = (action: string) => {
-    // Handle quick actions like "حجز سريع", "اتصل بنا", etc.
+  const handleQuickAction = async (action: string) => {
+    // Map quick action text to actual actions
+    const actionMap: { [key: string]: string } = {
+      'حجز سريع': 'booking',
+      'واتساب': 'contact',
+      'اتصل بنا': 'contact',
+      'معلومات': 'hours'
+    };
+
+    const mappedAction = actionMap[action] || 'main';
+    
     addMessage({
       text: action,
       sender: 'user'
     });
+
+    setIsLoading(true);
+    try {
+      const response = await chatbotService.handleAction(mappedAction);
+      setTimeout(() => {
+        addMessage(response);
+        setIsLoading(false);
+      }, 800);
+    } catch (error) {
+      console.error('Error handling quick action:', error);
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -128,7 +172,7 @@ const ChatBot = () => {
                 <QuickActions onAction={handleQuickAction} chatState={chatState} />
                 
                 <ChatInput 
-                  onSendMessage={(text) => addMessage({ text, sender: 'user' })}
+                  onSendMessage={handleSendMessage}
                   isLoading={isLoading}
                 />
               </div>
