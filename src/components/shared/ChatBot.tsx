@@ -35,6 +35,8 @@ interface ActionLink {
   text: string;
   url: string;
   icon: 'phone' | 'message' | 'link';
+  doctorId?: number;
+  specialtyId?: number;
 }
 
 const ChatBot = () => {
@@ -44,7 +46,7 @@ const ChatBot = () => {
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Define responseOptions
+  // Define responseOptions after state declaration
   const responseOptions: Record<string, Option[]> = {
     main: [
       { id: 'specialties', text: 'التخصصات الطبية', action: 'specialties' },
@@ -74,6 +76,13 @@ const ChatBot = () => {
 
   // Add back-to-main to responseOptions
   responseOptions['back-to-main'] = responseOptions.main;
+
+  // Auto-close function
+  const autoCloseChatBot = () => {
+    setTimeout(() => {
+      setIsOpen(false);
+    }, 1000);
+  };
 
   // Scroll to bottom of messages
   useEffect(() => {
@@ -411,7 +420,7 @@ const ChatBot = () => {
     }
   };
 
-  // Function to handle specialty selection
+  // Function to handle specialty selection with auto-close
   const handleSpecialtyClick = async (specialtyId: number, specialtyName: string) => {
     const userMessage: Message = {
       id: messages.length + 1,
@@ -439,8 +448,9 @@ const ChatBot = () => {
           { 
             type: 'booking',
             text: `حجز موعد في ${specialtyName}`,
-            url: `/booking?specialty=${encodeURIComponent(specialtyName)}`,
-            icon: 'link'
+            url: `/booking?specialty=${encodeURIComponent(specialtyName)}&specialtyId=${specialtyId}`,
+            icon: 'link',
+            specialtyId: specialtyId
           }
         ]
       };
@@ -455,7 +465,7 @@ const ChatBot = () => {
     }
   };
 
-  // Function to render action links
+  // Function to render action links with uniform styling
   const renderActionLinks = (links: ActionLink[]) => {
     return (
       <div className="flex flex-wrap gap-2 mt-3">
@@ -465,6 +475,12 @@ const ChatBot = () => {
             link.icon === 'message' ? MessageCircle :
             LinkIcon;
             
+          const handleLinkClick = () => {
+            if (link.type === 'booking') {
+              autoCloseChatBot();
+            }
+          };
+
           if (link.url.startsWith('http') || link.url.startsWith('tel:') || link.url.startsWith('mailto:')) {
             return (
               <a 
@@ -472,7 +488,8 @@ const ChatBot = () => {
                 href={link.url}
                 target={link.url.startsWith('http') ? '_blank' : '_self'}
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-md bg-brand/90 px-3 py-1.5 text-sm text-white hover:bg-brand transition-colors"
+                onClick={handleLinkClick}
+                className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-brand to-brand-light px-4 py-2 text-sm text-white hover:from-brand-dark hover:to-brand transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 <IconComponent size={16} />
                 <span>{link.text}</span>
@@ -484,7 +501,8 @@ const ChatBot = () => {
             <Link
               key={index}
               to={link.url}
-              className="inline-flex items-center gap-2 rounded-md bg-brand/90 px-3 py-1.5 text-sm text-white hover:bg-brand transition-colors"
+              onClick={handleLinkClick}
+              className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-brand to-brand-light px-4 py-2 text-sm text-white hover:from-brand-dark hover:to-brand transition-all duration-200 shadow-sm hover:shadow-md"
             >
               <IconComponent size={16} />
               <span>{link.text}</span>
@@ -520,7 +538,7 @@ const ChatBot = () => {
     );
   };
 
-  // Function to render doctor cards
+  // Function to render doctor cards with booking functionality
   const renderDoctorCards = (doctors: Doctor[]) => {
     return (
       <div className="grid grid-cols-1 gap-3 mt-3">
@@ -547,8 +565,9 @@ const ChatBot = () => {
                 )}
               </div>
               <Link 
-                to={`/booking?doctor=${doctor.id}`}
-                className="shrink-0 text-xs bg-brand text-white hover:bg-brand-dark px-3 py-1.5 rounded-md transition-colors"
+                to={`/booking?doctor=${doctor.id}&doctorName=${encodeURIComponent(doctor.name)}`}
+                onClick={autoCloseChatBot}
+                className="shrink-0 text-xs bg-gradient-to-r from-brand to-brand-light text-white hover:from-brand-dark hover:to-brand px-3 py-1.5 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 حجز موعد
               </Link>
@@ -701,17 +720,17 @@ const ChatBot = () => {
                       </div>
                     )}
                     
-                    {/* Option buttons */}
+                    {/* Option buttons - UNIFORM STYLING */}
                     {msg.sender === 'bot' && msg.options && msg.options.length > 0 && (
                       <div className="mr-10 flex flex-wrap gap-2 justify-start">
                         {msg.options.map((option) => (
-                          <Badge
+                          <button
                             key={option.id}
-                            className="bg-gradient-to-r from-brand/10 to-brand/5 hover:from-brand/20 hover:to-brand/10 text-brand hover:text-brand-dark cursor-pointer px-3 py-1.5 border border-brand/20 transition-all"
                             onClick={() => handleOptionClick(option.action)}
+                            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-gray-100 to-gray-50 hover:from-brand/10 hover:to-brand/5 text-gray-700 hover:text-brand cursor-pointer px-4 py-2 border border-gray-200 hover:border-brand/20 transition-all duration-200 shadow-sm hover:shadow-md text-sm font-medium"
                           >
                             {option.text}
-                          </Badge>
+                          </button>
                         ))}
                       </div>
                     )}
