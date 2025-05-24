@@ -1,4 +1,3 @@
-
 import { motion } from 'framer-motion';
 import { User, Stethoscope } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
@@ -35,8 +34,28 @@ const MessageBubble = ({
       setTimeout(() => {
         onAddMessage(response);
         onSetLoading(false);
-        if (response.data?.state) {
-          onSetChatState(response.data.state);
+        
+        // Handle state changes based on action type
+        const [actionType] = action.split('-');
+        switch (actionType) {
+          case 'specialties':
+            onSetChatState('specialties');
+            break;
+          case 'doctors':
+            onSetChatState('doctors');
+            break;
+          case 'specialty':
+            onSetChatState('doctors');
+            break;
+          case 'booking':
+            onSetChatState('booking');
+            break;
+          case 'main':
+            onSetChatState('main-menu');
+            break;
+          default:
+            // Keep current state
+            break;
         }
       }, 800);
     } catch (error) {
