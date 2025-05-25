@@ -9,6 +9,7 @@ import ChatInput from './ChatInput';
 import QuickActions from './QuickActions';
 import { Message, ChatBotState } from './types';
 import { chatbotService } from './chatbotService';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,6 +17,7 @@ const ChatBot = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [chatState, setChatState] = useState<ChatBotState>('welcome');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   // Initialize with welcome message
   useEffect(() => {
@@ -108,15 +110,19 @@ const ChatBot = () => {
 
   return (
     <>
-      {/* Floating Chat Button */}
+      {/* Floating Chat Button - Positioned above mobile navigation */}
       <motion.div
-        className="fixed bottom-6 left-6 z-50"
+        className={`fixed z-50 ${
+          isMobile 
+            ? 'bottom-20 left-4' // Above mobile navigation (16px + 64px navigation height)
+            : 'bottom-6 left-6'   // Desktop position
+        }`}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
       >
         <Button
-          className="w-16 h-16 rounded-full bg-gradient-to-r from-brand to-brand-dark hover:from-brand-dark hover:to-brand shadow-xl transform hover:scale-105 transition-all duration-200"
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-brand to-brand-dark hover:from-brand-dark hover:to-brand shadow-xl transform hover:scale-105 transition-all duration-200"
           onClick={() => setIsOpen(!isOpen)}
         >
           <AnimatePresence mode="wait">
@@ -128,7 +134,7 @@ const ChatBot = () => {
                 exit={{ rotate: 90, opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5" />
               </motion.div>
             ) : (
               <motion.div
@@ -138,7 +144,7 @@ const ChatBot = () => {
                 exit={{ rotate: -90, opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <MessageCircle className="h-6 w-6" />
+                <MessageCircle className="h-5 w-5" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -149,13 +155,17 @@ const ChatBot = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed bottom-24 left-6 z-50 bg-white rounded-2xl shadow-2xl w-96 max-w-[calc(100vw-3rem)] overflow-hidden border border-gray-100"
+            className={`fixed z-50 bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100 ${
+              isMobile 
+                ? 'bottom-36 left-4 right-4 max-w-none' // Full width on mobile, above navigation
+                : 'bottom-24 left-6 w-96 max-w-[calc(100vw-3rem)]' // Desktop position
+            }`}
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
           >
-            <div className="flex flex-col h-[32rem] max-h-[80vh]">
+            <div className={`flex flex-col ${isMobile ? 'h-96' : 'h-[32rem]'} max-h-[60vh]`}>
               <ChatHeader onClose={handleClose} />
               
               <div className="flex-1 flex flex-col min-h-0">
