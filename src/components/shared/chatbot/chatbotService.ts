@@ -188,7 +188,7 @@ class ChatbotService {
           {
             type: 'link',
             text: 'فتح الخريطة',
-            url: 'https://maps.google.com/?q=29.9771391,30.9428551',
+            url: 'https://maps.app.goo.gl/YC86Q6hMdknLVbK49',
             icon: 'link'
           }
         ]
