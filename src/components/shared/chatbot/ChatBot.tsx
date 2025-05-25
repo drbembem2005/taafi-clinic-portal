@@ -1,20 +1,21 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send } from 'lucide-react';
+import { MessageCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import ChatHeader from './ChatHeader';
+import ChatMessages from './ChatMessages';
+import ChatInput from './ChatInput';
+import QuickActions from './QuickActions';
+import { Message, ChatBotState } from './types';
+import { chatbotService } from './chatbotService';
 import { useIsMobile } from '@/hooks/use-mobile';
-import ChatMessage from './ChatMessage';
-import QuickActionsGrid from './QuickActionsGrid';
-import { Message } from './types';
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [chatState, setChatState] = useState<ChatBotState>('welcome');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
@@ -23,12 +24,13 @@ const ChatBot = () => {
     if (isOpen && messages.length === 0) {
       const welcomeMessage: Message = {
         id: 1,
-        text: 'مرحباً بك في عيادات تعافي! 👋\nكيف يمكنني مساعدتك اليوم؟',
+        text: 'مرحباً بك في عيادات تعافي التخصصية! 👋\nكيف يمكنني مساعدتك اليوم؟',
         sender: 'bot',
         timestamp: new Date(),
         type: 'welcome'
       };
       setMessages([welcomeMessage]);
+      setChatState('main-menu');
     }
   }, [isOpen, messages.length]);
 
@@ -51,89 +53,98 @@ const ChatBot = () => {
     setMessages(prev => [...prev, newMessage]);
   };
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
-    
+  const handleSendMessage = async (text: string) => {
     // Add user message
-    addMessage({ text: inputValue, sender: 'user' });
-    setInputValue('');
-    setIsTyping(true);
+    addMessage({ text, sender: 'user' });
+    setIsLoading(true);
 
-    // Simulate bot response
-    setTimeout(() => {
+    try {
+      // Get response from chatbot service
+      const response = await chatbotService.handleAction('main');
+      setTimeout(() => {
+        addMessage(response);
+        setIsLoading(false);
+      }, 800);
+    } catch (error) {
+      console.error('Error getting chatbot response:', error);
       addMessage({
-        text: 'شكراً لتواصلك معنا! سيتم الرد عليك في أقرب وقت ممكن.',
+        text: 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.',
         sender: 'bot'
       });
-      setIsTyping(false);
-    }, 1500);
+      setIsLoading(false);
+    }
   };
 
-  const handleQuickAction = (action: string) => {
-    addMessage({ text: action, sender: 'user' });
-    setIsTyping(true);
+  const handleClose = () => {
+    setIsOpen(false);
+  };
 
-    let response = '';
-    switch (action) {
-      case 'حجز موعد':
-        response = 'يمكنك حجز موعد من خلال:\n• الموقع الإلكتروني\n• الاتصال على: 01119007403\n• واتساب: 01119007403';
-        break;
-      case 'مواعيد العمل':
-        response = 'مواعيد العمل:\n• السبت - الخميس: 10 صباحاً - 10 مساءً\n• الجمعة: مغلق';
-        break;
-      case 'التخصصات':
-        response = 'التخصصات المتاحة:\n• طب الأسرة\n• الباطنة\n• الأطفال\n• النساء والتوليد\n• الجلدية\n• العظام';
-        break;
-      case 'الموقع':
-        response = 'العنوان:\nميدان الحصري، أبراج برعي بلازا، برج رقم ٢\nبجوار محل شعبان للملابس، الدور الثالث\n6 أكتوبر، القاهرة';
-        break;
-      default:
-        response = 'شكراً لك! كيف يمكنني مساعدتك أكثر؟';
+  const handleQuickAction = async (action: string) => {
+    // Map quick action text to actual actions
+    const actionMap: { [key: string]: string } = {
+      'حجز سريع': 'booking',
+      'واتساب': 'contact',
+      'اتصل بنا': 'contact',
+      'معلومات': 'hours'
+    };
+
+    const mappedAction = actionMap[action] || 'main';
+    
+    addMessage({
+      text: action,
+      sender: 'user'
+    });
+
+    setIsLoading(true);
+    try {
+      const response = await chatbotService.handleAction(mappedAction);
+      setTimeout(() => {
+        addMessage(response);
+        setIsLoading(false);
+      }, 800);
+    } catch (error) {
+      console.error('Error handling quick action:', error);
+      setIsLoading(false);
     }
-
-    setTimeout(() => {
-      addMessage({ text: response, sender: 'bot' });
-      setIsTyping(false);
-    }, 1000);
   };
 
   return (
     <>
-      {/* Chat Button */}
+      {/* Floating Chat Button - Positioned above mobile navigation */}
       <motion.div
         className={`fixed z-50 ${
           isMobile 
-            ? 'bottom-20 left-4' 
-            : 'bottom-6 left-6'
+            ? 'bottom-20 left-4' // Above mobile navigation (16px + 64px navigation height)
+            : 'bottom-6 left-6'   // Desktop position
         }`}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
       >
         <Button
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-brand to-brand-dark hover:from-brand-dark hover:to-brand shadow-xl transform hover:scale-105 transition-all duration-200"
           onClick={() => setIsOpen(!isOpen)}
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg hover:shadow-xl transition-all duration-200"
         >
           <AnimatePresence mode="wait">
             {isOpen ? (
               <motion.div
                 key="close"
-                initial={{ rotate: 90 }}
-                animate={{ rotate: 0 }}
-                exit={{ rotate: -90 }}
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <X size={20} />
+                <X className="h-5 w-5" />
               </motion.div>
             ) : (
               <motion.div
                 key="chat"
-                initial={{ rotate: -90 }}
-                animate={{ rotate: 0 }}
-                exit={{ rotate: 90 }}
+                initial={{ rotate: 90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: -90, opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <MessageCircle size={20} />
+                <MessageCircle className="h-5 w-5" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -144,81 +155,36 @@ const ChatBot = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className={`fixed z-50 bg-white rounded-2xl shadow-2xl border ${
+            className={`fixed z-50 bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100 ${
               isMobile 
-                ? 'bottom-36 left-4 right-4 h-[70vh]' 
-                : 'bottom-24 left-6 w-96 h-[32rem]'
+                ? 'bottom-36 left-4 right-4 max-w-none' // Full width on mobile, above navigation
+                : 'bottom-24 left-6 w-96 max-w-[calc(100vw-3rem)]' // Desktop position
             }`}
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
           >
-            {/* Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 rounded-t-2xl">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                    <MessageCircle size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg">مساعد تعافي</h3>
-                    <p className="text-sm opacity-90">متاح الآن</p>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsOpen(false)}
-                  className="text-white hover:bg-white/20 w-8 h-8 p-0"
-                >
-                  <X size={16} />
-                </Button>
-              </div>
-            </div>
-
-            {/* Messages */}
-            <div className="flex-1 flex flex-col h-[calc(100%-140px)]">
-              <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-                <div className="space-y-4">
-                  {messages.map((message) => (
-                    <ChatMessage key={message.id} message={message} />
-                  ))}
-                  
-                  {isTyping && (
-                    <div className="flex items-center gap-2 text-gray-500">
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                      </div>
-                      <span className="text-sm">يكتب...</span>
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-
-              {/* Quick Actions */}
-              <QuickActionsGrid onAction={handleQuickAction} />
-
-              {/* Input */}
-              <div className="p-4 border-t">
-                <div className="flex gap-2">
-                  <Input
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder="اكتب رسالتك..."
-                    className="flex-1"
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  />
-                  <Button
-                    onClick={handleSendMessage}
-                    disabled={!inputValue.trim()}
-                    className="bg-blue-600 hover:bg-blue-700 px-3"
-                  >
-                    <Send size={16} />
-                  </Button>
-                </div>
+            <div className={`flex flex-col ${isMobile ? 'h-96' : 'h-[32rem]'} max-h-[60vh]`}>
+              <ChatHeader onClose={handleClose} />
+              
+              <div className="flex-1 flex flex-col min-h-0">
+                <ChatMessages 
+                  messages={messages}
+                  isLoading={isLoading}
+                  onAddMessage={addMessage}
+                  onSetLoading={setIsLoading}
+                  chatState={chatState}
+                  onSetChatState={setChatState}
+                  scrollAreaRef={scrollAreaRef}
+                />
+                
+                <QuickActions onAction={handleQuickAction} chatState={chatState} />
+                
+                <ChatInput 
+                  onSendMessage={handleSendMessage}
+                  isLoading={isLoading}
+                />
               </div>
             </div>
           </motion.div>

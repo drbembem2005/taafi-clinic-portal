@@ -4,23 +4,13 @@ export interface Message {
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
-  type?: 'welcome' | 'info' | 'action' | 'specialties' | 'doctors' | 'booking' | 'options';
+  type?: 'welcome' | 'options' | 'doctors' | 'specialties' | 'info' | 'booking';
   data?: {
-    richContent?: string;
-    specialties?: Array<{
-      id: number;
-      name: string;
-      description?: string;
-    }>;
-    doctors?: Array<{
-      id: number;
-      name: string;
-      specialty: string;
-      experience?: string;
-      image?: string;
-    }>;
-    options?: QuickOption[];
+    doctors?: any[];
+    specialties?: any[];
     links?: ActionLink[];
+    richContent?: string;
+    options?: QuickOption[];
   };
 }
 
@@ -29,6 +19,7 @@ export interface ActionLink {
   text: string;
   url: string;
   icon: 'phone' | 'message' | 'link';
+  doctorId?: number;
   specialtyId?: number;
 }
 
@@ -36,6 +27,14 @@ export interface QuickOption {
   id: string;
   text: string;
   action: string;
+  icon?: string;
 }
 
-export type ChatBotState = 'welcome' | 'conversation' | 'closed' | 'specialties' | 'doctors' | 'booking' | 'main-menu';
+export type ChatBotState = 
+  | 'welcome' 
+  | 'main-menu' 
+  | 'specialties' 
+  | 'doctors' 
+  | 'booking' 
+  | 'contact' 
+  | 'info';
