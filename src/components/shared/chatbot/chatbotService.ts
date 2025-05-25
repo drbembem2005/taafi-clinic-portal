@@ -66,13 +66,26 @@ class ChatbotService {
 
   private async getDoctorsResponse(): Promise<Omit<Message, 'id' | 'timestamp'>> {
     const doctors = await getDoctors();
+    const specialties = await getSpecialties();
+    
+    // Transform doctors to match the expected interface
+    const transformedDoctors = doctors.map(doctor => {
+      const specialty = specialties.find(s => s.id === doctor.specialty_id);
+      return {
+        id: doctor.id,
+        name: doctor.name,
+        specialty: specialty?.name || 'طبيب متخصص',
+        experience: doctor.experience ? `${doctor.experience} سنة خبرة` : undefined,
+        image: doctor.image
+      };
+    });
     
     return {
       text: 'الأطباء المتاحون في عيادات تعافي:',
       sender: 'bot',
       type: 'doctors',
       data: {
-        doctors,
+        doctors: transformedDoctors,
         options: [
           { id: 'back', text: 'القائمة الرئيسية', action: 'main' }
         ],
@@ -93,12 +106,21 @@ class ChatbotService {
     const specialties = await getSpecialties();
     const specialty = specialties.find(s => s.id === specialtyId);
     
+    // Transform doctors to match the expected interface
+    const transformedDoctors = doctors.map(doctor => ({
+      id: doctor.id,
+      name: doctor.name,
+      specialty: specialty?.name || 'طبيب متخصص',
+      experience: doctor.experience ? `${doctor.experience} سنة خبرة` : undefined,
+      image: doctor.image
+    }));
+    
     return {
       text: `أطباء ${specialty?.name || 'التخصص'}:`,
       sender: 'bot',
       type: 'doctors',
       data: {
-        doctors,
+        doctors: transformedDoctors,
         options: [
           { id: 'specialties', text: 'التخصصات', action: 'specialties' },
           { id: 'main', text: 'القائمة الرئيسية', action: 'main' }
