@@ -34,15 +34,15 @@ const ChatBot = () => {
     }
   }, [isOpen, messages.length]);
 
-  // Auto-scroll to bottom
+  // Listen for close chatbot event
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      const scrollableNode = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollableNode) {
-        scrollableNode.scrollTop = scrollableNode.scrollHeight;
-      }
-    }
-  }, [messages]);
+    const handleCloseChatbot = () => {
+      setIsOpen(false);
+    };
+
+    window.addEventListener('closeChatbot', handleCloseChatbot);
+    return () => window.removeEventListener('closeChatbot', handleCloseChatbot);
+  }, []);
 
   const addMessage = (message: Omit<Message, 'id' | 'timestamp'>) => {
     const newMessage: Message = {
@@ -168,7 +168,7 @@ const ChatBot = () => {
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
             transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
           >
-            <div className={`flex flex-col ${isMobile ? 'h-96' : 'h-[32rem]'} max-h-[70vh]`}>
+            <div className={`flex flex-col ${isMobile ? 'h-[28rem]' : 'h-[32rem]'} max-h-[70vh]`}>
               <ChatHeader onClose={handleClose} />
               
               <div className="flex-1 flex flex-col min-h-0 bg-gradient-to-b from-gray-50/50 to-white/50">

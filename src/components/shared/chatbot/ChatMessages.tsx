@@ -3,7 +3,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Message, ChatBotState } from './types';
 import MessageBubble from './MessageBubble';
 import TypingIndicator from './TypingIndicator';
-import { RefObject } from 'react';
+import { RefObject, useEffect } from 'react';
 
 interface ChatMessagesProps {
   messages: Message[];
@@ -24,12 +24,24 @@ const ChatMessages = ({
   onSetChatState,
   scrollAreaRef 
 }: ChatMessagesProps) => {
+  // Auto-scroll to bottom when new messages are added
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      const scrollableNode = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollableNode) {
+        setTimeout(() => {
+          scrollableNode.scrollTop = scrollableNode.scrollHeight;
+        }, 100);
+      }
+    }
+  }, [messages, isLoading]);
+
   return (
-    <ScrollArea className="flex-1 px-4 py-2" ref={scrollAreaRef}>
-      <div className="space-y-4">
+    <ScrollArea className="flex-1 px-3 py-2" ref={scrollAreaRef}>
+      <div className="space-y-3 min-h-full">
         {messages.map((message, index) => (
           <MessageBubble 
-            key={`message-${message.id}-${index}`}
+            key={`${message.id}-${index}`}
             message={message}
             onAddMessage={onAddMessage}
             onSetLoading={onSetLoading}
@@ -38,11 +50,7 @@ const ChatMessages = ({
           />
         ))}
         
-        {isLoading && (
-          <div key="typing-indicator">
-            <TypingIndicator />
-          </div>
-        )}
+        {isLoading && <TypingIndicator />}
       </div>
     </ScrollArea>
   );
