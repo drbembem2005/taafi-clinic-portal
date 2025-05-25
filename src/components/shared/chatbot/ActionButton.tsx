@@ -1,4 +1,5 @@
 
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { PhoneCall, MessageCircle, ExternalLink, Calendar } from 'lucide-react';
 import { ActionLink } from './types';
@@ -14,18 +15,18 @@ const ActionButton = ({ link }: ActionButtonProps) => {
     link.type === 'booking' ? Calendar :
     ExternalLink;
 
-  const baseClasses = "inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md";
+  const baseClasses = "inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 shadow-lg hover:shadow-xl backdrop-blur-sm border border-white/20";
   
   const getButtonClasses = () => {
     switch (link.type) {
       case 'booking':
-        return `${baseClasses} bg-gradient-to-r from-brand to-brand-light text-white hover:from-brand-dark hover:to-brand`;
+        return `${baseClasses} bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white`;
       case 'whatsapp':
-        return `${baseClasses} bg-green-600 hover:bg-green-700 text-white`;
+        return `${baseClasses} bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white`;
       case 'phone':
-        return `${baseClasses} bg-blue-600 hover:bg-blue-700 text-white`;
+        return `${baseClasses} bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white`;
       default:
-        return `${baseClasses} bg-gray-100 hover:bg-gray-200 text-gray-700`;
+        return `${baseClasses} bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-700`;
     }
   };
 
@@ -36,29 +37,38 @@ const ActionButton = ({ link }: ActionButtonProps) => {
     }
   };
 
+  const ButtonContent = () => (
+    <motion.div
+      className={getButtonClasses()}
+      whileHover={{ scale: 1.05, y: -2 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={handleClick}
+    >
+      <motion.div
+        whileHover={{ rotate: 5 }}
+        transition={{ duration: 0.2 }}
+      >
+        <IconComponent size={16} />
+      </motion.div>
+      <span className="font-semibold">{link.text}</span>
+    </motion.div>
+  );
+
   if (link.url.startsWith('http') || link.url.startsWith('tel:') || link.url.startsWith('mailto:')) {
     return (
       <a 
         href={link.url}
         target={link.url.startsWith('http') ? '_blank' : '_self'}
         rel="noopener noreferrer"
-        onClick={handleClick}
-        className={getButtonClasses()}
       >
-        <IconComponent size={16} />
-        <span>{link.text}</span>
+        <ButtonContent />
       </a>
     );
   }
   
   return (
-    <Link
-      to={link.url}
-      onClick={handleClick}
-      className={getButtonClasses()}
-    >
-      <IconComponent size={16} />
-      <span>{link.text}</span>
+    <Link to={link.url}>
+      <ButtonContent />
     </Link>
   );
 };
