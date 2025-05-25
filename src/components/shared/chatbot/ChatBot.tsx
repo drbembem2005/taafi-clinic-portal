@@ -168,7 +168,7 @@ const ChatBot = () => {
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
             transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
           >
-            <div className={`flex flex-col ${isMobile ? 'h-[28rem]' : 'h-[32rem]'} max-h-[70vh]`}>
+            <div className={`flex flex-col ${isMobile ? 'h-[36rem]' : 'h-[42rem]'} max-h-[80vh]`}>
               <ChatHeader onClose={handleClose} />
               
               <div className="flex-1 flex flex-col min-h-0 bg-gradient-to-b from-gray-50/50 to-white/50">
