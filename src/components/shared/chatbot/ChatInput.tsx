@@ -27,22 +27,22 @@ const ChatInput = ({ onSendMessage, isLoading }: ChatInputProps) => {
   };
 
   return (
-    <div className="p-2 md:p-3 border-t border-gray-100 bg-white">
+    <div className="p-3 border-t border-gray-100 bg-white">
       <div className="flex gap-2">
         <Input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="اكتب رسالتك..."
-          className="flex-1 rounded-full border-gray-200 focus:border-brand text-sm h-9 md:h-10"
+          placeholder="اكتب رسالتك هنا..."
+          className="flex-1 rounded-full border-gray-200 focus:border-brand"
           onKeyPress={handleKeyPress}
           disabled={isLoading}
         />
         <Button
           onClick={handleSend}
           disabled={isLoading || !message.trim()}
-          className="bg-brand hover:bg-brand-dark rounded-full w-9 h-9 md:w-10 md:h-10 p-0"
+          className="bg-brand hover:bg-brand-dark rounded-full w-10 h-10 p-0"
         >
-          <Send size={14} className="transform rotate-180 md:w-4 md:h-4" />
+          <Send size={16} className="transform rotate-180" />
         </Button>
       </div>
     </div>

@@ -22,7 +22,7 @@ const ChatBot = () => {
     if (isOpen && messages.length === 0) {
       const welcomeMessage: Message = {
         id: 1,
-        text: 'مرحباً بك في عيادات تعافي! 🏥\nكيف يمكنني مساعدتك اليوم؟',
+        text: 'مرحباً بك في عيادات تعافي التخصصية! 👋\nكيف يمكنني مساعدتك اليوم؟',
         sender: 'bot',
         timestamp: new Date(),
         type: 'welcome'
@@ -110,13 +110,13 @@ const ChatBot = () => {
     <>
       {/* Floating Chat Button */}
       <motion.div
-        className="fixed bottom-4 right-4 z-50 md:bottom-6 md:right-6"
+        className="fixed bottom-6 left-6 z-50"
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
       >
         <Button
-          className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-r from-brand to-brand-dark hover:from-brand-dark hover:to-brand shadow-lg transform hover:scale-105 transition-all duration-200"
+          className="w-16 h-16 rounded-full bg-gradient-to-r from-brand to-brand-dark hover:from-brand-dark hover:to-brand shadow-xl transform hover:scale-105 transition-all duration-200"
           onClick={() => setIsOpen(!isOpen)}
         >
           <AnimatePresence mode="wait">
@@ -128,7 +128,7 @@ const ChatBot = () => {
                 exit={{ rotate: 90, opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <X className="h-5 w-5 md:h-6 md:w-6" />
+                <X className="h-6 w-6" />
               </motion.div>
             ) : (
               <motion.div
@@ -138,7 +138,7 @@ const ChatBot = () => {
                 exit={{ rotate: -90, opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <MessageCircle className="h-5 w-5 md:h-6 md:w-6" />
+                <MessageCircle className="h-6 w-6" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -149,16 +149,16 @@ const ChatBot = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed inset-x-2 bottom-20 top-20 z-50 md:bottom-24 md:top-auto md:right-6 md:left-auto md:w-96 md:h-[32rem] bg-white rounded-xl md:rounded-2xl shadow-2xl overflow-hidden border border-gray-100"
+            className="fixed bottom-24 left-6 z-50 bg-white rounded-2xl shadow-2xl w-96 max-w-[calc(100vw-3rem)] overflow-hidden border border-gray-100"
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
           >
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-[32rem] max-h-[80vh]">
               <ChatHeader onClose={handleClose} />
               
-              <div className="flex-1 flex flex-col min-h-0 bg-gray-50/30">
+              <div className="flex-1 flex flex-col min-h-0">
                 <ChatMessages 
                   messages={messages}
                   isLoading={isLoading}

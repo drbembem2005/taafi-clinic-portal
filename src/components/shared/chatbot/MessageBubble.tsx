@@ -1,4 +1,3 @@
-
 import { motion } from 'framer-motion';
 import { User, Stethoscope } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
@@ -67,32 +66,32 @@ const MessageBubble = ({
 
   return (
     <motion.div
-      className={`flex gap-2 md:gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
+      className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
       {/* Avatar */}
-      <Avatar className="h-7 w-7 md:h-8 md:w-8 flex-shrink-0">
+      <Avatar className="h-8 w-8 flex-shrink-0">
         {isUser ? (
           <div className="bg-gray-100 h-full w-full rounded-full flex items-center justify-center">
-            <User size={14} className="text-gray-600 md:w-4 md:h-4" />
+            <User size={16} className="text-gray-600" />
           </div>
         ) : (
           <div className="bg-gradient-to-br from-brand to-brand-dark h-full w-full rounded-full flex items-center justify-center">
-            <Stethoscope size={14} className="text-white md:w-4 md:h-4" />
+            <Stethoscope size={16} className="text-white" />
           </div>
         )}
       </Avatar>
 
       {/* Message Content */}
-      <div className={`max-w-[80%] md:max-w-[85%] ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-2`}>
+      <div className={`max-w-[85%] ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-2`}>
         {/* Text Bubble */}
         <div
-          className={`rounded-2xl px-3 py-2 md:px-4 md:py-3 shadow-sm ${
+          className={`rounded-2xl px-4 py-3 shadow-sm ${
             isUser
               ? 'bg-gradient-to-r from-brand to-brand-dark text-white rounded-br-md'
-              : 'bg-white text-gray-800 border border-gray-100 rounded-bl-md'
+              : 'bg-gray-50 text-gray-800 border border-gray-100 rounded-bl-md'
           }`}
         >
           <div className="whitespace-pre-wrap text-sm leading-relaxed">
@@ -101,7 +100,7 @@ const MessageBubble = ({
           
           {/* Rich Content */}
           {message.data?.richContent && (
-            <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-gray-200/30">
+            <div className="mt-3 pt-3 border-t border-gray-200/30">
               <div className="text-sm text-gray-600 whitespace-pre-wrap">
                 {message.data.richContent}
               </div>
@@ -109,45 +108,29 @@ const MessageBubble = ({
           )}
         </div>
 
-        {/* Specialty Cards - Limit to 3 for mobile */}
+        {/* Specialty Cards */}
         {message.data?.specialties && message.data.specialties.length > 0 && (
           <div className="w-full space-y-2">
-            {message.data.specialties.slice(0, 3).map((specialty) => (
+            {message.data.specialties.map((specialty) => (
               <SpecialtyCard 
                 key={specialty.id} 
                 specialty={specialty} 
                 onSelect={(id, name) => handleOptionClick(`specialty-${id}`, name)}
               />
             ))}
-            {message.data.specialties.length > 3 && (
-              <button
-                onClick={() => handleOptionClick('specialties', 'عرض جميع التخصصات')}
-                className="w-full text-center text-sm text-brand bg-brand/5 py-2 rounded-lg hover:bg-brand/10 transition-colors"
-              >
-                عرض {message.data.specialties.length - 3} تخصصات أخرى
-              </button>
-            )}
           </div>
         )}
 
-        {/* Doctor Cards - Limit to 2 for mobile */}
+        {/* Doctor Cards */}
         {message.data?.doctors && message.data.doctors.length > 0 && (
           <div className="w-full space-y-2">
-            {message.data.doctors.slice(0, 2).map((doctor) => (
+            {message.data.doctors.map((doctor) => (
               <DoctorCard 
                 key={doctor.id} 
                 doctor={doctor} 
                 onBook={(doctorId, doctorName) => handleOptionClick(`book-${doctorId}`, `حجز موعد مع ${doctorName}`)}
               />
             ))}
-            {message.data.doctors.length > 2 && (
-              <button
-                onClick={() => handleOptionClick('doctors', 'عرض جميع الأطباء')}
-                className="w-full text-center text-sm text-brand bg-brand/5 py-2 rounded-lg hover:bg-brand/10 transition-colors"
-              >
-                عرض {message.data.doctors.length - 2} أطباء آخرين
-              </button>
-            )}
           </div>
         )}
 
@@ -163,14 +146,14 @@ const MessageBubble = ({
           </div>
         )}
 
-        {/* Quick Options - Limit to 4 for mobile */}
+        {/* Quick Options */}
         {message.data?.options && message.data.options.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            {message.data.options.slice(0, 4).map((option) => (
+            {message.data.options.map((option) => (
               <button
                 key={option.id}
                 onClick={() => handleOptionClick(option.action, option.text)}
-                className="px-3 py-2 text-sm rounded-full border border-gray-200 bg-white hover:bg-gray-50 hover:border-brand/30 hover:text-brand transition-all duration-200 shadow-sm"
+                className="px-4 py-2 text-sm rounded-full border border-gray-200 bg-white hover:bg-gray-50 hover:border-brand/30 hover:text-brand transition-all duration-200 shadow-sm"
               >
                 {option.text}
               </button>

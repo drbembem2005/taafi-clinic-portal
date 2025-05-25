@@ -25,8 +25,8 @@ const ChatMessages = ({
   scrollAreaRef 
 }: ChatMessagesProps) => {
   return (
-    <ScrollArea className="flex-1 px-3 py-2 md:px-4" ref={scrollAreaRef}>
-      <div className="space-y-3 md:space-y-4 pb-2">
+    <ScrollArea className="flex-1 px-4 py-2" ref={scrollAreaRef}>
+      <div className="space-y-4">
         {messages.map((message, index) => (
           <MessageBubble 
             key={`message-${message.id}-${index}`}
@@ -39,7 +39,7 @@ const ChatMessages = ({
         ))}
         
         {isLoading && (
-          <div key="typing-indicator" className="flex justify-start">
+          <div key="typing-indicator">
             <TypingIndicator />
           </div>
         )}
