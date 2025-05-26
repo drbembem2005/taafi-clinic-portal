@@ -13,7 +13,7 @@ const QuickActions = ({ onAction, chatState }: QuickActionsProps) => {
   const quickActions = [
     { 
       id: 'booking', 
-      text: 'حجز سريع', 
+      text: 'حجز', 
       icon: Calendar, 
       gradient: 'from-emerald-500 to-teal-600',
       hoverGradient: 'hover:from-emerald-600 hover:to-teal-700'
@@ -27,7 +27,7 @@ const QuickActions = ({ onAction, chatState }: QuickActionsProps) => {
     },
     { 
       id: 'call', 
-      text: 'اتصل بنا', 
+      text: 'اتصال', 
       icon: Phone, 
       gradient: 'from-blue-500 to-indigo-600',
       hoverGradient: 'hover:from-blue-600 hover:to-indigo-700'
@@ -42,10 +42,10 @@ const QuickActions = ({ onAction, chatState }: QuickActionsProps) => {
   ];
 
   return (
-    <div className="p-4 bg-gradient-to-r from-gray-50/50 to-white/50 backdrop-blur-sm border-t border-gray-200/30">
+    <div className="p-2 bg-gradient-to-r from-gray-50/50 to-white/50 backdrop-blur-sm border-t border-gray-200/30">
       <motion.div 
-        className="flex gap-2 justify-center"
-        initial={{ opacity: 0, y: 20 }}
+        className="flex gap-1 justify-center"
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
@@ -54,29 +54,20 @@ const QuickActions = ({ onAction, chatState }: QuickActionsProps) => {
             key={action.id}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: index * 0.1 }}
+            transition={{ delay: index * 0.05 }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             <Button
               size="sm"
               onClick={() => onAction(action.text)}
-              className={`bg-gradient-to-r ${action.gradient} ${action.hoverGradient} text-white h-10 px-4 flex items-center gap-2 rounded-xl shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-200 font-medium`}
+              className={`bg-gradient-to-r ${action.gradient} ${action.hoverGradient} text-white h-8 px-3 flex items-center gap-1 rounded-lg shadow-md border border-white/20 backdrop-blur-sm transition-all duration-200 font-medium`}
             >
-              <action.icon size={16} />
-              <span className="text-xs hidden sm:inline">{action.text}</span>
+              <action.icon size={12} />
+              <span className="text-xs">{action.text}</span>
             </Button>
           </motion.div>
         ))}
-      </motion.div>
-      
-      <motion.div 
-        className="text-center mt-2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-      >
-        <span className="text-xs text-gray-500">اختر إجراء سريع أو اكتب رسالتك</span>
       </motion.div>
     </div>
   );

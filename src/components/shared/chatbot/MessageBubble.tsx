@@ -3,10 +3,10 @@ import { motion } from 'framer-motion';
 import { User, Bot, Clock } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
 import { Message, ChatBotState } from './types';
-import ActionButton from './ActionButton';
 import DoctorCard from './DoctorCard';
 import SpecialtyCard from './SpecialtyCard';
 import { chatbotService } from './chatbotService';
+import ChatBookingForm from './ChatBookingForm';
 
 interface MessageBubbleProps {
   message: Message;
@@ -64,6 +64,29 @@ const MessageBubble = ({
     }
   };
 
+  const handleDoctorBooking = (doctorId: number, doctorName: string, specialtyId?: number) => {
+    // Show booking form in chat
+    onAddMessage({
+      text: `حجز موعد مع ${doctorName}`,
+      sender: 'user'
+    });
+    
+    setTimeout(() => {
+      onAddMessage({
+        text: `املأ البيانات التالية لحجز موعد مع ${doctorName}:`,
+        sender: 'bot',
+        type: 'booking',
+        data: {
+          bookingForm: {
+            doctorId,
+            doctorName,
+            specialtyId
+          }
+        }
+      });
+    }, 500);
+  };
+
   const formatTime = (timestamp: Date) => {
     return timestamp.toLocaleTimeString('ar-EG', { 
       hour: '2-digit', 
@@ -74,8 +97,8 @@ const MessageBubble = ({
 
   return (
     <motion.div
-      className={`flex gap-3 mb-4 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      className={`flex gap-2 mb-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
+      initial={{ opacity: 0, y: 15, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
     >
@@ -85,24 +108,24 @@ const MessageBubble = ({
         animate={{ scale: 1 }}
         transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
       >
-        <Avatar className="h-10 w-10 flex-shrink-0 border-2 border-white shadow-lg">
+        <Avatar className="h-8 w-8 flex-shrink-0 border-2 border-white shadow-lg">
           {isUser ? (
             <div className="bg-gradient-to-br from-gray-100 to-gray-200 h-full w-full rounded-full flex items-center justify-center">
-              <User size={18} className="text-gray-600" />
+              <User size={14} className="text-gray-600" />
             </div>
           ) : (
             <div className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 h-full w-full rounded-full flex items-center justify-center">
-              <Bot size={18} className="text-white" />
+              <Bot size={14} className="text-white" />
             </div>
           )}
         </Avatar>
       </motion.div>
 
       {/* Message Content */}
-      <div className={`max-w-[85%] ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-3`}>
+      <div className={`max-w-[85%] ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-2`}>
         {/* Text Bubble */}
         <motion.div
-          className={`rounded-2xl px-4 py-3 shadow-lg backdrop-blur-sm ${
+          className={`rounded-2xl px-3 py-2 shadow-lg backdrop-blur-sm ${
             isUser
               ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white rounded-br-md border border-blue-400'
               : 'bg-white/90 text-gray-800 border border-gray-200 rounded-bl-md'
@@ -118,7 +141,7 @@ const MessageBubble = ({
           {/* Rich Content */}
           {message.data?.richContent && (
             <motion.div 
-              className="mt-3 pt-3 border-t border-gray-200/50"
+              className="mt-2 pt-2 border-t border-gray-200/50"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
@@ -130,11 +153,35 @@ const MessageBubble = ({
           )}
           
           {/* Timestamp */}
-          <div className={`flex items-center gap-1 mt-2 text-xs opacity-70 ${isUser ? 'justify-end' : 'justify-start'}`}>
-            <Clock size={12} />
+          <div className={`flex items-center gap-1 mt-1 text-xs opacity-70 ${isUser ? 'justify-end' : 'justify-start'}`}>
+            <Clock size={10} />
             <span>{formatTime(message.timestamp)}</span>
           </div>
         </motion.div>
+
+        {/* Booking Form */}
+        {message.data?.bookingForm && (
+          <motion.div 
+            className="w-full"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <ChatBookingForm
+              doctorId={message.data.bookingForm.doctorId}
+              doctorName={message.data.bookingForm.doctorName}
+              specialtyId={message.data.bookingForm.specialtyId}
+              onBookingComplete={(success) => {
+                if (success) {
+                  onAddMessage({
+                    text: 'تم حجز موعدك بنجاح! ✅\nسيتم التواصل معك قريباً لتأكيد الموعد.',
+                    sender: 'bot'
+                  });
+                }
+              }}
+            />
+          </motion.div>
+        )}
 
         {/* Specialty Cards */}
         {message.data?.specialties && message.data.specialties.length > 0 && (
@@ -177,50 +224,48 @@ const MessageBubble = ({
               >
                 <DoctorCard 
                   doctor={doctor} 
-                  onBook={(doctorId, doctorName) => handleOptionClick(`book-${doctorId}`, `حجز موعد مع ${doctorName}`)}
+                  onBook={(doctorId, doctorName) => handleDoctorBooking(doctorId, doctorName, doctor.specialty_id)}
                 />
               </motion.div>
             ))}
           </motion.div>
         )}
 
-        {/* Action Links */}
-        {message.data?.links && message.data.links.length > 0 && (
+        {/* Consolidated Action Buttons */}
+        {(message.data?.links || message.data?.options) && (
           <motion.div 
             className="flex flex-wrap gap-2"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
           >
-            {message.data.links.map((link, index) => (
-              <motion.div
+            {/* Action Links */}
+            {message.data?.links?.map((link, index) => (
+              <motion.a
                 key={index}
+                href={link.url}
+                target={link.url.startsWith('http') ? '_blank' : '_self'}
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border bg-white/90 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-200 shadow-sm backdrop-blur-sm font-medium"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5 + index * 0.1 }}
+                transition={{ delay: 0.5 + index * 0.05 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <ActionButton link={link} />
-              </motion.div>
+                {link.text}
+              </motion.a>
             ))}
-          </motion.div>
-        )}
 
-        {/* Quick Options */}
-        {message.data?.options && message.data.options.length > 0 && (
-          <motion.div 
-            className="flex flex-wrap gap-2"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            {message.data.options.map((option, index) => (
+            {/* Quick Options */}
+            {message.data?.options?.map((option, index) => (
               <motion.button
                 key={option.id}
                 onClick={() => handleOptionClick(option.action, option.text)}
-                className="px-4 py-2 text-sm rounded-full border border-gray-200 bg-white/90 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-200 shadow-sm backdrop-blur-sm font-medium"
+                className="px-3 py-1.5 text-xs rounded-lg border bg-white/90 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-200 shadow-sm backdrop-blur-sm font-medium"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 + index * 0.1 }}
+                transition={{ delay: 0.5 + (message.data?.links?.length || 0) * 0.05 + index * 0.05 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >

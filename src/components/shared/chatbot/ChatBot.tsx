@@ -19,7 +19,7 @@ const ChatBot = () => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
-  // Initialize with welcome message
+  // Initialize with welcome message and main menu
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       const welcomeMessage: Message = {
@@ -29,8 +29,20 @@ const ChatBot = () => {
         timestamp: new Date(),
         type: 'welcome'
       };
+      
       setMessages([welcomeMessage]);
-      setChatState('main-menu');
+      
+      // Add main menu after a short delay
+      setTimeout(async () => {
+        const mainMenuResponse = await chatbotService.handleAction('main');
+        const mainMenuMessage: Message = {
+          ...mainMenuResponse,
+          id: 2,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, mainMenuMessage]);
+        setChatState('main-menu');
+      }, 1000);
     }
   }, [isOpen, messages.length]);
 
@@ -168,7 +180,7 @@ const ChatBot = () => {
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
             transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
           >
-            <div className={`flex flex-col ${isMobile ? 'h-[36rem]' : 'h-[42rem]'} max-h-[80vh]`}>
+            <div className={`flex flex-col ${isMobile ? 'h-[40rem]' : 'h-[45rem]'} max-h-[85vh]`}>
               <ChatHeader onClose={handleClose} />
               
               <div className="flex-1 flex flex-col min-h-0 bg-gradient-to-b from-gray-50/50 to-white/50">

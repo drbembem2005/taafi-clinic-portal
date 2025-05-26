@@ -11,6 +11,11 @@ export interface Message {
     links?: ActionLink[];
     richContent?: string;
     options?: QuickOption[];
+    bookingForm?: {
+      doctorId: number;
+      doctorName: string;
+      specialtyId?: number;
+    };
   };
 }
 
