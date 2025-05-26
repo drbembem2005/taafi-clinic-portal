@@ -11,6 +11,13 @@ interface DoctorCardProps {
 }
 
 const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
+  const handleBookClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Doctor card clicked for booking:', doctor.name, doctor.id);
+    onBook(doctor.id, doctor.name);
+  };
+
   return (
     <motion.div
       whileHover={{ scale: 1.02, y: -3 }}
@@ -69,7 +76,7 @@ const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
           >
             <Button 
               size="sm"
-              onClick={() => onBook(doctor.id, doctor.name)}
+              onClick={handleBookClick}
               className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-4 py-2 h-9 rounded-xl shadow-lg font-medium transition-all duration-200"
             >
               <Calendar size={14} className="ml-1" />

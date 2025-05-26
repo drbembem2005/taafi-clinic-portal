@@ -65,6 +65,8 @@ const MessageBubble = ({
   };
 
   const handleDoctorBooking = (doctorId: number, doctorName: string, specialtyId?: number) => {
+    console.log('Doctor booking initiated:', { doctorId, doctorName, specialtyId });
+    
     // Show booking form in chat
     onAddMessage({
       text: `حجز موعد مع ${doctorName}`,
@@ -84,6 +86,7 @@ const MessageBubble = ({
           }
         }
       });
+      onSetChatState('booking');
     }, 500);
   };
 
