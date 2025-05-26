@@ -71,17 +71,18 @@ const MessageBubble = ({
   };
 
   const handleDoctorBooking = (doctorId: number, doctorName: string, specialtyId?: number) => {
-    console.log('Doctor booking initiated:', { doctorId, doctorName, specialtyId });
+    console.log('Doctor booking initiated in MessageBubble:', { doctorId, doctorName, specialtyId });
     
-    // Show booking form in chat
+    // Add user message to show booking intent
     onAddMessage({
-      text: `حجز موعد مع ${doctorName}`,
+      text: `حجز موعد مع د. ${doctorName}`,
       sender: 'user'
     });
     
+    // Show booking form immediately
     setTimeout(() => {
       onAddMessage({
-        text: `املأ البيانات التالية لحجز موعد مع ${doctorName}:`,
+        text: `املأ البيانات التالية لحجز موعد مع د. ${doctorName}:`,
         sender: 'bot',
         type: 'booking',
         data: {
@@ -219,14 +220,17 @@ const MessageBubble = ({
               >
                 <DoctorCard 
                   doctor={doctor} 
-                  onBook={(doctorId, doctorName) => handleDoctorBooking(doctorId, doctorName, doctor.specialty_id)}
+                  onBook={(doctorId, doctorName) => {
+                    console.log('DoctorCard onBook called:', { doctorId, doctorName });
+                    handleDoctorBooking(doctorId, doctorName, doctor.specialty_id);
+                  }}
                 />
               </motion.div>
             ))}
           </motion.div>
         )}
 
-        {/* Single Option Buttons - No Duplicates */}
+        {/* Option Buttons */}
         {message.data?.options && (
           <motion.div 
             className="flex flex-wrap gap-2"

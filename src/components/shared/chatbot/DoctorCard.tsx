@@ -14,8 +14,14 @@ const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
   const handleBookClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Doctor card clicked for booking:', doctor.name, doctor.id);
-    onBook(doctor.id, doctor.name);
+    console.log('Doctor card book button clicked:', doctor.name, doctor.id);
+    
+    // Ensure we call the onBook function with the correct parameters
+    if (onBook && typeof onBook === 'function') {
+      onBook(doctor.id, doctor.name);
+    } else {
+      console.error('onBook function not provided or not a function');
+    }
   };
 
   return (
@@ -23,7 +29,7 @@ const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
       whileHover={{ scale: 1.02, y: -3 }}
       whileTap={{ scale: 0.98 }}
     >
-      <Card className="p-4 hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-emerald-300 bg-gradient-to-br from-white to-emerald-50/30 backdrop-blur-sm relative overflow-hidden group">
+      <Card className="p-4 hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-emerald-300 bg-gradient-to-br from-white to-emerald-50/30 backdrop-blur-sm relative overflow-hidden group cursor-pointer">
         {/* Background Pattern */}
         <div className="absolute top-0 left-0 w-24 h-24 bg-gradient-to-br from-emerald-100/50 to-transparent rounded-full transform -translate-x-8 -translate-y-8 group-hover:scale-110 transition-transform duration-300"></div>
         
