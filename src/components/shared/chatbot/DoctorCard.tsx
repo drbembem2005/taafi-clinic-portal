@@ -14,13 +14,22 @@ const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
   const handleBookClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Doctor card book button clicked:', doctor.name, doctor.id);
     
-    // Ensure we call the onBook function with the correct parameters
-    if (onBook && typeof onBook === 'function') {
-      onBook(doctor.id, doctor.name);
-    } else {
-      console.error('onBook function not provided or not a function');
+    console.log('=== DOCTOR BOOKING DEBUG ===');
+    console.log('1. Button clicked for doctor:', doctor.name, 'ID:', doctor.id);
+    console.log('2. onBook function exists:', typeof onBook === 'function');
+    console.log('3. Doctor object:', doctor);
+    
+    try {
+      if (onBook && typeof onBook === 'function') {
+        console.log('4. Calling onBook function...');
+        onBook(doctor.id, doctor.name);
+        console.log('5. onBook function called successfully');
+      } else {
+        console.error('onBook function not provided or not a function');
+      }
+    } catch (error) {
+      console.error('Error in handleBookClick:', error);
     }
   };
 
