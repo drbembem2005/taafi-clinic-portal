@@ -29,9 +29,6 @@ class ChatbotService {
       case 'contact':
         return this.getContactResponse();
       
-      case 'insurance':
-        return this.getInsuranceResponse();
-      
       case 'prices':
         return this.getPricesResponse();
       
@@ -44,21 +41,13 @@ class ChatbotService {
     const specialties = await getSpecialties();
     
     return {
-      text: 'تضم عيادات تعافي التخصصات الطبية التالية:',
+      text: 'اختر التخصص المطلوب:',
       sender: 'bot',
       type: 'specialties',
       data: {
         specialties,
         options: [
-          { id: 'back', text: 'القائمة الرئيسية', action: 'main' }
-        ],
-        links: [
-          {
-            type: 'booking',
-            text: 'حجز موعد',
-            url: '/booking',
-            icon: 'link'
-          }
+          { id: 'back', text: '← القائمة الرئيسية', action: 'main' }
         ]
       }
     };
@@ -68,21 +57,13 @@ class ChatbotService {
     const doctors = await getDoctors();
     
     return {
-      text: 'الأطباء المتاحون في عيادات تعافي:',
+      text: 'اختر الطبيب المناسب:',
       sender: 'bot',
       type: 'doctors',
       data: {
         doctors,
         options: [
-          { id: 'back', text: 'القائمة الرئيسية', action: 'main' }
-        ],
-        links: [
-          {
-            type: 'booking',
-            text: 'حجز موعد',
-            url: '/booking',
-            icon: 'link'
-          }
+          { id: 'back', text: '← القائمة الرئيسية', action: 'main' }
         ]
       }
     };
@@ -100,17 +81,8 @@ class ChatbotService {
       data: {
         doctors,
         options: [
-          { id: 'specialties', text: 'التخصصات', action: 'specialties' },
-          { id: 'main', text: 'القائمة الرئيسية', action: 'main' }
-        ],
-        links: [
-          {
-            type: 'booking',
-            text: `حجز موعد في ${specialty?.name}`,
-            url: `/booking?specialty=${encodeURIComponent(specialty?.name || '')}&specialtyId=${specialtyId}`,
-            icon: 'link',
-            specialtyId
-          }
+          { id: 'specialties', text: '← التخصصات', action: 'specialties' },
+          { id: 'main', text: '← القائمة الرئيسية', action: 'main' }
         ]
       }
     };
@@ -118,35 +90,16 @@ class ChatbotService {
 
   private getBookingResponse(): Promise<Omit<Message, 'id' | 'timestamp'>> {
     return Promise.resolve({
-      text: 'يمكنك حجز موعد في عيادات تعافي بعدة طرق:',
+      text: 'اختر طريقة الحجز المناسبة لك:',
       sender: 'bot',
       type: 'booking',
       data: {
         options: [
-          { id: 'online', text: 'حجز أونلاين', action: 'booking-online' },
-          { id: 'whatsapp', text: 'حجز واتساب', action: 'booking-whatsapp' },
-          { id: 'phone', text: 'حجز هاتفي', action: 'booking-phone' },
-          { id: 'main', text: 'القائمة الرئيسية', action: 'main' }
-        ],
-        links: [
-          {
-            type: 'booking',
-            text: 'احجز الآن',
-            url: '/booking',
-            icon: 'link'
-          },
-          {
-            type: 'whatsapp',
-            text: 'واتساب',
-            url: 'https://wa.me/201119007403?text=مرحباً، أود حجز موعد في عيادات تعافي',
-            icon: 'message'
-          },
-          {
-            type: 'phone',
-            text: 'اتصل بنا',
-            url: 'tel:+201119007403',
-            icon: 'phone'
-          }
+          { id: 'specialties', text: '🏥 حجز بالتخصص', action: 'specialties' },
+          { id: 'doctors', text: '👨‍⚕️ حجز بالطبيب', action: 'doctors' },
+          { id: 'whatsapp', text: '📱 حجز واتساب', action: 'contact-whatsapp' },
+          { id: 'phone', text: '📞 حجز هاتفي', action: 'contact-phone' },
+          { id: 'main', text: '← القائمة الرئيسية', action: 'main' }
         ]
       }
     });
@@ -154,21 +107,12 @@ class ChatbotService {
 
   private getHoursResponse(): Promise<Omit<Message, 'id' | 'timestamp'>> {
     return Promise.resolve({
-      text: 'ساعات العمل في عيادات تعافي:',
+      text: 'مواعيد العمل في عيادات تعافي:\n\n📅 السبت - الخميس: 10 ص - 10 م\n🚫 الجمعة: مغلق\n\n🚨 للطوارئ: 01119007403',
       sender: 'bot',
       type: 'info',
       data: {
-        richContent: '• من السبت إلى الخميس: 10 صباحاً - 10 مساءً\n• الجمعة: مغلق\n\nللطوارئ بعد ساعات العمل، يرجى الاتصال على 01119007403',
         options: [
-          { id: 'main', text: 'القائمة الرئيسية', action: 'main' }
-        ],
-        links: [
-          {
-            type: 'phone',
-            text: 'اتصل بنا',
-            url: 'tel:+201119007403',
-            icon: 'phone'
-          }
+          { id: 'main', text: '← القائمة الرئيسية', action: 'main' }
         ]
       }
     });
@@ -176,21 +120,13 @@ class ChatbotService {
 
   private getLocationResponse(): Promise<Omit<Message, 'id' | 'timestamp'>> {
     return Promise.resolve({
-      text: 'موقعنا:',
+      text: 'موقع عيادات تعافي:\n\n📍 ميدان الحصري، أبراج برعي بلازا، برج رقم ٢\nبجوار محل شعبان للملابس، الدور الثالث\n6 أكتوبر، القاهرة',
       sender: 'bot',
       type: 'info',
       data: {
-        richContent: 'ميدان الحصري، أبراج برعي بلازا، برج رقم ٢\nبجوار محل شعبان للملابس، الدور الثالث (يوجد أسانسير)\n6 أكتوبر، القاهرة',
         options: [
-          { id: 'main', text: 'القائمة الرئيسية', action: 'main' }
-        ],
-        links: [
-          {
-            type: 'link',
-            text: 'فتح الخريطة',
-            url: 'https://maps.app.goo.gl/YC86Q6hMdknLVbK49',
-            icon: 'link'
-          }
+          { id: 'map', text: '🗺️ فتح الخريطة', action: 'external-map' },
+          { id: 'main', text: '← القائمة الرئيسية', action: 'main' }
         ]
       }
     });
@@ -198,49 +134,14 @@ class ChatbotService {
 
   private getContactResponse(): Promise<Omit<Message, 'id' | 'timestamp'>> {
     return Promise.resolve({
-      text: 'معلومات الاتصال:',
+      text: 'تواصل معنا:\n\n📞 الهاتف: 38377766\n📱 الموبايل: 01119007403\n💬 الواتساب: 01119007403\n📧 البريد: info@taafi-clinics.com',
       sender: 'bot',
       type: 'info',
       data: {
-        richContent: '• رقم الهاتف: 38377766\n• الموبايل: 01119007403\n• الواتساب: 01119007403\n• البريد الإلكتروني: info@taafi-clinics.com',
         options: [
-          { id: 'main', text: 'القائمة الرئيسية', action: 'main' }
-        ],
-        links: [
-          {
-            type: 'phone',
-            text: 'اتصل بنا',
-            url: 'tel:+201119007403',
-            icon: 'phone'
-          },
-          {
-            type: 'whatsapp',
-            text: 'واتساب',
-            url: 'https://wa.me/201119007403',
-            icon: 'message'
-          }
-        ]
-      }
-    });
-  }
-
-  private getInsuranceResponse(): Promise<Omit<Message, 'id' | 'timestamp'>> {
-    return Promise.resolve({
-      text: 'نتعامل مع العديد من شركات التأمين الطبي:',
-      sender: 'bot',
-      type: 'info',
-      data: {
-        richContent: '• ميد نت\n• جلوب ميد\n• نكست كير\n• كير بلس\n• وثائق تأمين البنوك\n\nللاستفسار عن تغطية وثيقتك، اتصل بنا على 38377766',
-        options: [
-          { id: 'main', text: 'القائمة الرئيسية', action: 'main' }
-        ],
-        links: [
-          {
-            type: 'phone',
-            text: 'اتصل للاستفسار',
-            url: 'tel:+2038377766',
-            icon: 'phone'
-          }
+          { id: 'whatsapp', text: '💬 واتساب', action: 'contact-whatsapp' },
+          { id: 'phone', text: '📞 اتصال', action: 'contact-phone' },
+          { id: 'main', text: '← القائمة الرئيسية', action: 'main' }
         ]
       }
     });
@@ -248,21 +149,13 @@ class ChatbotService {
 
   private getPricesResponse(): Promise<Omit<Message, 'id' | 'timestamp'>> {
     return Promise.resolve({
-      text: 'تختلف رسوم الكشف حسب التخصص والطبيب:',
+      text: 'الأسعار والرسوم:\n\n💰 رسوم الكشف: 200 - 500 جنيه\n🩺 رسوم الاستشارة: 100 - 200 جنيه\n🔬 الفحوصات: حسب النوع\n\n📞 للاستفسار: 38377766',
       sender: 'bot',
       type: 'info',
       data: {
-        richContent: '• رسوم الكشف العادي: تتراوح من 200 إلى 500 جنيه\n• رسوم الاستشارة: تتراوح من 100 إلى 200 جنيه\n• الفحوصات الإضافية: تُحدد حسب نوع الفحص',
         options: [
-          { id: 'main', text: 'القائمة الرئيسية', action: 'main' }
-        ],
-        links: [
-          {
-            type: 'booking',
-            text: 'حجز موعد',
-            url: '/booking',
-            icon: 'link'
-          }
+          { id: 'booking', text: '📅 حجز موعد', action: 'booking' },
+          { id: 'main', text: '← القائمة الرئيسية', action: 'main' }
         ]
       }
     });
@@ -270,22 +163,36 @@ class ChatbotService {
 
   private getMainMenuResponse(): Promise<Omit<Message, 'id' | 'timestamp'>> {
     return Promise.resolve({
-      text: 'كيف يمكنني مساعدتك اليوم؟',
+      text: 'القائمة الرئيسية - كيف يمكنني مساعدتك؟',
       sender: 'bot',
       type: 'options',
       data: {
         options: [
-          { id: 'specialties', text: 'التخصصات الطبية', action: 'specialties' },
-          { id: 'doctors', text: 'الأطباء المتاحون', action: 'doctors' },
-          { id: 'booking', text: 'حجز موعد', action: 'booking' },
-          { id: 'hours', text: 'مواعيد العمل', action: 'hours' },
-          { id: 'location', text: 'الموقع والعنوان', action: 'location' },
-          { id: 'insurance', text: 'التأمين الطبي', action: 'insurance' },
-          { id: 'contact', text: 'معلومات الاتصال', action: 'contact' },
-          { id: 'prices', text: 'الأسعار والرسوم', action: 'prices' }
+          { id: 'booking', text: '📅 حجز موعد', action: 'booking' },
+          { id: 'specialties', text: '🏥 التخصصات الطبية', action: 'specialties' },
+          { id: 'doctors', text: '👨‍⚕️ الأطباء', action: 'doctors' },
+          { id: 'hours', text: '⏰ مواعيد العمل', action: 'hours' },
+          { id: 'location', text: '📍 الموقع', action: 'location' },
+          { id: 'contact', text: '📞 تواصل معنا', action: 'contact' },
+          { id: 'prices', text: '💰 الأسعار', action: 'prices' }
         ]
       }
     });
+  }
+
+  // Handle external actions
+  async handleExternalAction(action: string): Promise<void> {
+    switch (action) {
+      case 'external-map':
+        window.open('https://maps.app.goo.gl/YC86Q6hMdknLVbK49', '_blank');
+        break;
+      case 'contact-whatsapp':
+        window.open('https://wa.me/201119007403?text=مرحباً، أود حجز موعد في عيادات تعافي', '_blank');
+        break;
+      case 'contact-phone':
+        window.open('tel:+201119007403', '_self');
+        break;
+    }
   }
 }
 

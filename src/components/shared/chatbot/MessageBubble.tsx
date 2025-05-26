@@ -26,6 +26,12 @@ const MessageBubble = ({
   const isUser = message.sender === 'user';
 
   const handleOptionClick = async (action: string, text: string) => {
+    // Handle external actions first
+    if (action.startsWith('external-') || action.startsWith('contact-')) {
+      await chatbotService.handleExternalAction(action);
+      return;
+    }
+
     // Add user message
     onAddMessage({ text, sender: 'user' });
     onSetLoading(true);
@@ -141,20 +147,6 @@ const MessageBubble = ({
             {message.text}
           </div>
           
-          {/* Rich Content */}
-          {message.data?.richContent && (
-            <motion.div 
-              className="mt-2 pt-2 border-t border-gray-200/50"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              <div className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">
-                {message.data.richContent}
-              </div>
-            </motion.div>
-          )}
-          
           {/* Timestamp */}
           <div className={`flex items-center gap-1 mt-1 text-xs opacity-70 ${isUser ? 'justify-end' : 'justify-start'}`}>
             <Clock size={10} />
@@ -234,41 +226,22 @@ const MessageBubble = ({
           </motion.div>
         )}
 
-        {/* Consolidated Action Buttons */}
-        {(message.data?.links || message.data?.options) && (
+        {/* Single Option Buttons - No Duplicates */}
+        {message.data?.options && (
           <motion.div 
             className="flex flex-wrap gap-2"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
           >
-            {/* Action Links */}
-            {message.data?.links?.map((link, index) => (
-              <motion.a
-                key={index}
-                href={link.url}
-                target={link.url.startsWith('http') ? '_blank' : '_self'}
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border bg-white/90 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-200 shadow-sm backdrop-blur-sm font-medium"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5 + index * 0.05 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {link.text}
-              </motion.a>
-            ))}
-
-            {/* Quick Options */}
-            {message.data?.options?.map((option, index) => (
+            {message.data.options.map((option, index) => (
               <motion.button
                 key={option.id}
                 onClick={() => handleOptionClick(option.action, option.text)}
                 className="px-3 py-1.5 text-xs rounded-lg border bg-white/90 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-200 shadow-sm backdrop-blur-sm font-medium"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5 + (message.data?.links?.length || 0) * 0.05 + index * 0.05 }}
+                transition={{ delay: 0.5 + index * 0.05 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >

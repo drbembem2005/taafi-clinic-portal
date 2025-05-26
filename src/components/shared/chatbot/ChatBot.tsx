@@ -24,7 +24,7 @@ const ChatBot = () => {
     if (isOpen && messages.length === 0) {
       const welcomeMessage: Message = {
         id: 1,
-        text: 'مرحباً بك في عيادات تعافي التخصصية! 👋\nأنا مساعدك الذكي، كيف يمكنني مساعدتك اليوم؟',
+        text: 'مرحباً بك في عيادات تعافي التخصصية! 👋\nأنا مساعدك الذكي، سأساعدك في حجز موعد أو الإجابة على استفساراتك.',
         sender: 'bot',
         timestamp: new Date(),
         type: 'welcome'
@@ -94,10 +94,9 @@ const ChatBot = () => {
   const handleQuickAction = async (action: string) => {
     // Map quick action text to actual actions
     const actionMap: { [key: string]: string } = {
-      'حجز سريع': 'booking',
-      'واتساب': 'contact',
-      'اتصل بنا': 'contact',
-      'معلومات': 'hours'
+      'القائمة الرئيسية': 'main',
+      'حجز موعد': 'booking',
+      'حجز': 'booking'
     };
 
     const mappedAction = actionMap[action] || 'main';
@@ -113,6 +112,13 @@ const ChatBot = () => {
       setTimeout(() => {
         addMessage(response);
         setIsLoading(false);
+        
+        // Update chat state based on action
+        if (mappedAction === 'booking') {
+          setChatState('booking');
+        } else if (mappedAction === 'main') {
+          setChatState('main-menu');
+        }
       }, 800);
     } catch (error) {
       console.error('Error handling quick action:', error);
@@ -180,7 +186,7 @@ const ChatBot = () => {
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
             transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
           >
-            <div className={`flex flex-col ${isMobile ? 'h-[40rem]' : 'h-[45rem]'} max-h-[85vh]`}>
+            <div className={`flex flex-col ${isMobile ? 'h-[45rem]' : 'h-[48rem]'} max-h-[85vh]`}>
               <ChatHeader onClose={handleClose} />
               
               <div className="flex-1 flex flex-col min-h-0 bg-gradient-to-b from-gray-50/50 to-white/50">
