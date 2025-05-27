@@ -1,6 +1,6 @@
 
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Message, ChatBotState } from './types';
+import { Message, ChatState } from './types';
 import MessageBubble from './MessageBubble';
 import TypingIndicator from './TypingIndicator';
 import { RefObject, useEffect } from 'react';
@@ -10,8 +10,8 @@ interface ChatMessagesProps {
   isLoading: boolean;
   onAddMessage: (message: Omit<Message, 'id' | 'timestamp'>) => void;
   onSetLoading: (loading: boolean) => void;
-  chatState: ChatBotState;
-  onSetChatState: (state: ChatBotState) => void;
+  chatState: ChatState;
+  onSetChatState: (state: ChatState) => void;
   scrollAreaRef: RefObject<HTMLDivElement>;
 }
 

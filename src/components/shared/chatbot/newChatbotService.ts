@@ -154,7 +154,15 @@ class NewChatbotService {
       data: { selectedDay: day }
     }));
 
-    buttons.push({ id: 'back', text: '← الأطباء', action: 'booking:select-doctor', data: { specialtyId: this.state.selectedData.specialtyId, specialtyName: this.state.selectedData.specialtyName } });
+    buttons.push({ 
+      id: 'back', 
+      text: '← الأطباء', 
+      action: 'booking:select-doctor', 
+      data: { 
+        specialtyId: this.state.selectedData.specialtyId, 
+        specialtyName: this.state.selectedData.specialtyName 
+      } 
+    });
 
     return {
       message: {
@@ -182,7 +190,15 @@ class NewChatbotService {
       data: { selectedTime: time }
     }));
 
-    buttons.push({ id: 'back', text: '← الأيام', action: 'booking:select-day', data: { doctorId: this.state.selectedData.doctorId, doctorName: this.state.selectedData.doctorName } });
+    buttons.push({ 
+      id: 'back', 
+      text: '← الأيام', 
+      action: 'booking:select-day', 
+      data: { 
+        doctorId: this.state.selectedData.doctorId, 
+        doctorName: this.state.selectedData.doctorName 
+      } 
+    });
 
     return {
       message: {
@@ -223,7 +239,7 @@ class NewChatbotService {
         specialty_id: this.state.selectedData.specialtyId!,
         booking_day: this.state.selectedData.selectedDay!,
         booking_time: this.state.selectedData.selectedTime!,
-        booking_method: 'chatbot',
+        booking_method: 'online',
         notes: ''
       });
 

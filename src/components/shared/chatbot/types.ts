@@ -62,3 +62,18 @@ export interface ChatState {
     };
   };
 }
+
+// Legacy types for backward compatibility
+export interface ActionLink {
+  id: string;
+  text: string;
+  url: string;
+  type: 'booking' | 'whatsapp' | 'phone' | 'external';
+  icon?: string;
+}
+
+export interface QuickOption {
+  id: string;
+  text: string;
+  action: string;
+}
