@@ -4,76 +4,42 @@ export interface Message {
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
-  type?: 'welcome' | 'main-menu' | 'specialty-selection' | 'doctor-selection' | 'day-selection' | 'time-selection' | 'user-info' | 'confirmation' | 'success' | 'info';
+  type?: 'welcome' | 'options' | 'doctors' | 'specialties' | 'info' | 'booking';
   data?: {
-    buttons?: ButtonOption[];
-    specialties?: any[];
     doctors?: any[];
-    availableDays?: string[];
-    availableTimes?: string[];
-    userForm?: boolean;
-    selectedData?: {
+    specialties?: any[];
+    links?: ActionLink[];
+    richContent?: string;
+    options?: QuickOption[];
+    bookingForm?: {
+      doctorId: number;
+      doctorName: string;
       specialtyId?: number;
-      specialtyName?: string;
-      doctorId?: number;
-      doctorName?: string;
-      selectedDay?: string;
-      selectedTime?: string;
     };
   };
 }
 
-export interface ButtonOption {
-  id: string;
-  text: string;
-  action: string;
-  data?: any;
-}
-
-export type ChatFlow = 
-  | 'welcome'
-  | 'main-menu'
-  | 'booking-specialty'
-  | 'booking-doctor'
-  | 'booking-day'
-  | 'booking-time'
-  | 'booking-info'
-  | 'booking-confirm'
-  | 'doctors-schedule-specialty'
-  | 'doctors-schedule-list'
-  | 'prices-list'
-  | 'specialties-list'
-  | 'location-info'
-  | 'customer-service';
-
-export interface ChatState {
-  currentFlow: ChatFlow;
-  selectedData: {
-    specialtyId?: number;
-    specialtyName?: string;
-    doctorId?: number;
-    doctorName?: string;
-    selectedDay?: string;
-    selectedTime?: string;
-    userInfo?: {
-      name: string;
-      phone: string;
-      email?: string;
-    };
-  };
-}
-
-// Legacy types for backward compatibility
 export interface ActionLink {
-  id: string;
+  type: 'booking' | 'whatsapp' | 'phone' | 'link';
   text: string;
   url: string;
-  type: 'booking' | 'whatsapp' | 'phone' | 'external';
-  icon?: string;
+  icon: 'phone' | 'message' | 'link';
+  doctorId?: number;
+  specialtyId?: number;
 }
 
 export interface QuickOption {
   id: string;
   text: string;
   action: string;
+  icon?: string;
 }
+
+export type ChatBotState = 
+  | 'welcome' 
+  | 'main-menu' 
+  | 'specialties' 
+  | 'doctors' 
+  | 'booking' 
+  | 'contact' 
+  | 'info';

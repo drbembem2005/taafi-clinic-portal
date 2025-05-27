@@ -1,163 +1,273 @@
 
-import { useState } from 'react';
-import { Message, ChatState } from './types';
-import { Card, CardContent } from '@/components/ui/card';
 import { motion } from 'framer-motion';
-import { newChatbotService } from './newChatbotService';
-import UserInfoForm from './UserInfoForm';
-import ActionButton from './ActionButton';
-import SpecialtyCard from './SpecialtyCard';
+import { User, Bot, Clock } from 'lucide-react';
+import { Avatar } from '@/components/ui/avatar';
+import { Message, ChatBotState } from './types';
 import DoctorCard from './DoctorCard';
+import SpecialtyCard from './SpecialtyCard';
+import { chatbotService } from './chatbotService';
+import ChatBookingForm from './ChatBookingForm';
 
 interface MessageBubbleProps {
   message: Message;
   onAddMessage: (message: Omit<Message, 'id' | 'timestamp'>) => void;
   onSetLoading: (loading: boolean) => void;
-  chatState: ChatState;
-  onSetChatState: (state: ChatState) => void;
+  chatState: ChatBotState;
+  onSetChatState: (state: ChatBotState) => void;
 }
 
 const MessageBubble = ({ 
   message, 
   onAddMessage, 
-  onSetLoading, 
-  chatState, 
+  onSetLoading,
+  chatState,
   onSetChatState 
 }: MessageBubbleProps) => {
-  const [selectedAction, setSelectedAction] = useState<string | null>(null);
+  const isUser = message.sender === 'user';
 
-  const handleButtonClick = async (action: string, buttonData?: any) => {
-    console.log('=== BUTTON CLICKED ===');
-    console.log('Action:', action);
-    console.log('Button Data:', buttonData);
-    console.log('Current Chat State:', chatState);
-
-    // Handle external actions
-    if (action.startsWith('external:')) {
-      await newChatbotService.handleExternalAction(action);
+  const handleOptionClick = async (action: string, text: string) => {
+    // Handle external actions first
+    if (action.startsWith('external-') || action.startsWith('contact-')) {
+      await chatbotService.handleExternalAction(action);
       return;
     }
 
-    setSelectedAction(action);
+    // Add user message
+    onAddMessage({ text, sender: 'user' });
     onSetLoading(true);
 
     try {
-      // Update service state
-      newChatbotService.updateState(chatState);
-      
-      // Get response from service
-      const { message: response, newState } = await newChatbotService.handleAction(action, buttonData);
-      
-      // Add user message based on the button text
-      const buttonText = message.data?.buttons?.find(b => b.action === action)?.text || action;
-      onAddMessage({
-        text: buttonText,
-        sender: 'user'
-      });
-
-      // Add bot response after delay
+      const response = await chatbotService.handleAction(action);
       setTimeout(() => {
         onAddMessage(response);
-        onSetChatState(newState);
         onSetLoading(false);
-        setSelectedAction(null);
+        
+        // Handle state changes based on action type
+        const [actionType] = action.split('-');
+        switch (actionType) {
+          case 'specialties':
+            onSetChatState('specialties');
+            break;
+          case 'doctors':
+            onSetChatState('doctors');
+            break;
+          case 'specialty':
+            onSetChatState('doctors');
+            break;
+          case 'booking':
+            onSetChatState('booking');
+            break;
+          case 'main':
+            onSetChatState('main-menu');
+            break;
+          default:
+            break;
+        }
       }, 800);
     } catch (error) {
-      console.error('Error handling button action:', error);
+      console.error('Error handling action:', error);
       onSetLoading(false);
-      setSelectedAction(null);
     }
   };
 
-  const handleSpecialtySelect = (id: number, name: string) => {
-    handleButtonClick('booking:select-doctor', { specialtyId: id, specialtyName: name });
+  const handleDoctorBooking = (doctorId: number, doctorName: string, specialtyId?: number) => {
+    console.log('=== DOCTOR BOOKING FLOW DEBUG ===');
+    console.log('6. handleDoctorBooking called with:', { doctorId, doctorName, specialtyId });
+    
+    try {
+      // Add user message to show booking intent
+      console.log('7. Adding user message...');
+      onAddMessage({
+        text: `حجز موعد مع د. ${doctorName}`,
+        sender: 'user'
+      });
+      
+      // Show booking form immediately
+      console.log('8. Setting timeout for booking form...');
+      setTimeout(() => {
+        console.log('9. Adding booking form message...');
+        onAddMessage({
+          text: `املأ البيانات التالية لحجز موعد مع د. ${doctorName}:`,
+          sender: 'bot',
+          type: 'booking',
+          data: {
+            bookingForm: {
+              doctorId,
+              doctorName,
+              specialtyId
+            }
+          }
+        });
+        console.log('10. Setting chat state to booking...');
+        onSetChatState('booking');
+        console.log('11. Booking flow completed successfully');
+      }, 500);
+    } catch (error) {
+      console.error('Error in handleDoctorBooking:', error);
+    }
   };
 
-  const handleDoctorSelect = (doctorId: number, doctorName: string) => {
-    handleButtonClick('booking:select-day', { doctorId, doctorName });
+  const formatTime = (timestamp: Date) => {
+    return timestamp.toLocaleTimeString('ar-EG', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: false 
+    });
   };
-
-  const handleUserInfoSubmit = (userInfo: any) => {
-    console.log('=== USER INFO SUBMITTED ===');
-    console.log('User Info:', userInfo);
-    handleButtonClick('booking:confirm', userInfo);
-  };
-
-  const isUser = message.sender === 'user';
 
   return (
     <motion.div
-      className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      className={`flex gap-2 mb-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
+      initial={{ opacity: 0, y: 15, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
     >
-      <div className={`max-w-[85%] ${isUser ? 'ml-4' : 'mr-4'}`}>
+      {/* Avatar */}
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+      >
+        <Avatar className="h-8 w-8 flex-shrink-0 border-2 border-white shadow-lg">
+          {isUser ? (
+            <div className="bg-gradient-to-br from-gray-100 to-gray-200 h-full w-full rounded-full flex items-center justify-center">
+              <User size={14} className="text-gray-600" />
+            </div>
+          ) : (
+            <div className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 h-full w-full rounded-full flex items-center justify-center">
+              <Bot size={14} className="text-white" />
+            </div>
+          )}
+        </Avatar>
+      </motion.div>
+
+      {/* Message Content */}
+      <div className={`max-w-[85%] ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-2`}>
+        {/* Text Bubble */}
         <motion.div
-          className={`px-4 py-3 rounded-2xl text-sm shadow-lg ${
-            isUser 
-              ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white ml-auto' 
-              : 'bg-white text-gray-800 border border-gray-200'
+          className={`rounded-2xl px-3 py-2 shadow-lg backdrop-blur-sm ${
+            isUser
+              ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white rounded-br-md border border-blue-400'
+              : 'bg-white/90 text-gray-800 border border-gray-200 rounded-bl-md'
           }`}
-          whileHover={{ scale: 1.02 }}
-          transition={{ type: "spring", stiffness: 300 }}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2 }}
         >
-          <div className="whitespace-pre-wrap leading-relaxed">{message.text}</div>
+          <div className="whitespace-pre-wrap text-sm leading-relaxed font-medium">
+            {message.text}
+          </div>
+          
+          {/* Timestamp */}
+          <div className={`flex items-center gap-1 mt-1 text-xs opacity-70 ${isUser ? 'justify-end' : 'justify-start'}`}>
+            <Clock size={10} />
+            <span>{formatTime(message.timestamp)}</span>
+          </div>
         </motion.div>
 
-        {/* Only show interactive elements for bot messages */}
-        {!isUser && (
-          <>
-            {/* Render specialties as cards */}
-            {message.data?.specialties && message.data.specialties.length > 0 && (
-              <div className="mt-4 space-y-2">
-                {message.data.specialties.map((specialty: any) => (
-                  <SpecialtyCard 
-                    key={specialty.id} 
-                    specialty={specialty} 
-                    onSelect={handleSpecialtySelect}
-                  />
-                ))}
-              </div>
-            )}
+        {/* Booking Form */}
+        {message.data?.bookingForm && (
+          <motion.div 
+            className="w-full"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            <ChatBookingForm
+              doctorId={message.data.bookingForm.doctorId}
+              doctorName={message.data.bookingForm.doctorName}
+              specialtyId={message.data.bookingForm.specialtyId}
+              onBookingComplete={(success) => {
+                if (success) {
+                  onAddMessage({
+                    text: 'تم حجز موعدك بنجاح! ✅\nسيتم التواصل معك قريباً لتأكيد الموعد.',
+                    sender: 'bot'
+                  });
+                }
+              }}
+            />
+          </motion.div>
+        )}
 
-            {/* Render doctors as cards */}
-            {message.data?.doctors && message.data.doctors.length > 0 && (
-              <div className="mt-4 space-y-2">
-                {message.data.doctors.map((doctor: any) => (
+        {/* Specialty Cards */}
+        {message.data?.specialties && message.data.specialties.length > 0 && (
+          <motion.div 
+            className="w-full space-y-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            {message.data.specialties.map((specialty, index) => (
+              <motion.div
+                key={specialty.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 + index * 0.1 }}
+              >
+                <SpecialtyCard 
+                  specialty={specialty} 
+                  onSelect={(id, name) => handleOptionClick(`specialty-${id}`, name)}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+
+        {/* Doctor Cards */}
+        {message.data?.doctors && message.data.doctors.length > 0 && (
+          <motion.div 
+            className="w-full space-y-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+          >
+            {message.data.doctors.map((doctor, index) => {
+              console.log(`Rendering doctor card ${index}:`, doctor.name, 'ID:', doctor.id);
+              return (
+                <motion.div
+                  key={doctor.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 + index * 0.1 }}
+                >
                   <DoctorCard 
-                    key={doctor.id} 
                     doctor={doctor} 
-                    onBook={handleDoctorSelect}
+                    onBook={(doctorId, doctorName) => {
+                      console.log('=== ONBOOK CALLBACK TRIGGERED ===');
+                      console.log('DoctorCard onBook called with:', { doctorId, doctorName });
+                      console.log('About to call handleDoctorBooking...');
+                      handleDoctorBooking(doctorId, doctorName, doctor.specialty_id);
+                    }}
                   />
-                ))}
-              </div>
-            )}
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
 
-            {/* Render action buttons only if no cards are shown */}
-            {message.data?.buttons && message.data.buttons.length > 0 && 
-             !message.data?.specialties && !message.data?.doctors && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                {message.data.buttons.map((button: any) => (
-                  <ActionButton
-                    key={button.id}
-                    button={button}
-                    onClick={handleButtonClick}
-                    isLoading={selectedAction === button.action}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Render user info form */}
-            {message.data?.userForm && (
-              <Card className="mt-4 border-2 border-blue-200 shadow-xl">
-                <CardContent className="p-4">
-                  <UserInfoForm onSubmit={handleUserInfoSubmit} />
-                </CardContent>
-              </Card>
-            )}
-          </>
+        {/* Option Buttons */}
+        {message.data?.options && (
+          <motion.div 
+            className="flex flex-wrap gap-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            {message.data.options.map((option, index) => (
+              <motion.button
+                key={option.id}
+                onClick={() => handleOptionClick(option.action, option.text)}
+                className="px-3 py-1.5 text-xs rounded-lg border bg-white/90 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-200 shadow-sm backdrop-blur-sm font-medium"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 + index * 0.05 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {option.text}
+              </motion.button>
+            ))}
+          </motion.div>
         )}
       </div>
     </motion.div>
