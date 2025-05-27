@@ -26,6 +26,12 @@ const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
+  // Handle phone number input to only allow numbers
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, ''); // Only allow numbers
+    setFormData(prev => ({ ...prev, user_phone: value }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.user_name || !formData.user_phone) return;
@@ -93,10 +99,15 @@ const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete 
         <div className="flex items-center gap-2">
           <Phone className="w-4 h-4 text-gray-400" />
           <Input
+            type="tel"
+            inputMode="numeric"
+            pattern="[0-9]*"
             placeholder="رقم الهاتف *"
             value={formData.user_phone}
-            onChange={(e) => setFormData(prev => ({ ...prev, user_phone: e.target.value }))}
-            className="text-sm"
+            onChange={handlePhoneChange}
+            className="text-sm text-left"
+            dir="ltr"
+            maxLength={15}
             required
           />
         </div>

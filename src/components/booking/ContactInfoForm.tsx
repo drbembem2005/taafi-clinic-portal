@@ -34,6 +34,12 @@ const ContactInfoForm = ({
   const [nameError, setNameError] = useState('');
   const [phoneError, setPhoneError] = useState('');
   const [emailError, setEmailError] = useState('');
+
+  // Handle phone number input to only allow numbers
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/[^0-9]/g, ''); // Only allow numbers
+    setPhone(value);
+  };
   
   // Validate inputs when they change
   useEffect(() => {
@@ -43,9 +49,9 @@ const ContactInfoForm = ({
     }
     
     // Phone validation
-    const phoneRegex = /^[0-9+\s]{10,15}$/;
-    if (phone && !phoneRegex.test(phone.replace(/\s/g, ''))) {
-      setPhoneError('يرجى إدخال رقم هاتف صحيح');
+    const phoneRegex = /^[0-9]{10,15}$/;
+    if (phone && !phoneRegex.test(phone)) {
+      setPhoneError('يرجى إدخال رقم هاتف صحيح (10-15 رقم)');
     } else {
       setPhoneError('');
     }
@@ -134,11 +140,15 @@ const ContactInfoForm = ({
           </Label>
           <Input 
             id="phone"
+            type="tel"
+            inputMode="numeric"
+            pattern="[0-9]*"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={handlePhoneChange}
             placeholder="01xxxxxxxxx"
             className={`text-left ${phoneError ? 'border-red-300' : ''}`}
             dir="ltr"
+            maxLength={15}
             required
           />
           {phoneError && (
