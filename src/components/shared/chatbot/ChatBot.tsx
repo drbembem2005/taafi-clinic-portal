@@ -178,7 +178,7 @@ const ChatBot = () => {
           <motion.div
             className={`fixed z-50 bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20 ${
               isMobile 
-                ? 'bottom-4 left-4 right-4 top-4 max-w-none' 
+                ? 'bottom-40 left-4 right-4 top-10 max-w-none' 
                 : 'bottom-28 left-6 w-96 max-w-[calc(100vw-3rem)]'
             }`}
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
