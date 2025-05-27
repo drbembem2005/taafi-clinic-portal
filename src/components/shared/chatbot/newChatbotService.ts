@@ -1,5 +1,5 @@
 
-import { getDoctors, getDoctorsBySpecialtyId } from '@/services/doctorService';
+import { getDoctors, getDoctorsBySpecialtyId, getDoctorSchedule } from '@/services/doctorService';
 import { getSpecialties } from '@/services/specialtyService';
 import { createBooking } from '@/services/bookingService';
 import { Message, ButtonOption, ChatFlow, ChatState } from './types';
@@ -55,12 +55,12 @@ class NewChatbotService {
         type: 'main-menu',
         data: {
           buttons: [
-            { id: 'booking', text: '📅 احجز موعد', action: 'booking:start' },
-            { id: 'schedule', text: '👨‍⚕️ مواعيد الأطباء', action: 'doctors-schedule:start' },
-            { id: 'prices', text: '💰 أسعار الكشف', action: 'prices:show' },
-            { id: 'specialties', text: '🏥 التخصصات الطبية', action: 'specialties:list' },
-            { id: 'location', text: '📍 الموقع والعنوان', action: 'location:show' },
-            { id: 'support', text: '📞 خدمة العملاء', action: 'customer-service:menu' }
+            { id: 'booking', text: '📅 احجز موعد', action: 'booking:start', data: {} },
+            { id: 'schedule', text: '👨‍⚕️ مواعيد الأطباء', action: 'doctors-schedule:start', data: {} },
+            { id: 'prices', text: '💰 أسعار الكشف', action: 'prices:show', data: {} },
+            { id: 'specialties', text: '🏥 التخصصات الطبية', action: 'specialties:list', data: {} },
+            { id: 'location', text: '📍 الموقع والعنوان', action: 'location:show', data: {} },
+            { id: 'support', text: '📞 خدمة العملاء', action: 'customer-service:menu', data: {} }
           ]
         }
       },
@@ -159,13 +159,30 @@ class NewChatbotService {
     const newState = { 
       ...this.state, 
       currentFlow: 'booking-day' as ChatFlow,
-      selectedData: { ...this.state.selectedData, doctorId: data.doctorId, doctorName: data.doctorName }
+      selectedData: { 
+        ...this.state.selectedData, 
+        doctorId: data.doctorId, 
+        doctorName: data.doctorName 
+      }
     };
 
-    const availableDays = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'السبت'];
+    // Get doctor's actual schedule from database
+    const schedule = await getDoctorSchedule(data.doctorId);
+    const availableDays = Object.keys(schedule);
+    
+    const dayNameMapping: { [key: string]: string } = {
+      'Sat': 'السبت',
+      'Sun': 'الأحد',
+      'Mon': 'الإثنين',
+      'Tue': 'الثلاثاء',
+      'Wed': 'الأربعاء',
+      'Thu': 'الخميس',
+      'Fri': 'الجمعة'
+    };
+
     const buttons = availableDays.map(day => ({
       id: `day-${day}`,
-      text: day,
+      text: dayNameMapping[day] || day,
       action: `booking:select-time`,
       data: { selectedDay: day }
     }));
@@ -187,7 +204,7 @@ class NewChatbotService {
         type: 'day-selection',
         data: { 
           buttons,
-          availableDays: availableDays
+          availableDays: availableDays.map(day => dayNameMapping[day] || day)
         }
       },
       newState
@@ -198,10 +215,16 @@ class NewChatbotService {
     const newState = { 
       ...this.state, 
       currentFlow: 'booking-time' as ChatFlow,
-      selectedData: { ...this.state.selectedData, selectedDay: data.selectedDay }
+      selectedData: { 
+        ...this.state.selectedData, 
+        selectedDay: data.selectedDay 
+      }
     };
 
-    const availableTimes = ['10:00 ص', '11:00 ص', '12:00 ظ', '2:00 م', '3:00 م', '4:00 م', '5:00 م', '6:00 م'];
+    // Get actual available times from doctor's schedule
+    const schedule = await getDoctorSchedule(this.state.selectedData.doctorId!);
+    const availableTimes = schedule[data.selectedDay] || [];
+
     const buttons = availableTimes.map(time => ({
       id: `time-${time}`,
       text: time,
@@ -237,7 +260,10 @@ class NewChatbotService {
     const newState = { 
       ...this.state, 
       currentFlow: 'booking-info' as ChatFlow,
-      selectedData: { ...this.state.selectedData, selectedTime: data.selectedTime }
+      selectedData: { 
+        ...this.state.selectedData, 
+        selectedTime: data.selectedTime 
+      }
     };
 
     return {
@@ -338,18 +364,35 @@ class NewChatbotService {
       const newState = { ...this.state, currentFlow: 'doctors-schedule-list' as ChatFlow };
 
       let text = `أطباء ${data.specialtyName}:\n\n`;
-      doctors.forEach((doctor, index) => {
+      
+      for (const doctor of doctors) {
         text += `👨‍⚕️ د. ${doctor.name}\n`;
         text += `🏥 ${doctor.title || 'طبيب متخصص'}\n`;
         text += `💰 الكشف: ${doctor.fees?.examination || '250'} جنيه\n`;
-        if (doctor.available_days) {
-          text += `📅 الأيام: ${Array.isArray(doctor.available_days) ? doctor.available_days.join(', ') : doctor.available_days}\n`;
+        
+        // Get actual schedule from database
+        const schedule = await getDoctorSchedule(doctor.id);
+        if (Object.keys(schedule).length > 0) {
+          const dayNameMapping: { [key: string]: string } = {
+            'Sat': 'السبت',
+            'Sun': 'الأحد',
+            'Mon': 'الإثنين',
+            'Tue': 'الثلاثاء',
+            'Wed': 'الأربعاء',
+            'Thu': 'الخميس',
+            'Fri': 'الجمعة'
+          };
+          
+          const arabicDays = Object.keys(schedule).map(day => dayNameMapping[day] || day);
+          text += `📅 الأيام: ${arabicDays.join(', ')}\n`;
+          
+          const allTimes = Object.values(schedule).flat();
+          if (allTimes.length > 0) {
+            text += `🕐 الساعات: ${allTimes.join(', ')}\n`;
+          }
         }
-        if (doctor.working_hours) {
-          text += `🕐 الساعات: ${doctor.working_hours}\n`;
-        }
-        if (index < doctors.length - 1) text += '\n';
-      });
+        text += '\n';
+      }
 
       const buttons = doctors.map(doctor => ({
         id: `book-${doctor.id}`,

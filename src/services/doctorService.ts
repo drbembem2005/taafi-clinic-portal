@@ -10,7 +10,7 @@ export interface Fees {
   consultation: number | string | null;
 }
 
-// Define the Doctor type
+// Define the Doctor type with schedule fields
 export interface Doctor {
   id: number;
   name: string;
@@ -24,6 +24,8 @@ export interface Doctor {
   old_schedule?: Record<string, unknown>;
   title?: string;
   experience?: number;
+  available_days?: string[] | string;
+  working_hours?: string;
 }
 
 // Define the DoctorSchedule type
@@ -91,7 +93,9 @@ export async function getDoctors(): Promise<Doctor[]> {
       ...doctor,
       fees: typeof doctor.fees === 'string' 
         ? JSON.parse(doctor.fees) 
-        : (doctor.fees as unknown as Fees)
+        : (doctor.fees as unknown as Fees),
+      available_days: doctor.available_days || [],
+      working_hours: doctor.working_hours || 'غير محدد'
     })) as Doctor[];
   } catch (error) {
     console.error('Error in getDoctors:', error);
@@ -122,7 +126,9 @@ export async function getDoctor(id: number): Promise<Doctor | null> {
       ...data,
       fees: typeof data.fees === 'string' 
         ? JSON.parse(data.fees) 
-        : (data.fees as unknown as Fees)
+        : (data.fees as unknown as Fees),
+      available_days: data.available_days || [],
+      working_hours: data.working_hours || 'غير محدد'
     } as Doctor;
   } catch (error) {
     console.error('Error in getDoctor:', error);
@@ -153,7 +159,9 @@ export async function getDoctorsBySpecialtyId(specialtyId: number): Promise<Doct
       ...doctor,
       fees: typeof doctor.fees === 'string' 
         ? JSON.parse(doctor.fees) 
-        : (doctor.fees as unknown as Fees)
+        : (doctor.fees as unknown as Fees),
+      available_days: doctor.available_days || [],
+      working_hours: doctor.working_hours || 'غير محدد'
     })) as Doctor[];
   } catch (error) {
     console.error('Error in getDoctorsBySpecialty:', error);

@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
 import { Message, ChatState } from './types';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 import { newChatbotService } from './newChatbotService';
@@ -106,53 +105,59 @@ const MessageBubble = ({
           <div className="whitespace-pre-wrap leading-relaxed">{message.text}</div>
         </motion.div>
 
-        {/* Render specialties as cards */}
-        {!isUser && message.data?.specialties && message.data.specialties.length > 0 && (
-          <div className="mt-4 space-y-2">
-            {message.data.specialties.map((specialty: any) => (
-              <SpecialtyCard 
-                key={specialty.id} 
-                specialty={specialty} 
-                onSelect={handleSpecialtySelect}
-              />
-            ))}
-          </div>
-        )}
+        {/* Only show interactive elements for bot messages */}
+        {!isUser && (
+          <>
+            {/* Render specialties as cards */}
+            {message.data?.specialties && message.data.specialties.length > 0 && (
+              <div className="mt-4 space-y-2">
+                {message.data.specialties.map((specialty: any) => (
+                  <SpecialtyCard 
+                    key={specialty.id} 
+                    specialty={specialty} 
+                    onSelect={handleSpecialtySelect}
+                  />
+                ))}
+              </div>
+            )}
 
-        {/* Render doctors as cards */}
-        {!isUser && message.data?.doctors && message.data.doctors.length > 0 && (
-          <div className="mt-4 space-y-2">
-            {message.data.doctors.map((doctor: any) => (
-              <DoctorCard 
-                key={doctor.id} 
-                doctor={doctor} 
-                onBook={handleDoctorSelect}
-              />
-            ))}
-          </div>
-        )}
+            {/* Render doctors as cards */}
+            {message.data?.doctors && message.data.doctors.length > 0 && (
+              <div className="mt-4 space-y-2">
+                {message.data.doctors.map((doctor: any) => (
+                  <DoctorCard 
+                    key={doctor.id} 
+                    doctor={doctor} 
+                    onBook={handleDoctorSelect}
+                  />
+                ))}
+              </div>
+            )}
 
-        {/* Render action buttons */}
-        {!isUser && message.data?.buttons && message.data.buttons.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
-            {message.data.buttons.map((button: any) => (
-              <ActionButton
-                key={button.id}
-                button={button}
-                onClick={handleButtonClick}
-                isLoading={selectedAction === button.action}
-              />
-            ))}
-          </div>
-        )}
+            {/* Render action buttons only if no cards are shown */}
+            {message.data?.buttons && message.data.buttons.length > 0 && 
+             !message.data?.specialties && !message.data?.doctors && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {message.data.buttons.map((button: any) => (
+                  <ActionButton
+                    key={button.id}
+                    button={button}
+                    onClick={handleButtonClick}
+                    isLoading={selectedAction === button.action}
+                  />
+                ))}
+              </div>
+            )}
 
-        {/* Render user info form */}
-        {!isUser && message.data?.userForm && (
-          <Card className="mt-4 border-2 border-blue-200 shadow-xl">
-            <CardContent className="p-4">
-              <UserInfoForm onSubmit={handleUserInfoSubmit} />
-            </CardContent>
-          </Card>
+            {/* Render user info form */}
+            {message.data?.userForm && (
+              <Card className="mt-4 border-2 border-blue-200 shadow-xl">
+                <CardContent className="p-4">
+                  <UserInfoForm onSubmit={handleUserInfoSubmit} />
+                </CardContent>
+              </Card>
+            )}
+          </>
         )}
       </div>
     </motion.div>
