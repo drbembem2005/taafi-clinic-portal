@@ -98,14 +98,22 @@ class NewChatbotService {
       data: { specialtyId: specialty.id, specialtyName: specialty.name }
     }));
 
-    buttons.push({ id: 'back', text: '← القائمة الرئيسية', action: 'main-menu' });
+    buttons.push({ 
+      id: 'back', 
+      text: '← القائمة الرئيسية', 
+      action: 'main-menu',
+      data: {}
+    });
 
     return {
       message: {
         text: 'اختر التخصص الطبي:',
         sender: 'bot',
         type: 'specialty-selection',
-        data: { buttons }
+        data: { 
+          buttons,
+          specialties: specialties
+        }
       },
       newState
     };
@@ -126,14 +134,22 @@ class NewChatbotService {
       data: { doctorId: doctor.id, doctorName: doctor.name }
     }));
 
-    buttons.push({ id: 'back', text: '← التخصصات', action: 'booking:start' });
+    buttons.push({ 
+      id: 'back', 
+      text: '← التخصصات', 
+      action: 'booking:start',
+      data: {}
+    });
 
     return {
       message: {
         text: 'اختر الطبيب:',
         sender: 'bot',
         type: 'doctor-selection',
-        data: { buttons }
+        data: { 
+          buttons,
+          doctors: doctors
+        }
       },
       newState
     };
@@ -159,8 +175,8 @@ class NewChatbotService {
       text: '← الأطباء', 
       action: 'booking:select-doctor', 
       data: { 
-        specialtyId: this.state.selectedData.specialtyId, 
-        specialtyName: this.state.selectedData.specialtyName 
+        specialtyId: this.state.selectedData.specialtyId!, 
+        specialtyName: this.state.selectedData.specialtyName!
       } 
     });
 
@@ -169,7 +185,10 @@ class NewChatbotService {
         text: 'اختر اليوم المتاح:',
         sender: 'bot',
         type: 'day-selection',
-        data: { buttons }
+        data: { 
+          buttons,
+          availableDays: availableDays
+        }
       },
       newState
     };
@@ -195,8 +214,8 @@ class NewChatbotService {
       text: '← الأيام', 
       action: 'booking:select-day', 
       data: { 
-        doctorId: this.state.selectedData.doctorId, 
-        doctorName: this.state.selectedData.doctorName 
+        doctorId: this.state.selectedData.doctorId!, 
+        doctorName: this.state.selectedData.doctorName!
       } 
     });
 
@@ -205,7 +224,10 @@ class NewChatbotService {
         text: 'اختر الوقت المناسب:',
         sender: 'bot',
         type: 'time-selection',
-        data: { buttons }
+        data: { 
+          buttons,
+          availableTimes: availableTimes
+        }
       },
       newState
     };
@@ -255,7 +277,7 @@ class NewChatbotService {
           type: 'success',
           data: {
             buttons: [
-              { id: 'main-menu', text: '← القائمة الرئيسية', action: 'main-menu' }
+              { id: 'main-menu', text: '← القائمة الرئيسية', action: 'main-menu', data: {} }
             ]
           }
         },
@@ -270,8 +292,8 @@ class NewChatbotService {
           type: 'info',
           data: {
             buttons: [
-              { id: 'retry', text: '🔄 المحاولة مرة أخرى', action: 'booking:start' },
-              { id: 'main-menu', text: '← القائمة الرئيسية', action: 'main-menu' }
+              { id: 'retry', text: '🔄 المحاولة مرة أخرى', action: 'booking:start', data: {} },
+              { id: 'main-menu', text: '← القائمة الرئيسية', action: 'main-menu', data: {} }
             ]
           }
         },
@@ -292,14 +314,22 @@ class NewChatbotService {
         data: { specialtyId: specialty.id, specialtyName: specialty.name }
       }));
 
-      buttons.push({ id: 'back', text: '← القائمة الرئيسية', action: 'main-menu' });
+      buttons.push({ 
+        id: 'back', 
+        text: '← القائمة الرئيسية', 
+        action: 'main-menu',
+        data: {}
+      });
 
       return {
         message: {
           text: 'اختر التخصص:',
           sender: 'bot',
           type: 'specialty-selection',
-          data: { buttons }
+          data: { 
+            buttons,
+            specialties: specialties
+          }
         },
         newState
       };
@@ -312,6 +342,12 @@ class NewChatbotService {
         text += `👨‍⚕️ د. ${doctor.name}\n`;
         text += `🏥 ${doctor.title || 'طبيب متخصص'}\n`;
         text += `💰 الكشف: ${doctor.fees?.examination || '250'} جنيه\n`;
+        if (doctor.available_days) {
+          text += `📅 الأيام: ${Array.isArray(doctor.available_days) ? doctor.available_days.join(', ') : doctor.available_days}\n`;
+        }
+        if (doctor.working_hours) {
+          text += `🕐 الساعات: ${doctor.working_hours}\n`;
+        }
         if (index < doctors.length - 1) text += '\n';
       });
 
@@ -319,17 +355,30 @@ class NewChatbotService {
         id: `book-${doctor.id}`,
         text: `احجز مع د. ${doctor.name}`,
         action: `booking:select-day`,
-        data: { doctorId: doctor.id, doctorName: doctor.name, specialtyId: data.specialtyId, specialtyName: data.specialtyName }
+        data: { 
+          doctorId: doctor.id, 
+          doctorName: doctor.name, 
+          specialtyId: data.specialtyId, 
+          specialtyName: data.specialtyName 
+        }
       }));
 
-      buttons.push({ id: 'back', text: '← التخصصات', action: 'doctors-schedule:start' });
+      buttons.push({ 
+        id: 'back', 
+        text: '← التخصصات', 
+        action: 'doctors-schedule:start',
+        data: {}
+      });
 
       return {
         message: {
           text,
           sender: 'bot',
           type: 'info',
-          data: { buttons }
+          data: { 
+            buttons,
+            doctors: doctors
+          }
         },
         newState
       };
@@ -363,8 +412,8 @@ class NewChatbotService {
         type: 'info',
         data: {
           buttons: [
-            { id: 'booking', text: '📅 احجز موعد', action: 'booking:start' },
-            { id: 'back', text: '← القائمة الرئيسية', action: 'main-menu' }
+            { id: 'booking', text: '📅 احجز موعد', action: 'booking:start', data: {} },
+            { id: 'back', text: '← القائمة الرئيسية', action: 'main-menu', data: {} }
           ]
         }
       },
@@ -388,14 +437,22 @@ class NewChatbotService {
       data: { specialtyId: specialty.id, specialtyName: specialty.name }
     }));
 
-    buttons.push({ id: 'back', text: '← القائمة الرئيسية', action: 'main-menu' });
+    buttons.push({ 
+      id: 'back', 
+      text: '← القائمة الرئيسية', 
+      action: 'main-menu',
+      data: {}
+    });
 
     return {
       message: {
         text,
         sender: 'bot',
         type: 'info',
-        data: { buttons }
+        data: { 
+          buttons,
+          specialties: specialties
+        }
       },
       newState
     };
@@ -411,8 +468,8 @@ class NewChatbotService {
         type: 'info',
         data: {
           buttons: [
-            { id: 'map', text: '🗺️ فتح الخريطة', action: 'external:map' },
-            { id: 'back', text: '← القائمة الرئيسية', action: 'main-menu' }
+            { id: 'map', text: '🗺️ فتح الخريطة', action: 'external:map', data: {} },
+            { id: 'back', text: '← القائمة الرئيسية', action: 'main-menu', data: {} }
           ]
         }
       },
@@ -430,10 +487,10 @@ class NewChatbotService {
         type: 'info',
         data: {
           buttons: [
-            { id: 'inquiry', text: '📝 إرسال استفسار', action: 'customer-service:inquiry' },
-            { id: 'whatsapp', text: '💬 التواصل عبر واتساب', action: 'external:whatsapp' },
-            { id: 'call', text: '📞 مكالمة هاتفية', action: 'external:call' },
-            { id: 'back', text: '← القائمة الرئيسية', action: 'main-menu' }
+            { id: 'inquiry', text: '📝 إرسال استفسار', action: 'customer-service:inquiry', data: {} },
+            { id: 'whatsapp', text: '💬 التواصل عبر واتساب', action: 'external:whatsapp', data: {} },
+            { id: 'call', text: '📞 مكالمة هاتفية', action: 'external:call', data: {} },
+            { id: 'back', text: '← القائمة الرئيسية', action: 'main-menu', data: {} }
           ]
         }
       },
