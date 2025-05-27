@@ -7,15 +7,18 @@ import ChatHeader from './ChatHeader';
 import ChatMessages from './ChatMessages';
 import ChatInput from './ChatInput';
 import QuickActions from './QuickActions';
-import { Message, ChatBotState } from './types';
-import { chatbotService } from './chatbotService';
+import { Message, ChatState } from './types';
+import { newChatbotService } from './newChatbotService';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [chatState, setChatState] = useState<ChatBotState>('welcome');
+  const [chatState, setChatState] = useState<ChatState>({
+    currentFlow: 'welcome',
+    selectedData: {}
+  });
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
@@ -24,7 +27,7 @@ const ChatBot = () => {
     if (isOpen && messages.length === 0) {
       const welcomeMessage: Message = {
         id: 1,
-        text: 'مرحباً بك في عيادات تعافي التخصصية! 👋\nأنا مساعدك الذكي، سأساعدك في حجز موعد أو الإجابة على استفساراتك.',
+        text: 'مرحبًا بك في عيادات تعافي التخصصية! 👋\nأنا تعافي بوت | TAAFE Assistant\nكيف يمكنني مساعدتك اليوم؟',
         sender: 'bot',
         timestamp: new Date(),
         type: 'welcome'
@@ -34,14 +37,19 @@ const ChatBot = () => {
       
       // Add main menu after a short delay
       setTimeout(async () => {
-        const mainMenuResponse = await chatbotService.handleAction('main');
-        const mainMenuMessage: Message = {
-          ...mainMenuResponse,
-          id: 2,
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, mainMenuMessage]);
-        setChatState('main-menu');
+        try {
+          newChatbotService.resetState();
+          const { message: mainMenuMessage, newState } = await newChatbotService.handleAction('main-menu');
+          const mainMenuMessageWithId: Message = {
+            ...mainMenuMessage,
+            id: 2,
+            timestamp: new Date()
+          };
+          setMessages(prev => [...prev, mainMenuMessageWithId]);
+          setChatState(newState);
+        } catch (error) {
+          console.error('Error initializing main menu:', error);
+        }
       }, 1000);
     }
   }, [isOpen, messages.length]);
@@ -71,10 +79,11 @@ const ChatBot = () => {
     setIsLoading(true);
 
     try {
-      // Get response from chatbot service
-      const response = await chatbotService.handleAction('main');
+      // Get response from chatbot service - treat as main menu for text input
+      const { message: response, newState } = await newChatbotService.handleAction('main-menu');
       setTimeout(() => {
         addMessage(response);
+        setChatState(newState);
         setIsLoading(false);
       }, 800);
     } catch (error) {
@@ -92,33 +101,38 @@ const ChatBot = () => {
   };
 
   const handleQuickAction = async (action: string) => {
-    // Map quick action text to actual actions
-    const actionMap: { [key: string]: string } = {
-      'القائمة الرئيسية': 'main',
-      'حجز موعد': 'booking',
-      'حجز': 'booking'
-    };
+    console.log('=== QUICK ACTION ===');
+    console.log('Action:', action);
 
-    const mappedAction = actionMap[action] || 'main';
-    
-    addMessage({
-      text: action,
-      sender: 'user'
-    });
+    // Handle external actions
+    if (action.startsWith('external:')) {
+      await newChatbotService.handleExternalAction(action);
+      return;
+    }
 
     setIsLoading(true);
     try {
-      const response = await chatbotService.handleAction(mappedAction);
+      // Update service state
+      newChatbotService.updateState(chatState);
+      
+      // Get response
+      const { message: response, newState } = await newChatbotService.handleAction(action);
+      
+      // Add user message based on action
+      const actionTexts: { [key: string]: string } = {
+        'main-menu': 'القائمة الرئيسية',
+        'booking:start': 'احجز موعد'
+      };
+      
+      addMessage({
+        text: actionTexts[action] || action,
+        sender: 'user'
+      });
+
       setTimeout(() => {
         addMessage(response);
+        setChatState(newState);
         setIsLoading(false);
-        
-        // Update chat state based on action
-        if (mappedAction === 'booking') {
-          setChatState('booking');
-        } else if (mappedAction === 'main') {
-          setChatState('main-menu');
-        }
       }, 800);
     } catch (error) {
       console.error('Error handling quick action:', error);

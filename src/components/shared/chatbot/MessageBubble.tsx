@@ -2,18 +2,16 @@
 import { motion } from 'framer-motion';
 import { User, Bot, Clock } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
-import { Message, ChatBotState } from './types';
-import DoctorCard from './DoctorCard';
-import SpecialtyCard from './SpecialtyCard';
-import { chatbotService } from './chatbotService';
-import ChatBookingForm from './ChatBookingForm';
+import { Message, ChatState } from './types';
+import { newChatbotService } from './newChatbotService';
+import UserInfoForm from './UserInfoForm';
 
 interface MessageBubbleProps {
   message: Message;
   onAddMessage: (message: Omit<Message, 'id' | 'timestamp'>) => void;
   onSetLoading: (loading: boolean) => void;
-  chatState: ChatBotState;
-  onSetChatState: (state: ChatBotState) => void;
+  chatState: ChatState;
+  onSetChatState: (state: ChatState) => void;
 }
 
 const MessageBubble = ({ 
@@ -25,84 +23,70 @@ const MessageBubble = ({
 }: MessageBubbleProps) => {
   const isUser = message.sender === 'user';
 
-  const handleOptionClick = async (action: string, text: string) => {
+  const handleButtonClick = async (action: string, buttonData?: any) => {
+    console.log('=== BUTTON CLICKED ===');
+    console.log('Action:', action);
+    console.log('Button Data:', buttonData);
+
     // Handle external actions first
-    if (action.startsWith('external-') || action.startsWith('contact-')) {
-      await chatbotService.handleExternalAction(action);
+    if (action.startsWith('external:')) {
+      await newChatbotService.handleExternalAction(action);
       return;
     }
 
-    // Add user message
-    onAddMessage({ text, sender: 'user' });
+    // Add user message for the action
+    const buttonText = message.data?.buttons?.find(b => b.action === action)?.text || action;
+    onAddMessage({ text: buttonText, sender: 'user' });
     onSetLoading(true);
 
     try {
-      const response = await chatbotService.handleAction(action);
+      // Update service state with current chat state
+      newChatbotService.updateState(chatState);
+      
+      // Get response from service
+      const { message: responseMessage, newState } = await newChatbotService.handleAction(action, buttonData);
+      
       setTimeout(() => {
-        onAddMessage(response);
+        onAddMessage(responseMessage);
+        onSetChatState(newState);
         onSetLoading(false);
-        
-        // Handle state changes based on action type
-        const [actionType] = action.split('-');
-        switch (actionType) {
-          case 'specialties':
-            onSetChatState('specialties');
-            break;
-          case 'doctors':
-            onSetChatState('doctors');
-            break;
-          case 'specialty':
-            onSetChatState('doctors');
-            break;
-          case 'booking':
-            onSetChatState('booking');
-            break;
-          case 'main':
-            onSetChatState('main-menu');
-            break;
-          default:
-            break;
-        }
       }, 800);
     } catch (error) {
-      console.error('Error handling action:', error);
+      console.error('Error handling button action:', error);
+      onAddMessage({
+        text: 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.',
+        sender: 'bot'
+      });
       onSetLoading(false);
     }
   };
 
-  const handleDoctorBooking = (doctorId: number, doctorName: string, specialtyId?: number) => {
-    console.log('=== DOCTOR BOOKING INITIATED ===');
-    console.log('Doctor ID:', doctorId);
-    console.log('Doctor Name:', doctorName);
-    console.log('Specialty ID:', specialtyId);
-    
-    // Add user message
-    onAddMessage({
-      text: `أريد حجز موعد مع د. ${doctorName}`,
-      sender: 'user'
-    });
-    
-    // Set loading briefly then show booking form
+  const handleUserInfoSubmit = async (userInfo: { name: string; phone: string; email?: string }) => {
+    console.log('=== USER INFO SUBMITTED ===');
+    console.log('User Info:', userInfo);
+
     onSetLoading(true);
-    
-    setTimeout(() => {
-      console.log('Adding booking form message...');
+
+    try {
+      // Update service state with current chat state
+      newChatbotService.updateState(chatState);
+      
+      // Handle booking confirmation
+      const { message: responseMessage, newState } = await newChatbotService.handleAction('booking:confirm', userInfo);
+      
+      setTimeout(() => {
+        onAddMessage(responseMessage);
+        onSetChatState(newState);
+        onSetLoading(false);
+      }, 1000);
+    } catch (error) {
+      console.error('Error submitting user info:', error);
       onAddMessage({
-        text: `يرجى تعبئة البيانات التالية لحجز موعد مع د. ${doctorName}:`,
-        sender: 'bot',
-        type: 'booking',
-        data: {
-          bookingForm: {
-            doctorId,
-            doctorName,
-            specialtyId
-          }
-        }
+        text: 'عذراً، حدث خطأ أثناء الحجز. يرجى المحاولة مرة أخرى.',
+        sender: 'bot'
       });
       onSetLoading(false);
-      onSetChatState('booking');
-      console.log('Booking form should now be visible');
-    }, 1000);
+    }
   };
 
   const formatTime = (timestamp: Date) => {
@@ -163,99 +147,30 @@ const MessageBubble = ({
           </div>
         </motion.div>
 
-        {/* Booking Form */}
-        {message.data?.bookingForm && (
+        {/* User Info Form */}
+        {message.data?.userForm && (
           <motion.div 
             className="w-full mt-2"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <ChatBookingForm
-              doctorId={message.data.bookingForm.doctorId}
-              doctorName={message.data.bookingForm.doctorName}
-              specialtyId={message.data.bookingForm.specialtyId}
-              onBookingComplete={(success) => {
-                if (success) {
-                  onAddMessage({
-                    text: 'تم حجز موعدك بنجاح! ✅\nسيتم التواصل معك قريباً لتأكيد الموعد.',
-                    sender: 'bot'
-                  });
-                  onSetChatState('main-menu');
-                } else {
-                  onAddMessage({
-                    text: 'عذراً، حدث خطأ أثناء الحجز. يرجى المحاولة مرة أخرى أو التواصل معنا.',
-                    sender: 'bot'
-                  });
-                }
-              }}
-            />
+            <UserInfoForm onSubmit={handleUserInfoSubmit} />
           </motion.div>
         )}
 
-        {/* Specialty Cards */}
-        {message.data?.specialties && message.data.specialties.length > 0 && (
-          <motion.div 
-            className="w-full space-y-2"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            {message.data.specialties.map((specialty, index) => (
-              <motion.div
-                key={specialty.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 + index * 0.1 }}
-              >
-                <SpecialtyCard 
-                  specialty={specialty} 
-                  onSelect={(id, name) => handleOptionClick(`specialty-${id}`, name)}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-
-        {/* Doctor Cards */}
-        {message.data?.doctors && message.data.doctors.length > 0 && (
-          <motion.div 
-            className="w-full space-y-2"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            {message.data.doctors.map((doctor, index) => (
-              <motion.div
-                key={doctor.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 + index * 0.1 }}
-              >
-                <DoctorCard 
-                  doctor={doctor} 
-                  onBook={(doctorId, doctorName) => {
-                    console.log('DoctorCard onBook triggered:', { doctorId, doctorName });
-                    handleDoctorBooking(doctorId, doctorName, doctor.specialty_id);
-                  }}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-
-        {/* Option Buttons */}
-        {message.data?.options && (
+        {/* Action Buttons */}
+        {message.data?.buttons && (
           <motion.div 
             className="flex flex-wrap gap-2"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
           >
-            {message.data.options.map((option, index) => (
+            {message.data.buttons.map((button, index) => (
               <motion.button
-                key={option.id}
-                onClick={() => handleOptionClick(option.action, option.text)}
+                key={button.id}
+                onClick={() => handleButtonClick(button.action, button.data)}
                 className="px-3 py-1.5 text-xs rounded-lg border bg-white/90 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-200 shadow-sm backdrop-blur-sm font-medium"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -263,7 +178,7 @@ const MessageBubble = ({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {option.text}
+                {button.text}
               </motion.button>
             ))}
           </motion.div>

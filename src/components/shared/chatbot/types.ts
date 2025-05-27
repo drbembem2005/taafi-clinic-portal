@@ -4,42 +4,61 @@ export interface Message {
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
-  type?: 'welcome' | 'options' | 'doctors' | 'specialties' | 'info' | 'booking';
+  type?: 'welcome' | 'main-menu' | 'specialty-selection' | 'doctor-selection' | 'day-selection' | 'time-selection' | 'user-info' | 'confirmation' | 'success' | 'info';
   data?: {
-    doctors?: any[];
+    buttons?: ButtonOption[];
     specialties?: any[];
-    links?: ActionLink[];
-    richContent?: string;
-    options?: QuickOption[];
-    bookingForm?: {
-      doctorId: number;
-      doctorName: string;
+    doctors?: any[];
+    availableDays?: string[];
+    availableTimes?: string[];
+    userForm?: boolean;
+    selectedData?: {
       specialtyId?: number;
+      specialtyName?: string;
+      doctorId?: number;
+      doctorName?: string;
+      selectedDay?: string;
+      selectedTime?: string;
     };
   };
 }
 
-export interface ActionLink {
-  type: 'booking' | 'whatsapp' | 'phone' | 'link';
-  text: string;
-  url: string;
-  icon: 'phone' | 'message' | 'link';
-  doctorId?: number;
-  specialtyId?: number;
-}
-
-export interface QuickOption {
+export interface ButtonOption {
   id: string;
   text: string;
   action: string;
-  icon?: string;
+  data?: any;
 }
 
-export type ChatBotState = 
-  | 'welcome' 
-  | 'main-menu' 
-  | 'specialties' 
-  | 'doctors' 
-  | 'booking' 
-  | 'contact' 
-  | 'info';
+export type ChatFlow = 
+  | 'welcome'
+  | 'main-menu'
+  | 'booking-specialty'
+  | 'booking-doctor'
+  | 'booking-day'
+  | 'booking-time'
+  | 'booking-info'
+  | 'booking-confirm'
+  | 'doctors-schedule-specialty'
+  | 'doctors-schedule-list'
+  | 'prices-list'
+  | 'specialties-list'
+  | 'location-info'
+  | 'customer-service';
+
+export interface ChatState {
+  currentFlow: ChatFlow;
+  selectedData: {
+    specialtyId?: number;
+    specialtyName?: string;
+    doctorId?: number;
+    doctorName?: string;
+    selectedDay?: string;
+    selectedTime?: string;
+    userInfo?: {
+      name: string;
+      phone: string;
+      email?: string;
+    };
+  };
+}
