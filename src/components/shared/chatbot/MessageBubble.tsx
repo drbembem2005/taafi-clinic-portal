@@ -71,40 +71,38 @@ const MessageBubble = ({
   };
 
   const handleDoctorBooking = (doctorId: number, doctorName: string, specialtyId?: number) => {
-    console.log('=== DOCTOR BOOKING FLOW DEBUG ===');
-    console.log('6. handleDoctorBooking called with:', { doctorId, doctorName, specialtyId });
+    console.log('=== DOCTOR BOOKING INITIATED ===');
+    console.log('Doctor ID:', doctorId);
+    console.log('Doctor Name:', doctorName);
+    console.log('Specialty ID:', specialtyId);
     
-    try {
-      // Add user message to show booking intent
-      console.log('7. Adding user message...');
+    // Add user message
+    onAddMessage({
+      text: `أريد حجز موعد مع د. ${doctorName}`,
+      sender: 'user'
+    });
+    
+    // Set loading briefly then show booking form
+    onSetLoading(true);
+    
+    setTimeout(() => {
+      console.log('Adding booking form message...');
       onAddMessage({
-        text: `حجز موعد مع د. ${doctorName}`,
-        sender: 'user'
-      });
-      
-      // Show booking form immediately
-      console.log('8. Setting timeout for booking form...');
-      setTimeout(() => {
-        console.log('9. Adding booking form message...');
-        onAddMessage({
-          text: `املأ البيانات التالية لحجز موعد مع د. ${doctorName}:`,
-          sender: 'bot',
-          type: 'booking',
-          data: {
-            bookingForm: {
-              doctorId,
-              doctorName,
-              specialtyId
-            }
+        text: `يرجى تعبئة البيانات التالية لحجز موعد مع د. ${doctorName}:`,
+        sender: 'bot',
+        type: 'booking',
+        data: {
+          bookingForm: {
+            doctorId,
+            doctorName,
+            specialtyId
           }
-        });
-        console.log('10. Setting chat state to booking...');
-        onSetChatState('booking');
-        console.log('11. Booking flow completed successfully');
-      }, 500);
-    } catch (error) {
-      console.error('Error in handleDoctorBooking:', error);
-    }
+        }
+      });
+      onSetLoading(false);
+      onSetChatState('booking');
+      console.log('Booking form should now be visible');
+    }, 1000);
   };
 
   const formatTime = (timestamp: Date) => {
@@ -168,7 +166,7 @@ const MessageBubble = ({
         {/* Booking Form */}
         {message.data?.bookingForm && (
           <motion.div 
-            className="w-full"
+            className="w-full mt-2"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
@@ -181,6 +179,12 @@ const MessageBubble = ({
                 if (success) {
                   onAddMessage({
                     text: 'تم حجز موعدك بنجاح! ✅\nسيتم التواصل معك قريباً لتأكيد الموعد.',
+                    sender: 'bot'
+                  });
+                  onSetChatState('main-menu');
+                } else {
+                  onAddMessage({
+                    text: 'عذراً، حدث خطأ أثناء الحجز. يرجى المحاولة مرة أخرى أو التواصل معنا.',
                     sender: 'bot'
                   });
                 }
@@ -221,27 +225,22 @@ const MessageBubble = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            {message.data.doctors.map((doctor, index) => {
-              console.log(`Rendering doctor card ${index}:`, doctor.name, 'ID:', doctor.id);
-              return (
-                <motion.div
-                  key={doctor.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + index * 0.1 }}
-                >
-                  <DoctorCard 
-                    doctor={doctor} 
-                    onBook={(doctorId, doctorName) => {
-                      console.log('=== ONBOOK CALLBACK TRIGGERED ===');
-                      console.log('DoctorCard onBook called with:', { doctorId, doctorName });
-                      console.log('About to call handleDoctorBooking...');
-                      handleDoctorBooking(doctorId, doctorName, doctor.specialty_id);
-                    }}
-                  />
-                </motion.div>
-              );
-            })}
+            {message.data.doctors.map((doctor, index) => (
+              <motion.div
+                key={doctor.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 + index * 0.1 }}
+              >
+                <DoctorCard 
+                  doctor={doctor} 
+                  onBook={(doctorId, doctorName) => {
+                    console.log('DoctorCard onBook triggered:', { doctorId, doctorName });
+                    handleDoctorBooking(doctorId, doctorName, doctor.specialty_id);
+                  }}
+                />
+              </motion.div>
+            ))}
           </motion.div>
         )}
 
