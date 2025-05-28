@@ -3,7 +3,9 @@ import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { User, Calendar, Star, Award, Clock, Stethoscope } from 'lucide-react';
+import { User, Calendar, Award, Clock, Stethoscope } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { getDoctorSchedule, getNextAvailableDays } from '@/services/doctorService';
 
 interface DoctorCardProps {
   doctor: any;
@@ -11,6 +13,54 @@ interface DoctorCardProps {
 }
 
 const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
+  const [isAvailableToday, setIsAvailableToday] = useState(false);
+  const [nextAvailableDate, setNextAvailableDate] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAvailability = async () => {
+      try {
+        setLoading(true);
+        const availableDays = await getNextAvailableDays(doctor.id);
+        
+        if (availableDays.length > 0) {
+          const today = new Date();
+          const todayDateString = today.toDateString();
+          
+          // Check if doctor is available today
+          const availableToday = availableDays.some(day => 
+            day.date.toDateString() === todayDateString
+          );
+          
+          setIsAvailableToday(availableToday);
+          
+          // Set next available date
+          if (availableToday) {
+            setNextAvailableDate('اليوم');
+          } else if (availableDays[0]) {
+            const nextDate = availableDays[0].date;
+            const options: Intl.DateTimeFormatOptions = { 
+              weekday: 'long',
+              month: 'long', 
+              day: 'numeric'
+            };
+            setNextAvailableDate(nextDate.toLocaleDateString('ar-EG', options));
+          }
+        }
+      } catch (error) {
+        console.error('Error checking doctor availability:', error);
+        setIsAvailableToday(false);
+        setNextAvailableDate('غير متاح');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (doctor.id) {
+      checkAvailability();
+    }
+  }, [doctor.id]);
+
   const handleBookClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -68,13 +118,6 @@ const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
               <Award size={16} className="text-yellow-500 flex-shrink-0" />
             </div>
             
-            <div className="flex items-center gap-1 mb-2">
-              <Stethoscope size={14} className="text-blue-500 flex-shrink-0" />
-              <p className="text-sm text-gray-600 line-clamp-1">
-                {doctor.specialty || 'طبيب متخصص'}
-              </p>
-            </div>
-            
             {doctor.bio && (
               <p className="text-xs text-gray-500 line-clamp-2 mb-2">
                 {doctor.bio}
@@ -83,7 +126,7 @@ const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
           </div>
         </div>
         
-        {/* Fees and rating section */}
+        {/* Fees section */}
         <div className="flex items-center justify-between mb-3 p-2 bg-white/60 rounded-lg">
           <div className="flex items-center gap-4">
             {doctor.fees?.examination && (
@@ -95,14 +138,6 @@ const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
                 </div>
               </div>
             )}
-            
-            <div className="flex items-center gap-1">
-              <Star size={14} className="text-yellow-500" />
-              <div>
-                <p className="text-xs text-gray-500">تقييم</p>
-                <p className="text-sm font-bold text-gray-700">4.8</p>
-              </div>
-            </div>
           </div>
           
           <motion.div
@@ -120,16 +155,28 @@ const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
           </motion.div>
         </div>
         
-        {/* Quick info badges */}
+        {/* Dynamic availability info */}
         <div className="flex flex-wrap gap-2">
-          <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
-            <Clock size={12} />
-            متاح اليوم
-          </div>
-          <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-            <Star size={12} />
-            خبرة 10+ سنوات
-          </div>
+          {loading ? (
+            <div className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-500 rounded-full text-xs">
+              <Clock size={12} />
+              جاري التحقق...
+            </div>
+          ) : (
+            <>
+              {isAvailableToday ? (
+                <div className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">
+                  <Clock size={12} />
+                  متاح اليوم
+                </div>
+              ) : (
+                <div className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
+                  <Clock size={12} />
+                  {nextAvailableDate ? `متاح ${nextAvailableDate}` : 'غير متاح حالياً'}
+                </div>
+              )}
+            </>
+          )}
         </div>
         
         {/* Hover effect overlay */}
