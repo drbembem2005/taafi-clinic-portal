@@ -1,3 +1,4 @@
+
 export type ChatBotState = 'welcome' | 'main-menu' | 'specialties' | 'doctors' | 'booking';
 
 export interface QuickOption {
@@ -10,7 +11,9 @@ export interface ActionLink {
   id: string;
   text: string;
   action: string;
-  type?: 'external' | 'internal';
+  type?: 'external' | 'internal' | 'booking' | 'whatsapp' | 'phone';
+  url: string;
+  icon?: string;
 }
 
 export interface Message {
