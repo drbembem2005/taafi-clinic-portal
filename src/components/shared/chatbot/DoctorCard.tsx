@@ -69,9 +69,9 @@ const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
               <Award size={14} className="text-yellow-500" />
             </div>
             
-            <p className="text-xs text-gray-600 mb-1 flex items-center gap-1">
-              <Star size={12} className="text-emerald-500" />
-              {doctor.specialty || 'طبيب متخصص'}
+            <p className="text-xs text-gray-600 mb-1 flex items-center gap-1 line-clamp-2">
+              <Star size={12} className="text-emerald-500 flex-shrink-0" />
+              {doctor.bio || doctor.specialty || 'طبيب متخصص'}
             </p>
             
             {doctor.fees?.examination && (
