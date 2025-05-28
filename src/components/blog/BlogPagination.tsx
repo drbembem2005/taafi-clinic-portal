@@ -30,7 +30,11 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
             <PaginationLink
               onClick={() => onPageChange(i)}
               isActive={currentPage === i}
-              className="cursor-pointer"
+              className={`cursor-pointer w-12 h-12 rounded-xl border-0 ${
+                currentPage === i 
+                  ? 'bg-brand text-white shadow-lg shadow-brand/25' 
+                  : 'bg-white hover:bg-brand hover:text-white text-gray-700 shadow-sm'
+              } transition-all duration-300`}
             >
               {i}
             </PaginationLink>
@@ -44,7 +48,11 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
           <PaginationLink
             onClick={() => onPageChange(1)}
             isActive={currentPage === 1}
-            className="cursor-pointer"
+            className={`cursor-pointer w-12 h-12 rounded-xl border-0 ${
+              currentPage === 1 
+                ? 'bg-brand text-white shadow-lg shadow-brand/25' 
+                : 'bg-white hover:bg-brand hover:text-white text-gray-700 shadow-sm'
+            } transition-all duration-300`}
           >
             1
           </PaginationLink>
@@ -55,7 +63,7 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
       if (currentPage > 3) {
         pages.push(
           <PaginationItem key="ellipsis-start">
-            <PaginationEllipsis />
+            <PaginationEllipsis className="w-12 h-12 rounded-xl bg-white shadow-sm" />
           </PaginationItem>
         );
       }
@@ -70,7 +78,11 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
             <PaginationLink
               onClick={() => onPageChange(i)}
               isActive={currentPage === i}
-              className="cursor-pointer"
+              className={`cursor-pointer w-12 h-12 rounded-xl border-0 ${
+                currentPage === i 
+                  ? 'bg-brand text-white shadow-lg shadow-brand/25' 
+                  : 'bg-white hover:bg-brand hover:text-white text-gray-700 shadow-sm'
+              } transition-all duration-300`}
             >
               {i}
             </PaginationLink>
@@ -82,7 +94,7 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
       if (currentPage < totalPages - 2) {
         pages.push(
           <PaginationItem key="ellipsis-end">
-            <PaginationEllipsis />
+            <PaginationEllipsis className="w-12 h-12 rounded-xl bg-white shadow-sm" />
           </PaginationItem>
         );
       }
@@ -94,7 +106,11 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
             <PaginationLink
               onClick={() => onPageChange(totalPages)}
               isActive={currentPage === totalPages}
-              className="cursor-pointer"
+              className={`cursor-pointer w-12 h-12 rounded-xl border-0 ${
+                currentPage === totalPages 
+                  ? 'bg-brand text-white shadow-lg shadow-brand/25' 
+                  : 'bg-white hover:bg-brand hover:text-white text-gray-700 shadow-sm'
+              } transition-all duration-300`}
             >
               {totalPages}
             </PaginationLink>
@@ -107,29 +123,35 @@ const BlogPagination = ({ currentPage, totalPages, onPageChange }: BlogPaginatio
   };
 
   return (
-    <Pagination className="mt-12">
-      <PaginationContent>
-        <PaginationItem>
-          <PaginationPrevious
-            onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-            className={`cursor-pointer ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            السابق
-          </PaginationPrevious>
-        </PaginationItem>
-        
-        {renderPageNumbers()}
-        
-        <PaginationItem>
-          <PaginationNext
-            onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-            className={`cursor-pointer ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            التالي
-          </PaginationNext>
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
+    <div className="flex justify-center">
+      <Pagination className="bg-white rounded-2xl shadow-lg p-4 border-0">
+        <PaginationContent className="gap-2">
+          <PaginationItem>
+            <PaginationPrevious
+              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+              className={`cursor-pointer px-6 py-3 rounded-xl border-0 bg-white hover:bg-brand hover:text-white text-gray-700 shadow-sm transition-all duration-300 ${
+                currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              السابق
+            </PaginationPrevious>
+          </PaginationItem>
+          
+          {renderPageNumbers()}
+          
+          <PaginationItem>
+            <PaginationNext
+              onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+              className={`cursor-pointer px-6 py-3 rounded-xl border-0 bg-white hover:bg-brand hover:text-white text-gray-700 shadow-sm transition-all duration-300 ${
+                currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              التالي
+            </PaginationNext>
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    </div>
   );
 };
 
