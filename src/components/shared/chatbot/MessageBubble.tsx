@@ -71,21 +71,15 @@ const MessageBubble = ({
   };
 
   const handleDoctorBooking = (doctorId: number, doctorName: string, specialtyId?: number) => {
-    console.log('=== DOCTOR BOOKING FLOW DEBUG ===');
-    console.log('6. handleDoctorBooking called with:', { doctorId, doctorName, specialtyId });
-    
     try {
       // Add user message to show booking intent
-      console.log('7. Adding user message...');
       onAddMessage({
         text: `حجز موعد مع د. ${doctorName}`,
         sender: 'user'
       });
       
       // Show booking form immediately
-      console.log('8. Setting timeout for booking form...');
       setTimeout(() => {
-        console.log('9. Adding booking form message...');
         onAddMessage({
           text: `املأ البيانات التالية لحجز موعد مع د. ${doctorName}:`,
           sender: 'bot',
@@ -98,9 +92,7 @@ const MessageBubble = ({
             }
           }
         });
-        console.log('10. Setting chat state to booking...');
         onSetChatState('booking');
-        console.log('11. Booking flow completed successfully');
       }, 500);
     } catch (error) {
       console.error('Error in handleDoctorBooking:', error);
@@ -168,6 +160,7 @@ const MessageBubble = ({
         {/* Booking Form */}
         {message.data?.bookingForm && (
           <motion.div 
+            key={`booking-form-${message.id}`}
             className="w-full"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -192,6 +185,7 @@ const MessageBubble = ({
         {/* Specialty Cards */}
         {message.data?.specialties && message.data.specialties.length > 0 && (
           <motion.div 
+            key={`specialties-${message.id}`}
             className="w-full space-y-2"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -199,7 +193,7 @@ const MessageBubble = ({
           >
             {message.data.specialties.map((specialty, index) => (
               <motion.div
-                key={specialty.id}
+                key={`specialty-${specialty.id}-${message.id}`}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 + index * 0.1 }}
@@ -216,38 +210,34 @@ const MessageBubble = ({
         {/* Doctor Cards */}
         {message.data?.doctors && message.data.doctors.length > 0 && (
           <motion.div 
+            key={`doctors-${message.id}`}
             className="w-full space-y-2"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            {message.data.doctors.map((doctor, index) => {
-              console.log(`Rendering doctor card ${index}:`, doctor.name, 'ID:', doctor.id);
-              return (
-                <motion.div
-                  key={doctor.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + index * 0.1 }}
-                >
-                  <DoctorCard 
-                    doctor={doctor} 
-                    onBook={(doctorId, doctorName) => {
-                      console.log('=== ONBOOK CALLBACK TRIGGERED ===');
-                      console.log('DoctorCard onBook called with:', { doctorId, doctorName });
-                      console.log('About to call handleDoctorBooking...');
-                      handleDoctorBooking(doctorId, doctorName, doctor.specialty_id);
-                    }}
-                  />
-                </motion.div>
-              );
-            })}
+            {message.data.doctors.map((doctor, index) => (
+              <motion.div
+                key={`doctor-${doctor.id}-${message.id}`}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 + index * 0.1 }}
+              >
+                <DoctorCard 
+                  doctor={doctor} 
+                  onBook={(doctorId, doctorName) => {
+                    handleDoctorBooking(doctorId, doctorName, doctor.specialty_id);
+                  }}
+                />
+              </motion.div>
+            ))}
           </motion.div>
         )}
 
         {/* Option Buttons */}
         {message.data?.options && (
           <motion.div 
+            key={`options-${message.id}`}
             className="flex flex-wrap gap-2"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -255,7 +245,7 @@ const MessageBubble = ({
           >
             {message.data.options.map((option, index) => (
               <motion.button
-                key={option.id}
+                key={`option-${option.id}-${message.id}`}
                 onClick={() => handleOptionClick(option.action, option.text)}
                 className="px-3 py-1.5 text-xs rounded-lg border bg-white/90 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-200 shadow-sm backdrop-blur-sm font-medium"
                 initial={{ opacity: 0, scale: 0.8 }}

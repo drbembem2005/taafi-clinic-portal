@@ -1,4 +1,24 @@
 
+export interface Doctor {
+  id: number;
+  name: string;
+  specialty_id: number;
+  image?: string;
+  bio?: string;
+  specialty?: string;
+  fees?: {
+    examination: number;
+    consultation: number | null;
+  };
+}
+
+export interface Specialty {
+  id: number;
+  name: string;
+  description?: string;
+  icon?: string;
+}
+
 export interface Message {
   id: number;
   text: string;
@@ -6,8 +26,8 @@ export interface Message {
   timestamp: Date;
   type?: 'welcome' | 'options' | 'doctors' | 'specialties' | 'info' | 'booking';
   data?: {
-    doctors?: any[];
-    specialties?: any[];
+    doctors?: Doctor[];
+    specialties?: Specialty[];
     links?: ActionLink[];
     richContent?: string;
     options?: QuickOption[];

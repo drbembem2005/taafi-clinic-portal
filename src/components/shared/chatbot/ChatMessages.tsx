@@ -39,9 +39,9 @@ const ChatMessages = ({
   return (
     <ScrollArea className="flex-1 px-3 py-2" ref={scrollAreaRef}>
       <div className="space-y-3 min-h-full">
-        {messages.map((message, index) => (
+        {messages.map((message) => (
           <MessageBubble 
-            key={`${message.id}-${index}`}
+            key={`message-${message.id}-${message.timestamp.getTime()}`}
             message={message}
             onAddMessage={onAddMessage}
             onSetLoading={onSetLoading}

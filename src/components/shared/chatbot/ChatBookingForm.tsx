@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { createBooking } from '@/services/bookingService';
-import { CalendarDays, User, Phone, Mail, MessageSquare, Loader2, CheckCircle } from 'lucide-react';
+import { CalendarDays, User, Phone, Mail, MessageSquare, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface ChatBookingFormProps {
   doctorId: number;
@@ -25,18 +25,32 @@ const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete 
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Handle phone number input to only allow numbers
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, ''); // Only allow numbers
     setFormData(prev => ({ ...prev, user_phone: value }));
+    setError(null); // Clear error when user starts typing
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.user_name || !formData.user_phone) return;
+    
+    // Validation
+    if (!formData.user_name.trim()) {
+      setError('الرجاء إدخال الاسم');
+      return;
+    }
+    
+    if (!formData.user_phone.trim() || formData.user_phone.length < 10) {
+      setError('الرجاء إدخال رقم هاتف صحيح');
+      return;
+    }
 
     setIsSubmitting(true);
+    setError(null);
+    
     try {
       await createBooking({
         ...formData,
@@ -51,6 +65,7 @@ const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete 
       }, 2000);
     } catch (error) {
       console.error('Error creating booking:', error);
+      setError('حدث خطأ أثناء الحجز، يرجى المحاولة مرة أخرى');
       onBookingComplete(false);
     } finally {
       setIsSubmitting(false);
@@ -84,13 +99,27 @@ const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete 
         <h3 className="font-bold text-gray-800">حجز موعد مع {doctorName}</h3>
       </div>
 
+      {error && (
+        <motion.div
+          className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 flex items-center gap-2"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <AlertCircle className="w-4 h-4 text-red-500" />
+          <span className="text-red-700 text-sm">{error}</span>
+        </motion.div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="flex items-center gap-2">
           <User className="w-4 h-4 text-gray-400" />
           <Input
             placeholder="الاسم الكامل *"
             value={formData.user_name}
-            onChange={(e) => setFormData(prev => ({ ...prev, user_name: e.target.value }))}
+            onChange={(e) => {
+              setFormData(prev => ({ ...prev, user_name: e.target.value }));
+              setError(null);
+            }}
             className="text-sm"
             required
           />
@@ -166,7 +195,7 @@ const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete 
 
         <Button
           type="submit"
-          disabled={isSubmitting || !formData.user_name || !formData.user_phone}
+          disabled={isSubmitting || !formData.user_name.trim() || !formData.user_phone.trim()}
           className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg font-medium"
         >
           {isSubmitting ? (
