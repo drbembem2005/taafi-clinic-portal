@@ -15,14 +15,21 @@ const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
     e.preventDefault();
     e.stopPropagation();
     
-    console.log('DoctorCard: Book button clicked for doctor:', doctor);
-    console.log('DoctorCard: onBook function exists:', typeof onBook === 'function');
+    console.log('🎯 DoctorCard: Book button clicked', {
+      doctorId: doctor.id,
+      doctorName: doctor.name,
+      onBookExists: typeof onBook === 'function'
+    });
     
     if (onBook && typeof onBook === 'function') {
-      console.log('DoctorCard: Calling onBook with:', doctor.id, doctor.name);
-      onBook(doctor.id, doctor.name);
+      try {
+        onBook(doctor.id, doctor.name);
+        console.log('✅ DoctorCard: onBook called successfully');
+      } catch (error) {
+        console.error('❌ DoctorCard: Error calling onBook:', error);
+      }
     } else {
-      console.error('DoctorCard: onBook function is not available or not a function');
+      console.error('❌ DoctorCard: onBook function not available');
     }
   };
 
@@ -86,6 +93,7 @@ const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
               size="sm"
               onClick={handleBookClick}
               className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-4 py-2 h-9 rounded-xl shadow-lg font-medium transition-all duration-200"
+              type="button"
             >
               <Calendar size={14} className="ml-1" />
               احجز

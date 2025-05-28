@@ -26,11 +26,8 @@ const MessageBubble = ({
   const isUser = message.sender === 'user';
 
   const handleOptionClick = async (action: string, text: string) => {
-    console.log('MessageBubble: handleOptionClick called with:', { action, text });
-    
     // Handle external actions first
     if (action.startsWith('external-') || action.startsWith('contact-')) {
-      console.log('MessageBubble: Handling external action:', action);
       await chatbotService.handleExternalAction(action);
       return;
     }
@@ -74,38 +71,22 @@ const MessageBubble = ({
   };
 
   const handleDoctorBooking = (doctorId: number, doctorName: string, specialtyId?: number) => {
-    try {
-      console.log('MessageBubble: handleDoctorBooking called with:', { doctorId, doctorName, specialtyId });
-      
-      // Add user message to show booking intent
-      const userMessage = {
-        text: `حجز موعد مع د. ${doctorName}`,
-        sender: 'user' as const
-      };
-      console.log('MessageBubble: Adding user message:', userMessage);
-      onAddMessage(userMessage);
-      
-      // Show booking form immediately
-      setTimeout(() => {
-        const botMessage = {
-          text: `املأ البيانات التالية لحجز موعد مع د. ${doctorName}:`,
-          sender: 'bot' as const,
-          type: 'booking' as const,
-          data: {
-            bookingForm: {
-              doctorId,
-              doctorName,
-              specialtyId
-            }
-          }
-        };
-        console.log('MessageBubble: Adding bot message with booking form:', botMessage);
-        onAddMessage(botMessage);
-        onSetChatState('booking');
-      }, 500);
-    } catch (error) {
-      console.error('MessageBubble: Error in handleDoctorBooking:', error);
-    }
+    console.log('📅 Starting booking flow for doctor:', { doctorId, doctorName, specialtyId });
+    
+    // Show booking form directly in the next message
+    const bookingFormMessage = {
+      text: `حجز موعد مع د. ${doctorName}`,
+      sender: 'bot' as const,
+      type: 'booking-form' as const,
+      data: {
+        doctorId,
+        doctorName,
+        specialtyId
+      }
+    };
+    
+    onAddMessage(bookingFormMessage);
+    onSetChatState('booking');
   };
 
   const formatTime = (timestamp: Date) => {
@@ -115,14 +96,6 @@ const MessageBubble = ({
       hour12: false 
     });
   };
-
-  console.log('MessageBubble: Rendering message:', { 
-    id: message.id, 
-    type: message.type, 
-    hasBookingForm: !!message.data?.bookingForm,
-    hasDoctors: !!message.data?.doctors,
-    bookingFormData: message.data?.bookingForm 
-  });
 
   return (
     <motion.div
@@ -174,21 +147,19 @@ const MessageBubble = ({
           </div>
         </motion.div>
 
-        {/* Booking Form */}
-        {message.data?.bookingForm && (
+        {/* Booking Form - Direct rendering based on message type */}
+        {message.type === 'booking-form' && message.data && (
           <motion.div 
-            key={`booking-form-${message.id}`}
             className="w-full"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
             <ChatBookingForm
-              doctorId={message.data.bookingForm.doctorId}
-              doctorName={message.data.bookingForm.doctorName}
-              specialtyId={message.data.bookingForm.specialtyId}
+              doctorId={message.data.doctorId}
+              doctorName={message.data.doctorName}
+              specialtyId={message.data.specialtyId}
               onBookingComplete={(success) => {
-                console.log('MessageBubble: Booking completed with success:', success);
                 if (success) {
                   onAddMessage({
                     text: 'تم حجز موعدك بنجاح! ✅\nسيتم التواصل معك قريباً لتأكيد الموعد.',
@@ -203,7 +174,6 @@ const MessageBubble = ({
         {/* Specialty Cards */}
         {message.data?.specialties && message.data.specialties.length > 0 && (
           <motion.div 
-            key={`specialties-${message.id}`}
             className="w-full space-y-2"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -228,7 +198,6 @@ const MessageBubble = ({
         {/* Doctor Cards */}
         {message.data?.doctors && message.data.doctors.length > 0 && (
           <motion.div 
-            key={`doctors-${message.id}`}
             className="w-full space-y-2"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -244,7 +213,6 @@ const MessageBubble = ({
                 <DoctorCard 
                   doctor={doctor} 
                   onBook={(doctorId, doctorName) => {
-                    console.log('MessageBubble: DoctorCard onBook called with:', { doctorId, doctorName, specialtyId: doctor.specialty_id });
                     handleDoctorBooking(doctorId, doctorName, doctor.specialty_id);
                   }}
                 />
@@ -256,7 +224,6 @@ const MessageBubble = ({
         {/* Option Buttons */}
         {message.data?.options && (
           <motion.div 
-            key={`options-${message.id}`}
             className="flex flex-wrap gap-2"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

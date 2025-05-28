@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -15,7 +14,7 @@ interface ChatBookingFormProps {
 }
 
 const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete }: ChatBookingFormProps) => {
-  console.log('ChatBookingForm: Component rendered with props:', { doctorId, doctorName, specialtyId });
+  console.log('📋 ChatBookingForm: Initialized with:', { doctorId, doctorName, specialtyId });
   
   const [formData, setFormData] = useState({
     user_name: '',
@@ -39,18 +38,17 @@ const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('ChatBookingForm: Form submission started with data:', formData);
+    console.log('📝 ChatBookingForm: Form submission started');
+    console.log('📝 Form data:', formData);
     
     // Validation
     if (!formData.user_name.trim()) {
       setError('الرجاء إدخال الاسم');
-      console.log('ChatBookingForm: Validation failed - missing name');
       return;
     }
     
     if (!formData.user_phone.trim() || formData.user_phone.length < 10) {
       setError('الرجاء إدخال رقم هاتف صحيح');
-      console.log('ChatBookingForm: Validation failed - invalid phone');
       return;
     }
 
@@ -64,19 +62,18 @@ const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete 
       booking_method: 'online' as const
     };
     
-    console.log('ChatBookingForm: Sending booking data to service:', bookingData);
+    console.log('📤 Sending booking data:', bookingData);
     
     try {
       const result = await createBooking(bookingData);
-      console.log('ChatBookingForm: Booking created successfully:', result);
+      console.log('✅ Booking created successfully:', result);
       
       setIsSuccess(true);
       setTimeout(() => {
-        console.log('ChatBookingForm: Calling onBookingComplete with success');
         onBookingComplete(true);
       }, 2000);
     } catch (error) {
-      console.error('ChatBookingForm: Error creating booking:', error);
+      console.error('❌ Booking error:', error);
       setError('حدث خطأ أثناء الحجز، يرجى المحاولة مرة أخرى');
       onBookingComplete(false);
     } finally {

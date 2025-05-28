@@ -1,22 +1,16 @@
+export type ChatBotState = 'welcome' | 'main-menu' | 'specialties' | 'doctors' | 'booking';
 
-export interface Doctor {
-  id: number;
-  name: string;
-  specialty_id: number;
-  image?: string;
-  bio?: string;
-  specialty?: string;
-  fees?: {
-    examination: number;
-    consultation: number | null;
-  };
+export interface QuickOption {
+  id: string;
+  text: string;
+  action: string;
 }
 
-export interface Specialty {
-  id: number;
-  name: string;
-  description?: string;
-  icon?: string;
+export interface ActionLink {
+  id: string;
+  text: string;
+  action: string;
+  type?: 'external' | 'internal';
 }
 
 export interface Message {
@@ -24,42 +18,18 @@ export interface Message {
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
-  type?: 'welcome' | 'options' | 'doctors' | 'specialties' | 'info' | 'booking';
+  type?: 'welcome' | 'options' | 'specialties' | 'doctors' | 'booking' | 'booking-form' | 'info';
   data?: {
-    doctors?: Doctor[];
-    specialties?: Specialty[];
-    links?: ActionLink[];
-    richContent?: string;
+    specialties?: any[];
+    doctors?: any[];
     options?: QuickOption[];
     bookingForm?: {
       doctorId: number;
       doctorName: string;
       specialtyId?: number;
     };
+    doctorId?: number;
+    doctorName?: string;
+    specialtyId?: number;
   };
 }
-
-export interface ActionLink {
-  type: 'booking' | 'whatsapp' | 'phone' | 'link';
-  text: string;
-  url: string;
-  icon: 'phone' | 'message' | 'link';
-  doctorId?: number;
-  specialtyId?: number;
-}
-
-export interface QuickOption {
-  id: string;
-  text: string;
-  action: string;
-  icon?: string;
-}
-
-export type ChatBotState = 
-  | 'welcome' 
-  | 'main-menu' 
-  | 'specialties' 
-  | 'doctors' 
-  | 'booking' 
-  | 'contact' 
-  | 'info';
