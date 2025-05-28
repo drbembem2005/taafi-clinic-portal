@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { User, Calendar, Award, Clock, Stethoscope } from 'lucide-react';
+import { User, Calendar, Clock } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getDoctorSchedule, getNextAvailableDays } from '@/services/doctorService';
 
@@ -15,13 +15,34 @@ interface DoctorCardProps {
 const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
   const [isAvailableToday, setIsAvailableToday] = useState(false);
   const [nextAvailableDate, setNextAvailableDate] = useState<string>('');
+  const [scheduleText, setScheduleText] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAvailability = async () => {
+    const checkAvailabilityAndSchedule = async () => {
       try {
         setLoading(true);
+        
+        // Get doctor's schedule
+        const schedule = await getDoctorSchedule(doctor.id);
+        console.log('Doctor schedule:', schedule);
+        
+        // Format schedule text
+        if (Object.keys(schedule).length > 0) {
+          const scheduleEntries = Object.entries(schedule);
+          if (scheduleEntries.length === 1) {
+            const [day, times] = scheduleEntries[0];
+            setScheduleText(`${times[0]} - يوم واحد أسبوعياً`);
+          } else {
+            setScheduleText(`${scheduleEntries.length} أيام أسبوعياً`);
+          }
+        } else {
+          setScheduleText('غير محدد');
+        }
+        
+        // Get next available days
         const availableDays = await getNextAvailableDays(doctor.id);
+        console.log('Available days:', availableDays);
         
         if (availableDays.length > 0) {
           const today = new Date();
@@ -46,18 +67,22 @@ const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
             };
             setNextAvailableDate(nextDate.toLocaleDateString('ar-EG', options));
           }
+        } else {
+          setIsAvailableToday(false);
+          setNextAvailableDate('غير متاح حالياً');
         }
       } catch (error) {
-        console.error('Error checking doctor availability:', error);
+        console.error('Error checking doctor availability and schedule:', error);
         setIsAvailableToday(false);
         setNextAvailableDate('غير متاح');
+        setScheduleText('غير محدد');
       } finally {
         setLoading(false);
       }
     };
 
     if (doctor.id) {
-      checkAvailability();
+      checkAvailabilityAndSchedule();
     }
   }, [doctor.id]);
 
@@ -115,13 +140,20 @@ const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <h4 className="font-bold text-base text-gray-900 truncate">{doctor.name}</h4>
-              <Award size={16} className="text-yellow-500 flex-shrink-0" />
             </div>
             
             {doctor.bio && (
               <p className="text-xs text-gray-500 line-clamp-2 mb-2">
                 {doctor.bio}
               </p>
+            )}
+            
+            {/* Schedule info from database */}
+            {!loading && scheduleText && (
+              <div className="flex items-center gap-1 text-xs text-gray-600 mb-1">
+                <Clock size={12} />
+                <span>{scheduleText}</span>
+              </div>
             )}
           </div>
         </div>
@@ -155,7 +187,7 @@ const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
           </motion.div>
         </div>
         
-        {/* Dynamic availability info */}
+        {/* Dynamic availability info from database */}
         <div className="flex flex-wrap gap-2">
           {loading ? (
             <div className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-500 rounded-full text-xs">

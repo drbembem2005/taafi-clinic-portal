@@ -1,11 +1,14 @@
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { Calendar, Clock, User, Phone, MessageSquare, CheckCircle, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { createBooking } from '@/services/bookingService';
-import { CalendarDays, User, Phone, Mail, MessageSquare, Loader2, CheckCircle, AlertCircle, Clock, Calendar } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import NextAvailableDaysPicker, { DayInfo } from '@/components/booking/NextAvailableDaysPicker';
 
 interface ChatBookingFormProps {
   doctorId: number;
@@ -14,66 +17,93 @@ interface ChatBookingFormProps {
   onBookingComplete: (success: boolean) => void;
 }
 
-const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete }: ChatBookingFormProps) => {
-  console.log('📋 ChatBookingForm: Initialized with:', { doctorId, doctorName, specialtyId });
-  
+const ChatBookingForm = ({
+  doctorId,
+  doctorName,
+  specialtyId,
+  onBookingComplete
+}: ChatBookingFormProps) => {
   const [formData, setFormData] = useState({
-    user_name: '',
-    user_phone: '',
-    user_email: '',
-    notes: '',
-    booking_day: 'السبت',
-    booking_time: '10:00'
+    name: '',
+    phone: '',
+    notes: ''
   });
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [selectedDay, setSelectedDay] = useState<string>('');
+  const [selectedTime, setSelectedTime] = useState<string>('');
+  const [formattedDate, setFormattedDate] = useState<string>('');
+  const [availableDays, setAvailableDays] = useState<DayInfo[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^0-9]/g, '');
-    setFormData(prev => ({ ...prev, user_phone: value }));
-    setError(null);
+  const handleDateTimeSelection = (
+    day: string,
+    time: string,
+    formatted: string,
+    days: DayInfo[],
+    date: Date
+  ) => {
+    setSelectedDay(day);
+    setSelectedTime(time);
+    setFormattedDate(formatted);
+    setAvailableDays(days);
+    setSelectedDate(date);
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('📝 ChatBookingForm: Form submission started');
-    console.log('📝 Form data:', formData);
-    
-    if (!formData.user_name.trim()) {
-      setError('الرجاء إدخال الاسم');
-      return;
-    }
-    
-    if (!formData.user_phone.trim() || formData.user_phone.length < 10) {
-      setError('الرجاء إدخال رقم هاتف صحيح');
+    if (!formData.name.trim() || !formData.phone.trim() || !selectedDate || !selectedTime) {
+      toast({
+        title: "بيانات مطلوبة",
+        description: "يرجى ملء جميع البيانات المطلوبة",
+        variant: "destructive",
+      });
       return;
     }
 
     setIsSubmitting(true);
-    setError(null);
-    
-    const bookingData = {
-      ...formData,
-      doctor_id: doctorId,
-      specialty_id: specialtyId || null,
-      booking_method: 'online' as const
-    };
-    
-    console.log('📤 Sending booking data:', bookingData);
-    
+
     try {
+      const bookingData = {
+        doctor_id: doctorId,
+        specialty_id: specialtyId || null,
+        patient_name: formData.name,
+        patient_phone: formData.phone,
+        appointment_date: selectedDate.toISOString().split('T')[0],
+        appointment_time: selectedTime,
+        notes: formData.notes || null,
+        status: 'pending' as const
+      };
+
+      console.log('Submitting booking with data:', bookingData);
+
       const result = await createBooking(bookingData);
-      console.log('✅ Booking created successfully:', result);
       
-      setIsSuccess(true);
-      setTimeout(() => {
+      if (result) {
+        setIsSuccess(true);
+        toast({
+          title: "تم الحجز بنجاح!",
+          description: `تم حجز موعدك مع د. ${doctorName} بنجاح`,
+        });
         onBookingComplete(true);
-      }, 2000);
+      } else {
+        throw new Error('فشل في إنشاء الحجز');
+      }
     } catch (error) {
-      console.error('❌ Booking error:', error);
-      setError('حدث خطأ أثناء الحجز، يرجى المحاولة مرة أخرى');
+      console.error('Error creating booking:', error);
+      toast({
+        title: "خطأ في الحجز",
+        description: "حدث خطأ أثناء حجز الموعد. يرجى المحاولة مرة أخرى.",
+        variant: "destructive",
+      });
       onBookingComplete(false);
     } finally {
       setIsSubmitting(false);
@@ -83,181 +113,175 @@ const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete 
   if (isSuccess) {
     return (
       <motion.div
-        className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 text-center"
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.3 }}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full"
       >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-        >
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-3" />
-        </motion.div>
-        <h3 className="text-green-800 font-bold text-lg mb-2">تم الحجز بنجاح! 🎉</h3>
-        <p className="text-green-600">سيتم التواصل معك خلال 24 ساعة لتأكيد الموعد</p>
+        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+          <CardContent className="p-6 text-center">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring" }}
+            >
+              <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
+            </motion.div>
+            <h3 className="text-xl font-bold text-green-800 mb-2">تم الحجز بنجاح!</h3>
+            <p className="text-green-700 mb-4">
+              تم حجز موعدك مع د. {doctorName} بنجاح
+            </p>
+            <div className="bg-white/60 rounded-lg p-3 mb-4">
+              <p className="text-sm text-green-600">
+                📅 {formattedDate} في {selectedTime}
+              </p>
+            </div>
+            <p className="text-sm text-green-600">
+              سيتم التواصل معك قريباً لتأكيد الموعد
+            </p>
+          </CardContent>
+        </Card>
       </motion.div>
     );
   }
 
   return (
     <motion.div
-      className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xl"
-      initial={{ scale: 0.9, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="w-full"
     >
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-5 p-3 bg-gradient-to-r from-blue-50 to-emerald-50 rounded-xl">
-        <CalendarDays className="w-6 h-6 text-blue-500" />
-        <div>
-          <h3 className="font-bold text-gray-800">حجز موعد</h3>
-          <p className="text-sm text-gray-600">مع د. {doctorName}</p>
-        </div>
-      </div>
+      <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
+        <CardContent className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Doctor Info Header */}
+            <div className="text-center pb-4 border-b border-blue-200">
+              <h3 className="text-lg font-bold text-blue-800 mb-1">
+                حجز موعد مع د. {doctorName}
+              </h3>
+              <p className="text-sm text-blue-600">
+                يرجى ملء البيانات أدناه لإتمام الحجز
+              </p>
+            </div>
 
-      {error && (
-        <motion.div
-          className="bg-red-50 border border-red-200 rounded-xl p-3 mb-4 flex items-center gap-3"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-          <span className="text-red-700 text-sm">{error}</span>
-        </motion.div>
-      )}
+            {/* Schedule Selection */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Calendar className="h-5 w-5 text-blue-600" />
+                <Label className="text-blue-800 font-medium">اختر موعد الكشف</Label>
+              </div>
+              
+              <NextAvailableDaysPicker
+                doctorId={doctorId}
+                onSelectDateTime={handleDateTimeSelection}
+                selectedDay={selectedDay}
+                selectedTime={selectedTime}
+              />
+            </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Personal Info Section */}
-        <div className="space-y-3">
-          <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-            <User className="w-4 h-4" />
-            البيانات الشخصية
-          </h4>
-          
-          <div className="space-y-3">
-            <Input
-              id="chat-booking-name"
-              name="user_name"
-              placeholder="الاسم الكامل *"
-              value={formData.user_name}
-              onChange={(e) => {
-                setFormData(prev => ({ ...prev, user_name: e.target.value }));
-                setError(null);
-              }}
-              className="h-12 rounded-xl border-gray-200 focus:border-blue-400"
-              required
-              autoComplete="name"
-            />
+            {/* Patient Information */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-3">
+                <User className="h-5 w-5 text-blue-600" />
+                <Label className="text-blue-800 font-medium">بيانات المريض</Label>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="name" className="text-sm text-gray-700 mb-1 block">
+                    الاسم الكامل *
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    placeholder="أدخل الاسم الكامل"
+                    className="bg-white border-gray-300 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="phone" className="text-sm text-gray-700 mb-1 block">
+                    رقم الهاتف *
+                  </Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    placeholder="01xxxxxxxxx"
+                    className="bg-white border-gray-300 focus:border-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="notes" className="text-sm text-gray-700 mb-1 block">
+                  ملاحظات إضافية
+                </Label>
+                <Input
+                  id="notes"
+                  type="text"
+                  value={formData.notes}
+                  onChange={(e) => handleInputChange('notes', e.target.value)}
+                  placeholder="أي ملاحظات أو تفاصيل إضافية"
+                  className="bg-white border-gray-300 focus:border-blue-500"
+                />
+              </div>
+            </div>
 
-            <Input
-              id="chat-booking-phone"
-              name="user_phone"
-              type="tel"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              placeholder="رقم الهاتف *"
-              value={formData.user_phone}
-              onChange={handlePhoneChange}
-              className="h-12 rounded-xl border-gray-200 focus:border-blue-400 text-left"
-              dir="ltr"
-              maxLength={15}
-              required
-              autoComplete="tel"
-            />
-
-            <Input
-              id="chat-booking-email"
-              name="user_email"
-              placeholder="البريد الإلكتروني (اختياري)"
-              type="email"
-              value={formData.user_email}
-              onChange={(e) => setFormData(prev => ({ ...prev, user_email: e.target.value }))}
-              className="h-12 rounded-xl border-gray-200 focus:border-blue-400"
-              autoComplete="email"
-            />
-          </div>
-        </div>
-
-        {/* Appointment Time Section */}
-        <div className="space-y-3">
-          <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-            <Clock className="w-4 h-4" />
-            موعد الحجز المفضل
-          </h4>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <select
-              id="chat-booking-day"
-              name="booking_day"
-              value={formData.booking_day}
-              onChange={(e) => setFormData(prev => ({ ...prev, booking_day: e.target.value }))}
-              className="h-12 px-4 border border-gray-200 rounded-xl focus:border-blue-400 focus:outline-none bg-white"
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              disabled={isSubmitting || !selectedDate || !selectedTime || !formData.name.trim() || !formData.phone.trim()}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-3 h-12 text-lg font-medium transition-all duration-200"
             >
-              <option value="السبت">السبت</option>
-              <option value="الأحد">الأحد</option>
-              <option value="الاثنين">الاثنين</option>
-              <option value="الثلاثاء">الثلاثاء</option>
-              <option value="الأربعاء">الأربعاء</option>
-              <option value="الخميس">الخميس</option>
-            </select>
+              {isSubmitting ? (
+                <>
+                  <Clock className="h-5 w-5 mr-2 animate-spin" />
+                  جاري الحجز...
+                </>
+              ) : (
+                <>
+                  <Calendar className="h-5 w-5 mr-2" />
+                  تأكيد الحجز
+                </>
+              )}
+            </Button>
 
-            <select
-              id="chat-booking-time"
-              name="booking_time"
-              value={formData.booking_time}
-              onChange={(e) => setFormData(prev => ({ ...prev, booking_time: e.target.value }))}
-              className="h-12 px-4 border border-gray-200 rounded-xl focus:border-blue-400 focus:outline-none bg-white"
-            >
-              <option value="10:00">10:00 ص</option>
-              <option value="11:00">11:00 ص</option>
-              <option value="12:00">12:00 ظ</option>
-              <option value="14:00">2:00 م</option>
-              <option value="15:00">3:00 م</option>
-              <option value="16:00">4:00 م</option>
-              <option value="17:00">5:00 م</option>
-              <option value="18:00">6:00 م</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Notes Section */}
-        <div className="space-y-3">
-          <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-            <MessageSquare className="w-4 h-4" />
-            ملاحظات إضافية
-          </h4>
-          
-          <Textarea
-            id="chat-booking-notes"
-            name="notes"
-            placeholder="اكتب أي ملاحظات أو أعراض تود ذكرها للطبيب (اختياري)"
-            value={formData.notes}
-            onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-            className="rounded-xl border-gray-200 focus:border-blue-400 min-h-[80px] resize-none"
-            rows={3}
-          />
-        </div>
-
-        <Button
-          type="submit"
-          disabled={isSubmitting || !formData.user_name.trim() || !formData.user_phone.trim()}
-          className="w-full bg-gradient-to-r from-blue-500 to-emerald-600 hover:from-blue-600 hover:to-emerald-700 text-white rounded-xl font-medium h-12 text-base shadow-lg hover:shadow-xl transition-all duration-200"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              جاري الحجز...
-            </>
-          ) : (
-            <>
-              <Calendar className="w-5 h-5 mr-2" />
-              تأكيد الحجز
-            </>
-          )}
-        </Button>
-      </form>
+            {/* Contact fallback */}
+            <div className="text-center pt-4 border-t border-blue-200">
+              <p className="text-sm text-gray-600 mb-2">
+                أو يمكنك التواصل معنا مباشرة
+              </p>
+              <div className="flex justify-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open('https://wa.me/201119007403', '_blank')}
+                  className="border-green-500 text-green-600 hover:bg-green-50"
+                >
+                  <MessageSquare className="h-4 w-4 mr-1" />
+                  واتساب
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open('tel:+201119007403', '_self')}
+                  className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                >
+                  <Phone className="h-4 w-4 mr-1" />
+                  اتصال
+                </Button>
+              </div>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </motion.div>
   );
 };
