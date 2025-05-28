@@ -73,14 +73,15 @@ const ChatBookingForm = ({
 
     try {
       const bookingData = {
-        doctor_id: doctorId,
-        specialty_id: specialtyId || null,
-        patient_name: formData.name,
-        patient_phone: formData.phone,
-        appointment_date: selectedDate.toISOString().split('T')[0],
-        appointment_time: selectedTime,
+        user_name: formData.name,
+        user_phone: formData.phone,
+        user_email: null,
         notes: formData.notes || null,
-        status: 'pending' as const
+        specialty_id: specialtyId || null,
+        doctor_id: doctorId,
+        booking_day: selectedDay,
+        booking_time: selectedTime,
+        booking_method: 'online' as const
       };
 
       console.log('Submitting booking with data:', bookingData);
