@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -216,36 +215,28 @@ const ChatBookingForm = ({
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {Object.entries(schedule).map(([day, times]) => {
-                    const arabicDay = arabicDayNames[day as keyof typeof arabicDayNames] || day;
-                    return (
-                      <div key={day} className="bg-white/70 rounded-lg p-3 border border-gray-200">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Clock className="h-4 w-4 text-blue-600" />
-                          <span className="text-sm font-medium text-gray-700">{arabicDay}</span>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2">
-                          {times.map((time, index) => (
-                            <Button
-                              key={`${day}-${time}-${index}`}
-                              type="button"
-                              variant={selectedDay === day && selectedTime === time ? "default" : "outline"}
-                              size="sm"
-                              className={`text-xs h-8 px-3 ${
-                                selectedDay === day && selectedTime === time 
-                                  ? 'bg-blue-500 hover:bg-blue-600 text-white border-blue-500' 
-                                  : 'border-gray-300 hover:border-blue-500 hover:text-blue-600 bg-white'
-                              }`}
-                              onClick={() => handleTimeSelection(day, time)}
-                            >
-                              {time}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div className="bg-white/70 rounded-lg p-3 border border-gray-200">
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(schedule).map(([day, times]) => {
+                      const arabicDay = arabicDayNames[day as keyof typeof arabicDayNames] || day;
+                      return times.map((time, index) => (
+                        <Button
+                          key={`${day}-${time}-${index}`}
+                          type="button"
+                          variant={selectedDay === day && selectedTime === time ? "default" : "outline"}
+                          size="sm"
+                          className={`text-xs h-8 px-3 ${
+                            selectedDay === day && selectedTime === time 
+                              ? 'bg-blue-500 hover:bg-blue-600 text-white border-blue-500' 
+                              : 'border-gray-300 hover:border-blue-500 hover:text-blue-600 bg-white'
+                          }`}
+                          onClick={() => handleTimeSelection(day, time)}
+                        >
+                          {arabicDay} - {time}
+                        </Button>
+                      ));
+                    })}
+                  </div>
                 </div>
               )}
             </div>
