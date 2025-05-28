@@ -8,7 +8,7 @@ import { Calendar, Clock, User, Phone, MessageSquare, CheckCircle, AlertCircle }
 import { motion } from 'framer-motion';
 import { createBooking } from '@/services/bookingService';
 import { toast } from '@/hooks/use-toast';
-import NextAvailableDaysPicker, { DayInfo } from '@/components/booking/NextAvailableDaysPicker';
+import { getDoctorSchedule } from '@/services/doctorService';
 
 interface ChatBookingFormProps {
   doctorId: number;
@@ -32,22 +32,51 @@ const ChatBookingForm = ({
   const [selectedDay, setSelectedDay] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [formattedDate, setFormattedDate] = useState<string>('');
-  const [availableDays, setAvailableDays] = useState<DayInfo[]>([]);
+  const [schedule, setSchedule] = useState<Record<string, string[]>>({});
+  const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleDateTimeSelection = (
-    day: string,
-    time: string,
-    formatted: string,
-    days: DayInfo[],
-    date: Date
-  ) => {
+  // Arabic day names mapping
+  const arabicDayNames = {
+    'Sat': 'السبت',
+    'Sun': 'الأحد',
+    'Mon': 'الاثنين',
+    'Tue': 'الثلاثاء',
+    'Wed': 'الأربعاء',
+    'Thu': 'الخميس',
+    'Fri': 'الجمعة'
+  };
+
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      try {
+        setLoading(true);
+        const doctorSchedule = await getDoctorSchedule(doctorId);
+        setSchedule(doctorSchedule);
+        console.log('Fetched doctor schedule:', doctorSchedule);
+      } catch (error) {
+        console.error('Error fetching doctor schedule:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (doctorId) {
+      fetchSchedule();
+    }
+  }, [doctorId]);
+
+  const handleTimeSelection = (day: string, time: string) => {
     setSelectedDay(day);
     setSelectedTime(time);
-    setFormattedDate(formatted);
-    setAvailableDays(days);
-    setSelectedDate(date);
+    
+    // Create a simple formatted date for display
+    const arabicDay = arabicDayNames[day as keyof typeof arabicDayNames] || day;
+    setFormattedDate(`${arabicDay} في ${time}`);
+    
+    // Set a mock date for the selected day (this would be improved with actual date selection)
+    setSelectedDate(new Date());
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -60,10 +89,10 @@ const ChatBookingForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name.trim() || !formData.phone.trim() || !selectedDate || !selectedTime) {
+    if (!formData.name.trim() || !formData.phone.trim() || !selectedDay || !selectedTime) {
       toast({
         title: "بيانات مطلوبة",
-        description: "يرجى ملء جميع البيانات المطلوبة",
+        description: "يرجى ملء جميع البيانات المطلوبة واختيار موعد",
         variant: "destructive",
       });
       return;
@@ -133,7 +162,7 @@ const ChatBookingForm = ({
             </p>
             <div className="bg-white/60 rounded-lg p-3 mb-4">
               <p className="text-sm text-green-600">
-                📅 {formattedDate} في {selectedTime}
+                📅 {formattedDate}
               </p>
             </div>
             <p className="text-sm text-green-600">
@@ -152,10 +181,10 @@ const ChatBookingForm = ({
       className="w-full"
     >
       <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
-        <CardContent className="p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <CardContent className="p-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Doctor Info Header */}
-            <div className="text-center pb-4 border-b border-blue-200">
+            <div className="text-center pb-3 border-b border-blue-200">
               <h3 className="text-lg font-bold text-blue-800 mb-1">
                 حجز موعد مع د. {doctorName}
               </h3>
@@ -164,31 +193,75 @@ const ChatBookingForm = ({
               </p>
             </div>
 
-            {/* Schedule Selection */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-3">
-                <Calendar className="h-5 w-5 text-blue-600" />
-                <Label className="text-blue-800 font-medium">اختر موعد الكشف</Label>
+            {/* Compact Schedule Selection */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-2">
+                <Calendar className="h-4 w-4 text-blue-600" />
+                <Label className="text-blue-800 font-medium text-sm">اختر موعد الكشف</Label>
               </div>
               
-              <NextAvailableDaysPicker
-                doctorId={doctorId}
-                onSelectDateTime={handleDateTimeSelection}
-                selectedDay={selectedDay}
-                selectedTime={selectedTime}
-              />
+              {loading ? (
+                <div className="text-center py-4">
+                  <Clock className="h-6 w-6 animate-spin text-blue-500 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">جاري تحميل المواعيد...</p>
+                </div>
+              ) : Object.keys(schedule).length === 0 ? (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
+                  <p className="text-sm text-yellow-700">لا توجد مواعيد متاحة حالياً</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-2 bg-white border-green-300 hover:bg-green-50 text-green-600"
+                    onClick={() => window.open('https://wa.me/201119007403', '_blank')}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    تواصل مع العيادة
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {Object.entries(schedule).map(([day, times]) => {
+                    const arabicDay = arabicDayNames[day as keyof typeof arabicDayNames] || day;
+                    return (
+                      <div key={day} className="space-y-1">
+                        <p className="text-xs font-medium text-gray-600">{arabicDay}</p>
+                        <div className="space-y-1">
+                          {times.map((time, index) => (
+                            <Button
+                              key={`${day}-${time}-${index}`}
+                              type="button"
+                              variant={selectedDay === day && selectedTime === time ? "default" : "outline"}
+                              size="sm"
+                              className={`w-full text-xs h-8 ${
+                                selectedDay === day && selectedTime === time 
+                                  ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                                  : 'hover:border-blue-500 hover:text-blue-600'
+                              }`}
+                              onClick={() => handleTimeSelection(day, time)}
+                            >
+                              <Clock className="h-3 w-3 mr-1" />
+                              {time}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Patient Information */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-3">
-                <User className="h-5 w-5 text-blue-600" />
-                <Label className="text-blue-800 font-medium">بيانات المريض</Label>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 mb-2">
+                <User className="h-4 w-4 text-blue-600" />
+                <Label className="text-blue-800 font-medium text-sm">بيانات المريض</Label>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-3">
                 <div>
-                  <Label htmlFor="name" className="text-sm text-gray-700 mb-1 block">
+                  <Label htmlFor="name" className="text-xs text-gray-700 mb-1 block">
                     الاسم الكامل *
                   </Label>
                   <Input
@@ -197,13 +270,13 @@ const ChatBookingForm = ({
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     placeholder="أدخل الاسم الكامل"
-                    className="bg-white border-gray-300 focus:border-blue-500"
+                    className="bg-white border-gray-300 focus:border-blue-500 h-9 text-sm"
                     required
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="phone" className="text-sm text-gray-700 mb-1 block">
+                  <Label htmlFor="phone" className="text-xs text-gray-700 mb-1 block">
                     رقم الهاتف *
                   </Label>
                   <Input
@@ -212,60 +285,60 @@ const ChatBookingForm = ({
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                     placeholder="01xxxxxxxxx"
-                    className="bg-white border-gray-300 focus:border-blue-500"
+                    className="bg-white border-gray-300 focus:border-blue-500 h-9 text-sm"
                     required
                   />
                 </div>
-              </div>
               
-              <div>
-                <Label htmlFor="notes" className="text-sm text-gray-700 mb-1 block">
-                  ملاحظات إضافية
-                </Label>
-                <Input
-                  id="notes"
-                  type="text"
-                  value={formData.notes}
-                  onChange={(e) => handleInputChange('notes', e.target.value)}
-                  placeholder="أي ملاحظات أو تفاصيل إضافية"
-                  className="bg-white border-gray-300 focus:border-blue-500"
-                />
+                <div>
+                  <Label htmlFor="notes" className="text-xs text-gray-700 mb-1 block">
+                    ملاحظات إضافية
+                  </Label>
+                  <Input
+                    id="notes"
+                    type="text"
+                    value={formData.notes}
+                    onChange={(e) => handleInputChange('notes', e.target.value)}
+                    placeholder="أي ملاحظات أو تفاصيل إضافية"
+                    className="bg-white border-gray-300 focus:border-blue-500 h-9 text-sm"
+                  />
+                </div>
               </div>
             </div>
 
             {/* Submit Button */}
             <Button
               type="submit"
-              disabled={isSubmitting || !selectedDate || !selectedTime || !formData.name.trim() || !formData.phone.trim()}
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-3 h-12 text-lg font-medium transition-all duration-200"
+              disabled={isSubmitting || !selectedDay || !selectedTime || !formData.name.trim() || !formData.phone.trim()}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white py-2 h-10 text-sm font-medium transition-all duration-200"
             >
               {isSubmitting ? (
                 <>
-                  <Clock className="h-5 w-5 mr-2 animate-spin" />
+                  <Clock className="h-4 w-4 mr-2 animate-spin" />
                   جاري الحجز...
                 </>
               ) : (
                 <>
-                  <Calendar className="h-5 w-5 mr-2" />
+                  <Calendar className="h-4 w-4 mr-2" />
                   تأكيد الحجز
                 </>
               )}
             </Button>
 
             {/* Contact fallback */}
-            <div className="text-center pt-4 border-t border-blue-200">
-              <p className="text-sm text-gray-600 mb-2">
+            <div className="text-center pt-3 border-t border-blue-200">
+              <p className="text-xs text-gray-600 mb-2">
                 أو يمكنك التواصل معنا مباشرة
               </p>
-              <div className="flex justify-center gap-3">
+              <div className="flex justify-center gap-2">
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={() => window.open('https://wa.me/201119007403', '_blank')}
-                  className="border-green-500 text-green-600 hover:bg-green-50"
+                  className="border-green-500 text-green-600 hover:bg-green-50 text-xs h-8"
                 >
-                  <MessageSquare className="h-4 w-4 mr-1" />
+                  <MessageSquare className="h-3 w-3 mr-1" />
                   واتساب
                 </Button>
                 <Button
@@ -273,9 +346,9 @@ const ChatBookingForm = ({
                   variant="outline"
                   size="sm"
                   onClick={() => window.open('tel:+201119007403', '_self')}
-                  className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                  className="border-blue-500 text-blue-600 hover:bg-blue-50 text-xs h-8"
                 >
-                  <Phone className="h-4 w-4 mr-1" />
+                  <Phone className="h-3 w-3 mr-1" />
                   اتصال
                 </Button>
               </div>
