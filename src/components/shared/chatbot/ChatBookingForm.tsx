@@ -28,7 +28,6 @@ const ChatBookingForm = ({
     phone: '',
     notes: ''
   });
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedDay, setSelectedDay] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [formattedDate, setFormattedDate] = useState<string>('');
@@ -74,9 +73,6 @@ const ChatBookingForm = ({
     // Create a simple formatted date for display
     const arabicDay = arabicDayNames[day as keyof typeof arabicDayNames] || day;
     setFormattedDate(`${arabicDay} في ${time}`);
-    
-    // Set a mock date for the selected day (this would be improved with actual date selection)
-    setSelectedDate(new Date());
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -193,7 +189,7 @@ const ChatBookingForm = ({
               </p>
             </div>
 
-            {/* Compact Schedule Selection */}
+            {/* Unified Schedule Selection */}
             <div className="space-y-3">
               <div className="flex items-center gap-2 mb-2">
                 <Calendar className="h-4 w-4 text-blue-600" />
@@ -220,27 +216,29 @@ const ChatBookingForm = ({
                   </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-2">
                   {Object.entries(schedule).map(([day, times]) => {
                     const arabicDay = arabicDayNames[day as keyof typeof arabicDayNames] || day;
                     return (
-                      <div key={day} className="space-y-1">
-                        <p className="text-xs font-medium text-gray-600">{arabicDay}</p>
-                        <div className="space-y-1">
+                      <div key={day} className="bg-white/70 rounded-lg p-3 border border-gray-200">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Clock className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm font-medium text-gray-700">{arabicDay}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
                           {times.map((time, index) => (
                             <Button
                               key={`${day}-${time}-${index}`}
                               type="button"
                               variant={selectedDay === day && selectedTime === time ? "default" : "outline"}
                               size="sm"
-                              className={`w-full text-xs h-8 ${
+                              className={`text-xs h-8 px-3 ${
                                 selectedDay === day && selectedTime === time 
-                                  ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                                  : 'hover:border-blue-500 hover:text-blue-600'
+                                  ? 'bg-blue-500 hover:bg-blue-600 text-white border-blue-500' 
+                                  : 'border-gray-300 hover:border-blue-500 hover:text-blue-600 bg-white'
                               }`}
                               onClick={() => handleTimeSelection(day, time)}
                             >
-                              <Clock className="h-3 w-3 mr-1" />
                               {time}
                             </Button>
                           ))}
