@@ -26,13 +26,11 @@ const MessageBubble = ({
   const isUser = message.sender === 'user';
 
   const handleOptionClick = async (action: string, text: string) => {
-    // Handle external actions first
     if (action.startsWith('external-') || action.startsWith('contact-')) {
       await chatbotService.handleExternalAction(action);
       return;
     }
 
-    // Add user message
     onAddMessage({ text, sender: 'user' });
     onSetLoading(true);
 
@@ -42,7 +40,6 @@ const MessageBubble = ({
         onAddMessage(response);
         onSetLoading(false);
         
-        // Handle state changes based on action type
         const [actionType] = action.split('-');
         switch (actionType) {
           case 'specialties':
@@ -71,22 +68,30 @@ const MessageBubble = ({
   };
 
   const handleDoctorBooking = (doctorId: number, doctorName: string, specialtyId?: number) => {
-    console.log('📅 Starting booking flow for doctor:', { doctorId, doctorName, specialtyId });
+    console.log('📅 MessageBubble: Starting booking flow for doctor:', { doctorId, doctorName, specialtyId });
     
-    // Show booking form directly in the next message
-    const bookingFormMessage = {
-      text: `حجز موعد مع د. ${doctorName}`,
-      sender: 'bot' as const,
-      type: 'booking-form' as const,
-      data: {
-        doctorId,
-        doctorName,
-        specialtyId
-      }
-    };
-    
-    onAddMessage(bookingFormMessage);
-    onSetChatState('booking');
+    // Add user message first
+    onAddMessage({
+      text: `أريد حجز موعد مع د. ${doctorName}`,
+      sender: 'user'
+    });
+
+    // Then add the booking form message
+    setTimeout(() => {
+      const bookingFormMessage = {
+        text: `ممتاز! سأساعدك في حجز موعد مع د. ${doctorName}. الرجاء ملء البيانات التالية:`,
+        sender: 'bot' as const,
+        type: 'booking-form' as const,
+        data: {
+          doctorId,
+          doctorName,
+          specialtyId
+        }
+      };
+      
+      onAddMessage(bookingFormMessage);
+      onSetChatState('booking');
+    }, 500);
   };
 
   const formatTime = (timestamp: Date) => {
@@ -99,7 +104,7 @@ const MessageBubble = ({
 
   return (
     <motion.div
-      className={`flex gap-2 mb-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
+      className={`flex gap-3 mb-4 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
       initial={{ opacity: 0, y: 15, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
@@ -110,27 +115,27 @@ const MessageBubble = ({
         animate={{ scale: 1 }}
         transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
       >
-        <Avatar className="h-8 w-8 flex-shrink-0 border-2 border-white shadow-lg">
+        <Avatar className="h-9 w-9 flex-shrink-0 border-2 border-white shadow-lg">
           {isUser ? (
             <div className="bg-gradient-to-br from-gray-100 to-gray-200 h-full w-full rounded-full flex items-center justify-center">
-              <User size={14} className="text-gray-600" />
+              <User size={16} className="text-gray-600" />
             </div>
           ) : (
             <div className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 h-full w-full rounded-full flex items-center justify-center">
-              <Bot size={14} className="text-white" />
+              <Bot size={16} className="text-white" />
             </div>
           )}
         </Avatar>
       </motion.div>
 
       {/* Message Content */}
-      <div className={`max-w-[85%] ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-2`}>
+      <div className={`max-w-[85%] ${isUser ? 'items-end' : 'items-start'} flex flex-col gap-3`}>
         {/* Text Bubble */}
         <motion.div
-          className={`rounded-2xl px-3 py-2 shadow-lg backdrop-blur-sm ${
+          className={`rounded-2xl px-4 py-3 shadow-lg backdrop-blur-sm ${
             isUser
               ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white rounded-br-md border border-blue-400'
-              : 'bg-white/90 text-gray-800 border border-gray-200 rounded-bl-md'
+              : 'bg-white/95 text-gray-800 border border-gray-200 rounded-bl-md'
           }`}
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
@@ -141,17 +146,17 @@ const MessageBubble = ({
           </div>
           
           {/* Timestamp */}
-          <div className={`flex items-center gap-1 mt-1 text-xs opacity-70 ${isUser ? 'justify-end' : 'justify-start'}`}>
+          <div className={`flex items-center gap-1 mt-2 text-xs opacity-70 ${isUser ? 'justify-end' : 'justify-start'}`}>
             <Clock size={10} />
             <span>{formatTime(message.timestamp)}</span>
           </div>
         </motion.div>
 
-        {/* Booking Form - Direct rendering based on message type */}
+        {/* Booking Form */}
         {message.type === 'booking-form' && message.data && (
           <motion.div 
             className="w-full"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
@@ -161,10 +166,12 @@ const MessageBubble = ({
               specialtyId={message.data.specialtyId}
               onBookingComplete={(success) => {
                 if (success) {
-                  onAddMessage({
-                    text: 'تم حجز موعدك بنجاح! ✅\nسيتم التواصل معك قريباً لتأكيد الموعد.',
-                    sender: 'bot'
-                  });
+                  setTimeout(() => {
+                    onAddMessage({
+                      text: 'شكراً لك! تم حجز موعدك بنجاح ✅\nسيتم التواصل معك قريباً لتأكيد الموعد.\n\nهل تحتاج مساعدة في أي شيء آخر؟',
+                      sender: 'bot'
+                    });
+                  }, 2500);
                 }
               }}
             />
@@ -174,8 +181,8 @@ const MessageBubble = ({
         {/* Specialty Cards */}
         {message.data?.specialties && message.data.specialties.length > 0 && (
           <motion.div 
-            className="w-full space-y-2"
-            initial={{ opacity: 0, y: 10 }}
+            className="w-full space-y-3"
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
@@ -198,8 +205,8 @@ const MessageBubble = ({
         {/* Doctor Cards */}
         {message.data?.doctors && message.data.doctors.length > 0 && (
           <motion.div 
-            className="w-full space-y-2"
-            initial={{ opacity: 0, y: 10 }}
+            className="w-full space-y-3"
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
@@ -225,7 +232,7 @@ const MessageBubble = ({
         {message.data?.options && (
           <motion.div 
             className="flex flex-wrap gap-2"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
           >
@@ -233,7 +240,7 @@ const MessageBubble = ({
               <motion.button
                 key={`option-${option.id}-${message.id}`}
                 onClick={() => handleOptionClick(option.action, option.text)}
-                className="px-3 py-1.5 text-xs rounded-lg border bg-white/90 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-200 shadow-sm backdrop-blur-sm font-medium"
+                className="px-4 py-2 text-sm rounded-xl border bg-white/95 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition-all duration-200 shadow-sm backdrop-blur-sm font-medium"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5 + index * 0.05 }}
