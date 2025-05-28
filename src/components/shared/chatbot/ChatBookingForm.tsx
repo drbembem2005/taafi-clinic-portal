@@ -225,7 +225,7 @@ const ChatBookingForm = ({
                           <Clock className="h-4 w-4 text-blue-600" />
                           <span className="text-sm font-medium text-gray-700">{arabicDay}</span>
                         </div>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="grid grid-cols-3 gap-2">
                           {times.map((time, index) => (
                             <Button
                               key={`${day}-${time}-${index}`}
