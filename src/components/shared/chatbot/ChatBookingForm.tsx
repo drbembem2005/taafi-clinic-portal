@@ -126,6 +126,8 @@ const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete 
         <div className="flex items-center gap-2">
           <User className="w-4 h-4 text-gray-400" />
           <Input
+            id="chat-booking-name"
+            name="user_name"
             placeholder="الاسم الكامل *"
             value={formData.user_name}
             onChange={(e) => {
@@ -134,12 +136,15 @@ const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete 
             }}
             className="text-sm"
             required
+            autoComplete="name"
           />
         </div>
 
         <div className="flex items-center gap-2">
           <Phone className="w-4 h-4 text-gray-400" />
           <Input
+            id="chat-booking-phone"
+            name="user_phone"
             type="tel"
             inputMode="numeric"
             pattern="[0-9]*"
@@ -150,22 +155,28 @@ const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete 
             dir="ltr"
             maxLength={15}
             required
+            autoComplete="tel"
           />
         </div>
 
         <div className="flex items-center gap-2">
           <Mail className="w-4 h-4 text-gray-400" />
           <Input
+            id="chat-booking-email"
+            name="user_email"
             placeholder="البريد الإلكتروني (اختياري)"
             type="email"
             value={formData.user_email}
             onChange={(e) => setFormData(prev => ({ ...prev, user_email: e.target.value }))}
             className="text-sm"
+            autoComplete="email"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <select
+            id="chat-booking-day"
+            name="booking_day"
             value={formData.booking_day}
             onChange={(e) => setFormData(prev => ({ ...prev, booking_day: e.target.value }))}
             className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-400 focus:outline-none"
@@ -179,6 +190,8 @@ const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete 
           </select>
 
           <select
+            id="chat-booking-time"
+            name="booking_time"
             value={formData.booking_time}
             onChange={(e) => setFormData(prev => ({ ...prev, booking_time: e.target.value }))}
             className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:border-blue-400 focus:outline-none"
@@ -197,6 +210,8 @@ const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete 
         <div className="flex items-start gap-2">
           <MessageSquare className="w-4 h-4 text-gray-400 mt-1" />
           <Textarea
+            id="chat-booking-notes"
+            name="notes"
             placeholder="ملاحظات إضافية (اختياري)"
             value={formData.notes}
             onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
