@@ -26,8 +26,11 @@ const MessageBubble = ({
   const isUser = message.sender === 'user';
 
   const handleOptionClick = async (action: string, text: string) => {
+    console.log('MessageBubble: handleOptionClick called with:', { action, text });
+    
     // Handle external actions first
     if (action.startsWith('external-') || action.startsWith('contact-')) {
+      console.log('MessageBubble: Handling external action:', action);
       await chatbotService.handleExternalAction(action);
       return;
     }
@@ -72,18 +75,22 @@ const MessageBubble = ({
 
   const handleDoctorBooking = (doctorId: number, doctorName: string, specialtyId?: number) => {
     try {
+      console.log('MessageBubble: handleDoctorBooking called with:', { doctorId, doctorName, specialtyId });
+      
       // Add user message to show booking intent
-      onAddMessage({
+      const userMessage = {
         text: `حجز موعد مع د. ${doctorName}`,
-        sender: 'user'
-      });
+        sender: 'user' as const
+      };
+      console.log('MessageBubble: Adding user message:', userMessage);
+      onAddMessage(userMessage);
       
       // Show booking form immediately
       setTimeout(() => {
-        onAddMessage({
+        const botMessage = {
           text: `املأ البيانات التالية لحجز موعد مع د. ${doctorName}:`,
-          sender: 'bot',
-          type: 'booking',
+          sender: 'bot' as const,
+          type: 'booking' as const,
           data: {
             bookingForm: {
               doctorId,
@@ -91,11 +98,13 @@ const MessageBubble = ({
               specialtyId
             }
           }
-        });
+        };
+        console.log('MessageBubble: Adding bot message with booking form:', botMessage);
+        onAddMessage(botMessage);
         onSetChatState('booking');
       }, 500);
     } catch (error) {
-      console.error('Error in handleDoctorBooking:', error);
+      console.error('MessageBubble: Error in handleDoctorBooking:', error);
     }
   };
 
@@ -106,6 +115,14 @@ const MessageBubble = ({
       hour12: false 
     });
   };
+
+  console.log('MessageBubble: Rendering message:', { 
+    id: message.id, 
+    type: message.type, 
+    hasBookingForm: !!message.data?.bookingForm,
+    hasDoctors: !!message.data?.doctors,
+    bookingFormData: message.data?.bookingForm 
+  });
 
   return (
     <motion.div
@@ -171,6 +188,7 @@ const MessageBubble = ({
               doctorName={message.data.bookingForm.doctorName}
               specialtyId={message.data.bookingForm.specialtyId}
               onBookingComplete={(success) => {
+                console.log('MessageBubble: Booking completed with success:', success);
                 if (success) {
                   onAddMessage({
                     text: 'تم حجز موعدك بنجاح! ✅\nسيتم التواصل معك قريباً لتأكيد الموعد.',
@@ -226,6 +244,7 @@ const MessageBubble = ({
                 <DoctorCard 
                   doctor={doctor} 
                   onBook={(doctorId, doctorName) => {
+                    console.log('MessageBubble: DoctorCard onBook called with:', { doctorId, doctorName, specialtyId: doctor.specialty_id });
                     handleDoctorBooking(doctorId, doctorName, doctor.specialty_id);
                   }}
                 />

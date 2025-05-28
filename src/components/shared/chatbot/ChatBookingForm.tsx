@@ -15,6 +15,8 @@ interface ChatBookingFormProps {
 }
 
 const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete }: ChatBookingFormProps) => {
+  console.log('ChatBookingForm: Component rendered with props:', { doctorId, doctorName, specialtyId });
+  
   const [formData, setFormData] = useState({
     user_name: '',
     user_phone: '',
@@ -37,34 +39,44 @@ const ChatBookingForm = ({ doctorId, doctorName, specialtyId, onBookingComplete 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('ChatBookingForm: Form submission started with data:', formData);
+    
     // Validation
     if (!formData.user_name.trim()) {
       setError('الرجاء إدخال الاسم');
+      console.log('ChatBookingForm: Validation failed - missing name');
       return;
     }
     
     if (!formData.user_phone.trim() || formData.user_phone.length < 10) {
       setError('الرجاء إدخال رقم هاتف صحيح');
+      console.log('ChatBookingForm: Validation failed - invalid phone');
       return;
     }
 
     setIsSubmitting(true);
     setError(null);
     
+    const bookingData = {
+      ...formData,
+      doctor_id: doctorId,
+      specialty_id: specialtyId || null,
+      booking_method: 'online' as const
+    };
+    
+    console.log('ChatBookingForm: Sending booking data to service:', bookingData);
+    
     try {
-      await createBooking({
-        ...formData,
-        doctor_id: doctorId,
-        specialty_id: specialtyId || null,
-        booking_method: 'online'
-      });
+      const result = await createBooking(bookingData);
+      console.log('ChatBookingForm: Booking created successfully:', result);
       
       setIsSuccess(true);
       setTimeout(() => {
+        console.log('ChatBookingForm: Calling onBookingComplete with success');
         onBookingComplete(true);
       }, 2000);
     } catch (error) {
-      console.error('Error creating booking:', error);
+      console.error('ChatBookingForm: Error creating booking:', error);
       setError('حدث خطأ أثناء الحجز، يرجى المحاولة مرة أخرى');
       onBookingComplete(false);
     } finally {

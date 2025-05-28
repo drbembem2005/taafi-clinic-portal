@@ -15,8 +15,14 @@ const DoctorCard = ({ doctor, onBook }: DoctorCardProps) => {
     e.preventDefault();
     e.stopPropagation();
     
+    console.log('DoctorCard: Book button clicked for doctor:', doctor);
+    console.log('DoctorCard: onBook function exists:', typeof onBook === 'function');
+    
     if (onBook && typeof onBook === 'function') {
+      console.log('DoctorCard: Calling onBook with:', doctor.id, doctor.name);
       onBook(doctor.id, doctor.name);
+    } else {
+      console.error('DoctorCard: onBook function is not available or not a function');
     }
   };
 
