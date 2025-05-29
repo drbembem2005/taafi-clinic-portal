@@ -211,7 +211,7 @@ const HealthTools = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Enhanced Hero Section */}
       <section className="bg-gradient-to-l from-brand/10 via-blue-50 to-indigo-100 py-16 md:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%231373b4" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%231373b4\" fill-opacity=\"0.05\"%3E%3Ccircle cx=\"30\" cy=\"30\" r=\"2\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
         <div className="container mx-auto px-4 text-center relative z-10">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center justify-center gap-3 mb-6">
@@ -279,7 +279,7 @@ const HealthTools = () => {
       {/* Enhanced Tools Grid */}
       <section className="py-12 md:py-20">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {filteredTools.map((tool) => {
               const IconComponent = tool.icon;
               return (
@@ -289,22 +289,22 @@ const HealthTools = () => {
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-brand/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   <CardHeader className="pb-4 relative z-10">
-                    <div className={`w-20 h-20 rounded-3xl bg-gradient-to-br ${categoryColors[tool.category]} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-lg`}>
-                      <IconComponent className="h-10 w-10 text-white" />
+                    <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-3xl bg-gradient-to-br ${categoryColors[tool.category]} flex items-center justify-center mb-4 md:mb-6 group-hover:scale-110 transition-transform duration-500 shadow-lg mx-auto`}>
+                      <IconComponent className="h-8 w-8 md:h-10 md:w-10 text-white" />
                     </div>
-                    <CardTitle className="text-xl md:text-2xl font-bold text-gray-900 leading-tight mb-3">
+                    <CardTitle className="text-lg md:text-xl xl:text-2xl font-bold text-gray-900 leading-tight mb-3 text-center min-h-[3rem] md:min-h-[4rem] flex items-center justify-center">
                       {tool.title}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="pt-0 relative z-10">
-                    <p className="text-gray-600 leading-relaxed mb-8 text-base">
+                  <CardContent className="pt-0 relative z-10 px-4 md:px-6">
+                    <p className="text-gray-600 leading-relaxed mb-6 md:mb-8 text-sm md:text-base text-center min-h-[4rem] md:min-h-[5rem] flex items-center justify-center">
                       {tool.description}
                     </p>
                     <Button 
-                      className="w-full bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white rounded-2xl py-4 font-bold transition-all duration-500 group-hover:shadow-xl transform group-hover:scale-105 text-lg"
+                      className="w-full bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white rounded-xl md:rounded-2xl py-3 md:py-4 font-bold transition-all duration-500 group-hover:shadow-xl transform group-hover:scale-105 text-base md:text-lg"
                       onClick={() => openTool(tool.id)}
                     >
-                      <Zap className="ml-2 h-5 w-5" />
+                      <Zap className="ml-2 h-4 w-4 md:h-5 md:w-5" />
                       ابدأ الآن
                     </Button>
                   </CardContent>
@@ -317,7 +317,7 @@ const HealthTools = () => {
 
       {/* Enhanced CTA Section */}
       <section className="py-20 bg-gradient-to-r from-brand/10 via-blue-50 to-indigo-100 relative">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%231373b4" fill-opacity="0.03"%3E%3Cpath d="M50 50l25-25v50l-25-25z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"100\" height=\"100\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%231373b4\" fill-opacity=\"0.03\"%3E%3Cpath d=\"M50 50l25-25v50l-25-25z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
         <div className="container mx-auto px-4 text-center relative z-10">
           <div className="max-w-4xl mx-auto">
             <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-2xl">
