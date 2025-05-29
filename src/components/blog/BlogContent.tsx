@@ -67,54 +67,6 @@ const BlogContent = ({ content, className = '' }: BlogContentProps) => {
         dangerouslySetInnerHTML={{ __html: content }}
         dir="rtl"
       />
-      
-      {/* Medical Content Styling */}
-      <style jsx>{`
-        .medical-content h2 + p:first-of-type {
-          font-size: 1.125rem;
-          color: #4b5563;
-          font-weight: 500;
-          margin-bottom: 2rem;
-          padding: 1rem;
-          background: linear-gradient(to left, #eff6ff, #dbeafe);
-          border-radius: 0.75rem;
-          border-right: 4px solid #1373b4;
-        }
-        
-        .medical-content h3:has(+ ul) {
-          background: linear-gradient(to left, #1373b4, #0e5991);
-          color: white;
-          padding: 1rem 1.5rem;
-          border-radius: 0.75rem;
-          border: none;
-          margin-bottom: 1rem;
-        }
-        
-        .medical-content ul + h3,
-        .medical-content ol + h3 {
-          margin-top: 3rem;
-        }
-        
-        .medical-content table {
-          font-family: 'Cairo', sans-serif;
-        }
-        
-        .medical-content table th:first-child {
-          border-top-right-radius: 0.5rem;
-        }
-        
-        .medical-content table th:last-child {
-          border-top-left-radius: 0.5rem;
-        }
-        
-        .medical-content table tr:last-child td:first-child {
-          border-bottom-right-radius: 0.5rem;
-        }
-        
-        .medical-content table tr:last-child td:last-child {
-          border-bottom-left-radius: 0.5rem;
-        }
-      `}</style>
     </div>
   );
 };
