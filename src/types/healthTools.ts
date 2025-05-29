@@ -1,3 +1,4 @@
+
 export interface HealthToolResult {
   score?: number;
   category: string;
@@ -58,11 +59,28 @@ export interface OvulationResult {
   tips: string[];
 }
 
+export interface AnxietyResult {
+  score: number;
+  category: string;
+  level: 'low' | 'moderate' | 'high' | 'very-high';
+  recommendations: string[];
+  details: string;
+  needsAttention?: boolean;
+}
+
 export interface DentalResult {
   riskLevel: 'low' | 'moderate' | 'high' | 'very-high';
   category: string;
   recommendations: string[];
   warningSign: boolean;
+}
+
+export interface DentalVisitResult {
+  urgency: 'routine' | 'soon' | 'urgent' | 'emergency';
+  category: string;
+  recommendations: string[];
+  firstAid?: string[];
+  timeframe: string;
 }
 
 export interface BreathingSession {

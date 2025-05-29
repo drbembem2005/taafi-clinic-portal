@@ -28,20 +28,6 @@ interface HealthTool {
 
 const healthTools: HealthTool[] = [
   {
-    id: 'dental-decay-risk',
-    title: 'اختبار خطر تسوس الأسنان',
-    description: 'تقييم مخاطر تسوس أسنانك بناءً على عاداتك اليومية',
-    icon: Eye,
-    category: 'assessment'
-  },
-  {
-    id: 'dental-visit-needed',
-    title: 'هل تحتاج لزيارة طبيب الأسنان؟',
-    description: 'اكتشف إذا كانت أعراضك تستدعي زيارة فورية للطبيب',
-    icon: Stethoscope,
-    category: 'guidance'
-  },
-  {
     id: 'bmi-calculator',
     title: 'حاسبة كتلة الجسم (BMI)',
     description: 'احسب مؤشر كتلة الجسم وتعرف على وزنك الصحي',
@@ -63,11 +49,25 @@ const healthTools: HealthTool[] = [
     category: 'calculation'
   },
   {
-    id: 'healthy-habits',
-    title: 'اختبار عاداتك الصحية',
-    description: 'قيّم نمط حياتك واكتشف نقاط التحسين',
+    id: 'heart-rate-calculator',
+    title: 'حاسبة معدل النبض الطبيعي حسب العمر',
+    description: 'تحقق من معدل نبضك الطبيعي حسب عمرك',
+    icon: Heart,
+    category: 'calculation'
+  },
+  {
+    id: 'waist-calculator',
+    title: 'حاسبة محيط الخصر الصحي',
+    description: 'تأكد من أن محيط خصرك ضمن المعدل الصحي',
+    icon: Target,
+    category: 'calculation'
+  },
+  {
+    id: 'steps-calories',
+    title: 'حاسبة خطوات المشي إلى سعرات حرارية',
+    description: 'احسب السعرات المحروقة من خطوات المشي',
     icon: Activity,
-    category: 'assessment'
+    category: 'calculation'
   },
   {
     id: 'diabetes-risk',
@@ -84,39 +84,25 @@ const healthTools: HealthTool[] = [
     category: 'assessment'
   },
   {
-    id: 'heart-rate-calculator',
-    title: 'حاسبة معدل النبض الطبيعي حسب العمر',
-    description: 'تحقق من معدل نبضك الطبيعي حسب عمرك',
+    id: 'healthy-habits',
+    title: 'اختبار عاداتك الصحية',
+    description: 'قيّم نمط حياتك واكتشف نقاط التحسين',
     icon: Activity,
-    category: 'calculation'
+    category: 'assessment'
   },
   {
-    id: 'waist-calculator',
-    title: 'حاسبة محيط الخصر الصحي',
-    description: 'تأكد من أن محيط خصرك ضمن المعدل الصحي',
-    icon: Scale,
-    category: 'calculation'
+    id: 'dental-decay-risk',
+    title: 'اختبار خطر تسوس الأسنان',
+    description: 'تقييم مخاطر تسوس أسنانك بناءً على عاداتك اليومية',
+    icon: Eye,
+    category: 'assessment'
   },
   {
-    id: 'pregnancy-calculator',
-    title: 'حاسبة الحمل / موعد الولادة',
-    description: 'احسبي موعد الولادة المتوقع',
-    icon: Baby,
-    category: 'pregnancy'
-  },
-  {
-    id: 'ovulation-calculator',
-    title: 'حاسبة التبويض',
-    description: 'احسبي أيام التبويض والخصوبة',
-    icon: Baby,
-    category: 'pregnancy'
-  },
-  {
-    id: 'pregnancy-symptoms',
-    title: 'هل أعراضك طبيعية أثناء الحمل؟',
-    description: 'تحققي من طبيعية أعراض الحمل التي تمرين بها',
-    icon: Baby,
-    category: 'pregnancy'
+    id: 'dental-visit-needed',
+    title: 'هل تحتاج لزيارة طبيب الأسنان؟',
+    description: 'اكتشف إذا كانت أعراضك تستدعي زيارة فورية للطبيب',
+    icon: Stethoscope,
+    category: 'guidance'
   },
   {
     id: 'anxiety-test',
@@ -140,11 +126,25 @@ const healthTools: HealthTool[] = [
     category: 'mental'
   },
   {
-    id: 'steps-calories',
-    title: 'حاسبة خطوات المشي إلى سعرات حرارية',
-    description: 'احسب السعرات المحروقة من خطوات المشي',
-    icon: Activity,
-    category: 'calculation'
+    id: 'pregnancy-calculator',
+    title: 'حاسبة الحمل / موعد الولادة',
+    description: 'احسبي موعد الولادة المتوقع',
+    icon: Baby,
+    category: 'pregnancy'
+  },
+  {
+    id: 'ovulation-calculator',
+    title: 'حاسبة التبويض',
+    description: 'احسبي أيام التبويض والخصوبة',
+    icon: Baby,
+    category: 'pregnancy'
+  },
+  {
+    id: 'pregnancy-symptoms',
+    title: 'هل أعراضك طبيعية أثناء الحمل؟',
+    description: 'تحققي من طبيعية أعراض الحمل التي تمرين بها',
+    icon: Baby,
+    category: 'pregnancy'
   },
   {
     id: 'medical-specialty-guide',

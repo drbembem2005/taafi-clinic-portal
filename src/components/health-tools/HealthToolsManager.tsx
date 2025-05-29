@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import HealthToolModal from './HealthToolModal';
 import BMICalculator from './BMICalculator';
@@ -14,6 +15,10 @@ import WaistCalculator from './WaistCalculator';
 import StepsCaloriesCalculator from './StepsCaloriesCalculator';
 import DentalDecayRisk from './DentalDecayRisk';
 import MedicalSpecialtyGuide from './MedicalSpecialtyGuide';
+import DentalVisitAssessment from './DentalVisitAssessment';
+import BloodPressureRiskTest from './BloodPressureRiskTest';
+import HealthyHabitsAssessment from './HealthyHabitsAssessment';
+import PregnancySymptomsChecker from './PregnancySymptomsChecker';
 
 const toolComponents: { [key: string]: React.ComponentType } = {
   'bmi-calculator': BMICalculator,
@@ -29,7 +34,12 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'waist-calculator': WaistCalculator,
   'steps-calories': StepsCaloriesCalculator,
   'dental-decay-risk': DentalDecayRisk,
+  'dental-visit-needed': DentalVisitAssessment,
+  'blood-pressure-risk': BloodPressureRiskTest,
+  'healthy-habits': HealthyHabitsAssessment,
+  'pregnancy-symptoms': PregnancySymptomsChecker,
   'medical-specialty-guide': MedicalSpecialtyGuide,
+  'specialty-finder': MedicalSpecialtyGuide, // Using same component for both
 };
 
 const toolTitles: { [key: string]: string } = {
@@ -46,7 +56,12 @@ const toolTitles: { [key: string]: string } = {
   'waist-calculator': 'حاسبة محيط الخصر الصحي',
   'steps-calories': 'حاسبة خطوات المشي إلى سعرات',
   'dental-decay-risk': 'اختبار خطر تسوس الأسنان',
+  'dental-visit-needed': 'هل تحتاج لزيارة طبيب الأسنان؟',
+  'blood-pressure-risk': 'اختبار خطر ارتفاع ضغط الدم',
+  'healthy-habits': 'تقييم العادات الصحية',
+  'pregnancy-symptoms': 'فاحص أعراض الحمل',
   'medical-specialty-guide': 'مرشد التخصصات الطبية',
+  'specialty-finder': 'باحث التخصصات الطبية',
 };
 
 interface HealthToolsManagerProps {

@@ -2,12 +2,13 @@ import {
   BMIResult,
   CalorieResult,
   HealthToolResult,
+  AnxietyResult,
   WaterResult,
   HeartRateResult,
   PregnancyResult,
   OvulationResult,
-  AnxietyResult,
   DentalResult,
+  DentalVisitResult,
   WaistResult,
   StepsCaloriesResult,
   BloodPressureRiskResult,
@@ -16,7 +17,13 @@ import {
   MedicalSpecialtyResult,
 } from '@/types/healthTools';
 
-export const calculateBMI = (weight: number, height: number): BMIResult => {
+export const calculateBMI = (
+  weight: number, 
+  height: number, 
+  age: number, 
+  gender: string, 
+  activityLevel?: string
+): BMIResult => {
   const heightInMeters = height / 100;
   const bmi = weight / (heightInMeters * heightInMeters);
   let category = '';
@@ -25,44 +32,58 @@ export const calculateBMI = (weight: number, height: number): BMIResult => {
   if (bmi < 18.5) {
     category = 'نحافة';
     recommendations = [
-      'تناول وجبات غنية بالسعرات الحرارية',
+      'تناول وجبات غنية بالسعرات الحرارية الصحية',
       'زد من كمية البروتين في غذائك',
+      'مارس تمارين القوة لبناء العضلات',
       'استشر أخصائي تغذية لزيادة الوزن بشكل صحي'
     ];
   } else if (bmi < 25) {
     category = 'وزن طبيعي';
     recommendations = [
       'حافظ على نمط حياة صحي',
-      'مارس الرياضة بانتظام',
-      'تناول غذاء متوازن'
+      'مارس الرياضة بانتظام 150 دقيقة أسبوعياً',
+      'تناول غذاء متوازن غني بالخضروات والفواكه',
+      'احرص على النوم الكافي 7-8 ساعات يومياً'
     ];
   } else if (bmi < 30) {
     category = 'زيادة في الوزن';
     recommendations = [
-      'مارس الرياضة بانتظام',
-      'قلل من السعرات الحرارية في غذائك',
+      'مارس الرياضة بانتظام 300 دقيقة أسبوعياً',
+      'قلل من السعرات الحرارية 500 سعرة يومياً',
+      'ركز على الخضروات والبروتين الخالي من الدهون',
       'استشر أخصائي تغذية لإنقاص الوزن بشكل صحي'
     ];
   } else {
     category = 'سمنة';
     recommendations = [
       'استشر طبيبك لتقييم حالتك الصحية',
-      'اتبع نظام غذائي صحي وممارسة الرياضة بانتظام',
+      'اتبع نظام غذائي محسوب السعرات مع أخصائي',
+      'ابدأ بتمارين خفيفة وزد التدريج',
       'فكر في استشارة أخصائي تغذية أو مدرب شخصي'
     ];
   }
 
-  const idealWeight = {
-    min: 18.5 * (heightInMeters * heightInMeters),
-    max: 24.9 * (heightInMeters * heightInMeters)
-  };
+  // Enhanced ideal weight calculation based on age and activity level
+  let idealWeightMin = 18.5 * (heightInMeters * heightInMeters);
+  let idealWeightMax = 24.9 * (heightInMeters * heightInMeters);
+
+  // Adjust for age (older adults can have slightly higher BMI)
+  if (age > 65) {
+    idealWeightMin = 22 * (heightInMeters * heightInMeters);
+    idealWeightMax = 27 * (heightInMeters * heightInMeters);
+  }
+
+  // Adjust for activity level (athletes may have higher BMI due to muscle mass)
+  if (activityLevel === 'veryActive' || activityLevel === 'active') {
+    idealWeightMax = 26 * (heightInMeters * heightInMeters);
+  }
 
   return {
     bmi: parseFloat(bmi.toFixed(1)),
     category,
     idealWeight: {
-      min: parseFloat(idealWeight.min.toFixed(1)),
-      max: parseFloat(idealWeight.max.toFixed(1))
+      min: parseFloat(idealWeightMin.toFixed(1)),
+      max: parseFloat(idealWeightMax.toFixed(1))
     },
     recommendations
   };
@@ -600,8 +621,8 @@ export const calculateStepsCalories = (
 export const assessDentalDecayRisk = (answers: { [key: string]: string }): DentalResult => {
   let score = 0;
   
-  // Calculate risk score based on answers
-  const scoring = {
+  // Define scoring system with proper typing
+  const scoringRules: { [key: string]: { [key: string]: number } } = {
     brushingFrequency: { never: 4, once: 3, twice: 1, moreThanTwice: 0 },
     flossing: { never: 3, sometimes: 2, regularly: 0 },
     sugarIntake: { rarely: 0, once: 1, twiceThree: 2, moreThanThree: 3 },
@@ -612,9 +633,10 @@ export const assessDentalDecayRisk = (answers: { [key: string]: string }): Denta
     smoking: { no: 0, occasionally: 1, regularly: 2 }
   };
   
+  // Calculate score safely
   Object.keys(answers).forEach(key => {
-    if (scoring[key as keyof typeof scoring]) {
-      score += scoring[key as keyof typeof scoring][answers[key] as keyof typeof scoring[typeof key]] || 0;
+    if (scoringRules[key] && scoringRules[key][answers[key]]) {
+      score += scoringRules[key][answers[key]];
     }
   });
   
@@ -650,6 +672,261 @@ export const assessDentalDecayRisk = (answers: { [key: string]: string }): Denta
     category,
     recommendations,
     warningSign: score > 15
+  };
+};
+
+export const assessDentalVisitNeed = (symptoms: { [key: string]: string }): DentalVisitResult => {
+  let urgencyScore = 0;
+  
+  // Emergency symptoms
+  if (symptoms.severePain === 'yes' || symptoms.swelling === 'yes' || symptoms.trauma === 'yes') {
+    urgencyScore += 10;
+  }
+  
+  // Urgent symptoms  
+  if (symptoms.bleeding === 'persistent' || symptoms.looseTooth === 'yes' || symptoms.infection === 'yes') {
+    urgencyScore += 7;
+  }
+  
+  // Moderate symptoms
+  if (symptoms.sensitivity === 'severe' || symptoms.badBreath === 'persistent' || symptoms.gumPain === 'yes') {
+    urgencyScore += 4;
+  }
+  
+  // Mild symptoms
+  if (symptoms.staining === 'yes' || symptoms.mildPain === 'yes' || symptoms.tartar === 'yes') {
+    urgencyScore += 2;
+  }
+  
+  let urgency: 'routine' | 'soon' | 'urgent' | 'emergency';
+  let category: string;
+  let timeframe: string;
+  let firstAid: string[] = [];
+  
+  if (urgencyScore >= 10) {
+    urgency = 'emergency';
+    category = 'حالة طوارئ أسنان';
+    timeframe = 'خلال ساعات قليلة';
+    firstAid = [
+      'اتصل بطبيب الأسنان فوراً أو توجه للطوارئ',
+      'ضع كمادة باردة على الخد المتورم',
+      'تناول مسكن ألم مناسب',
+      'لا تضع أسبرين مباشرة على السن'
+    ];
+  } else if (urgencyScore >= 7) {
+    urgency = 'urgent';
+    category = 'يحتاج زيارة عاجلة';
+    timeframe = 'خلال 24-48 ساعة';
+  } else if (urgencyScore >= 4) {
+    urgency = 'soon';
+    category = 'يحتاج زيارة قريبة';
+    timeframe = 'خلال أسبوع';
+  } else {
+    urgency = 'routine';
+    category = 'فحص روتيني';
+    timeframe = 'خلال شهر أو عند الفحص الدوري';
+  }
+  
+  const recommendations = [
+    'حافظ على نظافة الأسنان حتى موعد الزيارة',
+    'تجنب الأطعمة الصلبة إذا كان هناك ألم',
+    'استخدم مسكن ألم مناسب حسب الحاجة',
+    'تجنب المشروبات الساخنة أو الباردة جداً'
+  ];
+  
+  return {
+    urgency,
+    category,
+    recommendations,
+    firstAid: firstAid.length > 0 ? firstAid : undefined,
+    timeframe
+  };
+};
+
+export const assessBloodPressureRisk = (formData: { [key: string]: any }): BloodPressureRiskResult => {
+  let score = 0;
+  
+  // Age factor
+  if (formData.age >= 65) score += 3;
+  else if (formData.age >= 45) score += 2;
+  else if (formData.age >= 35) score += 1;
+  
+  // Family history
+  if (formData.familyHistory === 'yes') score += 3;
+  
+  // Lifestyle factors
+  if (formData.smoking === 'yes') score += 2;
+  if (formData.alcohol === 'heavy') score += 2;
+  else if (formData.alcohol === 'moderate') score += 1;
+  
+  // Physical factors
+  if (formData.bmi >= 30) score += 3;
+  else if (formData.bmi >= 25) score += 2;
+  
+  if (formData.exercise === 'never') score += 2;
+  else if (formData.exercise === 'rarely') score += 1;
+  
+  // Medical conditions
+  if (formData.diabetes === 'yes') score += 2;
+  if (formData.kidney === 'yes') score += 2;
+  if (formData.stress === 'high') score += 2;
+  
+  // Salt intake
+  if (formData.saltIntake === 'high') score += 2;
+  else if (formData.saltIntake === 'moderate') score += 1;
+  
+  let riskLevel: 'low' | 'moderate' | 'high' | 'very-high';
+  let category: string;
+  let needsAttention = false;
+  
+  if (score <= 3) {
+    riskLevel = 'low';
+    category = 'مخاطر منخفضة لارتفاع ضغط الدم';
+  } else if (score <= 7) {
+    riskLevel = 'moderate';
+    category = 'مخاطر متوسطة لارتفاع ضغط الدم';
+  } else if (score <= 12) {
+    riskLevel = 'high';
+    category = 'مخاطر عالية لارتفاع ضغط الدم';
+    needsAttention = true;
+  } else {
+    riskLevel = 'very-high';
+    category = 'مخاطر عالية جداً لارتفاع ضغط الدم';
+    needsAttention = true;
+  }
+  
+  const recommendations = [
+    'قس ضغط دمك بانتظام',
+    'قلل من تناول الملح والصوديوم',
+    'مارس الرياضة بانتظام 30 دقيقة يومياً',
+    'حافظ على وزن صحي',
+    'تجنب التدخين والكحول',
+    'تناول غذاء غني بالبوتاسيوم والمغنيسيوم'
+  ];
+  
+  const lifestyle = [
+    'نظام DASH الغذائي (غني بالخضروات والفواكه)',
+    'تقليل التوتر بتقنيات الاسترخاء',
+    'النوم الكافي 7-8 ساعات يومياً',
+    'تجنب الأطعمة المصنعة والوجبات السريعة'
+  ];
+  
+  return {
+    riskLevel,
+    category,
+    recommendations,
+    lifestyle,
+    needsAttention
+  };
+};
+
+export const assessHealthyHabits = (habits: { [key: string]: number }): HealthyHabitsResult => {
+  const categories = {
+    nutrition: habits.nutrition || 0,
+    exercise: habits.exercise || 0,
+    sleep: habits.sleep || 0,
+    stress: habits.stress || 0,
+    social: habits.social || 0
+  };
+  
+  const overallScore = Math.round(
+    (categories.nutrition + categories.exercise + categories.sleep + categories.stress + categories.social) / 5
+  );
+  
+  const recommendations = [];
+  const priority = [];
+  
+  if (categories.nutrition < 7) {
+    recommendations.push('حسّن نظامك الغذائي بتناول المزيد من الخضروات والفواكه');
+    priority.push('التغذية');
+  }
+  
+  if (categories.exercise < 7) {
+    recommendations.push('زد من نشاطك البدني لـ 150 دقيقة أسبوعياً');
+    priority.push('الرياضة');
+  }
+  
+  if (categories.sleep < 7) {
+    recommendations.push('حسّن جودة نومك والتزم بمواعيد ثابتة');
+    priority.push('النوم');
+  }
+  
+  if (categories.stress < 7) {
+    recommendations.push('طبق تقنيات إدارة التوتر والاسترخاء');
+    priority.push('إدارة التوتر');
+  }
+  
+  if (categories.social < 7) {
+    recommendations.push('عزز علاقاتك الاجتماعية وشارك في أنشطة جماعية');
+    priority.push('التواصل الاجتماعي');
+  }
+  
+  if (recommendations.length === 0) {
+    recommendations.push('ممتاز! حافظ على نمط حياتك الصحي الحالي');
+  }
+  
+  return {
+    overallScore,
+    categories,
+    recommendations,
+    priority
+  };
+};
+
+export const assessPregnancySymptoms = (symptoms: { [key: string]: string }, weeks: number): PregnancySymptomsResult => {
+  let warningScore = 0;
+  let warningSign = false;
+  
+  // Emergency symptoms
+  if (symptoms.severeBleeding === 'yes' || symptoms.severePain === 'yes' || symptoms.noMovement === 'yes') {
+    warningScore = 10;
+    warningSign = true;
+  }
+  
+  // Warning symptoms
+  if (symptoms.bleeding === 'yes' || symptoms.fever === 'yes' || symptoms.severeHeadache === 'yes') {
+    warningScore += 5;
+  }
+  
+  // Moderate concerns
+  if (symptoms.swelling === 'sudden' || symptoms.visionChanges === 'yes' || symptoms.contractions === 'yes') {
+    warningScore += 3;
+  }
+  
+  let status: 'normal' | 'monitor' | 'urgent';
+  let category: string;
+  
+  if (warningScore >= 10) {
+    status = 'urgent';
+    category = 'أعراض تحتاج رعاية طبية فورية';
+  } else if (warningScore >= 5) {
+    status = 'monitor';
+    category = 'أعراض تحتاج متابعة طبية';
+  } else {
+    status = 'normal';
+    category = 'أعراض طبيعية للحمل';
+  }
+  
+  const recommendations = [];
+  const nextSteps = [];
+  
+  if (status === 'urgent') {
+    recommendations.push('اتصلي بطبيبك فوراً أو توجهي للطوارئ');
+    nextSteps.push('لا تنتظري - اطلبي المساعدة الطبية الآن');
+  } else if (status === 'monitor') {
+    recommendations.push('احجزي موعداً مع طبيبك خلال يوم أو يومين');
+    nextSteps.push('راقبي الأعراض وسجلي أي تغييرات');
+  } else {
+    recommendations.push('هذه أعراض طبيعية للحمل');
+    nextSteps.push('واصلي متابعتك الدورية مع الطبيب');
+  }
+  
+  return {
+    status,
+    category,
+    recommendations,
+    warningSign,
+    nextSteps
   };
 };
 
