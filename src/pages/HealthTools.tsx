@@ -209,33 +209,29 @@ const HealthTools = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <section className="bg-gradient-to-l from-brand/10 via-blue-50 to-indigo-100 py-16 md:py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.1%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
+      {/* Compact Header */}
+      <section className="bg-gradient-to-l from-brand/10 via-blue-50 to-indigo-100 py-8 md:py-12 relative overflow-hidden">
         <div className="container mx-auto px-4 text-center relative z-10">
-          <div className="max-w-5xl mx-auto">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <Sparkles className="h-8 w-8 md:h-12 md:w-12 text-brand animate-pulse" />
-              <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                الأدوات الصحية التفاعلية
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-brand animate-pulse" />
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
+                🤖 أدوات صحية ذكية بين يديك!
               </h1>
-              <Sparkles className="h-8 w-8 md:h-12 md:w-12 text-brand animate-pulse" />
+              <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-brand animate-pulse" />
             </div>
-            <p className="text-xl md:text-2xl lg:text-3xl text-brand mb-8 font-bold">
-              🤖 أدوات صحية ذكية بين يديك!
-            </p>
-            <p className="text-base md:text-lg lg:text-xl text-gray-600 leading-relaxed max-w-4xl mx-auto mb-8">
+            <p className="text-sm md:text-base lg:text-lg text-gray-600 leading-relaxed mb-6">
               استكشف مجموعة شاملة من الأدوات الصحية التفاعلية. 
-              احسب مؤشراتك الصحية، قيّم مخاطرك الطبية، واحصل على توجيهات صحية مخصصة - 
-              كل ذلك بشكل آمن وسري ومجاني تماماً.
+              احسب مؤشراتك الصحية، قيّم مخاطرك الطبية، واحصل على توجيهات صحية مخصصة
             </p>
-            <div className="flex flex-wrap justify-center gap-3 md:gap-4 text-sm md:text-base">
-              <span className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-brand font-medium shadow-lg border border-white/20">
-                ✅ 19 أداة صحية متطورة
+            <div className="flex flex-wrap justify-center gap-2 text-xs md:text-sm">
+              <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-brand font-medium shadow-md border border-white/20">
+                ✅ 19 أداة متطورة
               </span>
-              <span className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-brand font-medium shadow-lg border border-white/20">
+              <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-brand font-medium shadow-md border border-white/20">
                 🔒 آمن وسري 100%
               </span>
-              <span className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full text-brand font-medium shadow-lg border border-white/20">
+              <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-brand font-medium shadow-md border border-white/20">
                 📱 متوافق مع الجوال
               </span>
             </div>
@@ -243,17 +239,18 @@ const HealthTools = () => {
         </div>
       </section>
 
-      <section className="py-8 bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-20 shadow-sm">
+      {/* Fixed Category Navigation */}
+      <section className="py-4 bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-20 shadow-sm">
         <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-2 md:gap-3">
+          <div className="flex overflow-x-auto gap-2 scrollbar-hide pb-2">
             <Button
               variant={selectedCategory === null ? "default" : "outline"}
               onClick={() => setSelectedCategory(null)}
-              className="rounded-full px-4 md:px-6 py-2 md:py-3 font-medium shadow-md hover:shadow-lg transition-all duration-300 border-2"
+              className="rounded-full px-3 py-2 font-medium shadow-md hover:shadow-lg transition-all duration-300 border-2 whitespace-nowrap flex-shrink-0"
               size="sm"
             >
-              <Calculator className="ml-2 h-3 w-3 md:h-4 md:w-4" />
-              <span className="text-xs md:text-sm">جميع الأدوات ({healthTools.length})</span>
+              <Calculator className="ml-1 h-3 w-3" />
+              <span className="text-xs">الكل ({healthTools.length})</span>
             </Button>
             {categories.map((category) => {
               const IconComponent = categoryIcons[category];
@@ -262,11 +259,11 @@ const HealthTools = () => {
                   key={category}
                   variant={selectedCategory === category ? "default" : "outline"}
                   onClick={() => setSelectedCategory(category)}
-                  className="rounded-full px-4 md:px-6 py-2 md:py-3 font-medium shadow-md hover:shadow-lg transition-all duration-300 border-2"
+                  className="rounded-full px-3 py-2 font-medium shadow-md hover:shadow-lg transition-all duration-300 border-2 whitespace-nowrap flex-shrink-0"
                   size="sm"
                 >
-                  <IconComponent className="ml-2 h-3 w-3 md:h-4 md:w-4" />
-                  <span className="text-xs md:text-sm">{categoryNames[category]} ({healthTools.filter(t => t.category === category).length})</span>
+                  <IconComponent className="ml-1 h-3 w-3" />
+                  <span className="text-xs">{categoryNames[category]} ({healthTools.filter(t => t.category === category).length})</span>
                 </Button>
               );
             })}
@@ -274,34 +271,35 @@ const HealthTools = () => {
         </div>
       </section>
 
-      <section className="py-12 md:py-20">
+      {/* Compact Tools Grid */}
+      <section className="py-6 md:py-8">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredTools.map((tool) => {
               const IconComponent = tool.icon;
               return (
                 <Card 
                   key={tool.id} 
-                  className="group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden border-0 shadow-xl rounded-3xl bg-white/95 backdrop-blur-sm relative"
+                  className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border-0 shadow-md rounded-2xl bg-white/95 backdrop-blur-sm relative"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-brand/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  <CardHeader className="pb-4 relative z-10">
-                    <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-3xl bg-gradient-to-br ${categoryColors[tool.category]} flex items-center justify-center mb-4 md:mb-6 group-hover:scale-110 transition-transform duration-500 shadow-lg mx-auto`}>
-                      <IconComponent className="h-8 w-8 md:h-10 md:w-10 text-white" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-brand/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <CardHeader className="pb-3 pt-4 relative z-10">
+                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br ${categoryColors[tool.category]} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 shadow-lg mx-auto`}>
+                      <IconComponent className="h-6 w-6 md:h-7 md:w-7 text-white" />
                     </div>
-                    <CardTitle className="text-lg md:text-xl xl:text-2xl font-bold text-gray-900 leading-tight mb-3 text-center min-h-[3rem] md:min-h-[4rem] flex items-center justify-center px-2">
+                    <CardTitle className="text-base md:text-lg font-bold text-gray-900 leading-tight text-center min-h-[2.5rem] flex items-center justify-center px-2">
                       {tool.title}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="pt-0 relative z-10 px-4 md:px-6">
-                    <p className="text-gray-600 leading-relaxed mb-6 md:mb-8 text-sm md:text-base text-center min-h-[4rem] md:min-h-[5rem] flex items-center justify-center">
+                  <CardContent className="pt-0 relative z-10 px-4 pb-4">
+                    <p className="text-gray-600 leading-relaxed mb-4 text-sm text-center min-h-[3rem] flex items-center justify-center">
                       {tool.description}
                     </p>
                     <Button 
-                      className="w-full bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white rounded-xl md:rounded-2xl py-3 md:py-4 font-bold transition-all duration-500 group-hover:shadow-xl transform group-hover:scale-105 text-base md:text-lg shadow-lg"
+                      className="w-full bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white rounded-xl py-2.5 font-bold transition-all duration-300 group-hover:shadow-lg transform group-hover:scale-105 text-sm shadow-md"
                       onClick={() => openTool(tool.id)}
                     >
-                      <Zap className="ml-2 h-4 w-4 md:h-5 md:w-5" />
+                      <Zap className="ml-2 h-4 w-4" />
                       ابدأ الآن
                     </Button>
                   </CardContent>
@@ -312,23 +310,22 @@ const HealthTools = () => {
         </div>
       </section>
 
-      <section className="py-20 bg-gradient-to-r from-brand/10 via-blue-50 to-indigo-100 relative">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%22100%22%20height%3D%22100%22%20viewBox%3D%220%200%20100%20100%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.05%22%3E%3Cpath%20d%3D%22M50%2050l25-25v50l-25-25z%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white/90 backdrop-blur-sm rounded-3xl p-8 md:p-12 shadow-2xl border border-white/20">
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6 text-gray-900">
+      {/* Compact CTA Section */}
+      <section className="py-12 bg-gradient-to-r from-brand/10 via-blue-50 to-indigo-100">
+        <div className="container mx-auto px-4 text-center">
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-xl border border-white/20">
+              <h2 className="text-xl md:text-2xl font-bold mb-4 text-gray-900">
                 هل تحتاج استشارة طبية متخصصة؟
               </h2>
-              <p className="text-base md:text-lg lg:text-xl text-gray-600 mb-8 leading-relaxed">
-                هذه الأدوات مخصصة للتوعية الصحية والتقييم الأولي فقط ولا تغني عن الاستشارة الطبية المتخصصة. 
-                إذا كانت نتائجك تشير لضرورة المتابعة، لا تتردد في حجز موعد مع أطبائنا المتخصصين.
+              <p className="text-sm md:text-base text-gray-600 mb-6 leading-relaxed">
+                هذه الأدوات مخصصة للتوعية الصحية والتقييم الأولي فقط ولا تغني عن الاستشارة الطبية المتخصصة
               </p>
               <Button 
                 size="lg" 
-                className="bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white px-8 md:px-12 py-4 md:py-5 rounded-2xl font-bold text-lg md:text-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+                className="bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white px-6 md:px-8 py-3 md:py-4 rounded-xl font-bold text-base shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
               >
-                <Stethoscope className="ml-3 h-5 w-5 md:h-6 md:w-6" />
+                <Stethoscope className="ml-2 h-5 w-5" />
                 احجز موعدك الآن
               </Button>
             </div>
