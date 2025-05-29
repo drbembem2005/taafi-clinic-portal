@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 
@@ -10,22 +9,53 @@ export interface Specialty {
   details: string;
 }
 
-export const getSpecialties = async (): Promise<Specialty[]> => {
+export const getSpecialties = async (limit?: number, random?: boolean): Promise<Specialty[]> => {
   try {
-    const { data, error } = await supabase
-      .from('specialties')
-      .select('*');
+    let query = supabase.from('specialties').select('*');
     
-    if (error) {
-      toast({
-        title: "Error fetching specialties",
-        description: error.message,
-        variant: "destructive",
-      });
-      return [];
+    if (random) {
+      // For random selection, we'll fetch all and then randomize
+      const { data: allData, error } = await query;
+      
+      if (error) {
+        toast({
+          title: "Error fetching specialties",
+          description: error.message,
+          variant: "destructive",
+        });
+        return [];
+      }
+      
+      if (!allData || allData.length === 0) {
+        return [];
+      }
+      
+      // Shuffle the array randomly
+      const shuffled = [...allData].sort(() => Math.random() - 0.5);
+      
+      // Return limited results if limit is specified
+      return limit ? shuffled.slice(0, limit) : shuffled;
+    } else {
+      // Default alphabetical ordering
+      query = query.order('name');
+      
+      if (limit) {
+        query = query.limit(limit);
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        toast({
+          title: "Error fetching specialties",
+          description: error.message,
+          variant: "destructive",
+        });
+        return [];
+      }
+      
+      return data || [];
     }
-    
-    return data || [];
   } catch (error) {
     console.error("Error fetching specialties:", error);
     return [];

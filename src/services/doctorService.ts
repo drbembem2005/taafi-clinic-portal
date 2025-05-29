@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { format, addDays, startOfDay } from 'date-fns';
@@ -62,37 +61,79 @@ export const dayIndexToCode = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 // Standard day codes we'll use throughout the app for consistency
 export const standardDayCodes = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
-export async function getDoctors(): Promise<Doctor[]> {
+export async function getDoctors(limit?: number, random?: boolean): Promise<Doctor[]> {
   try {
-    const { data, error } = await supabase
-      .from('doctors')
-      .select('*')
-      .order('name');
+    let query = supabase.from('doctors').select('*');
+    
+    if (random) {
+      // For random selection, we'll fetch all and then randomize
+      const { data: allData, error } = await query;
+      
+      if (error) {
+        console.error('Error fetching doctors:', error);
+        toast({
+          title: "خطأ",
+          description: error.message,
+          variant: "destructive",
+        });
+        return [];
+      }
 
-    if (error) {
-      console.error('Error fetching doctors:', error);
-      toast({
-        title: "خطأ",
-        description: error.message,
-        variant: "destructive",
-      });
-      return [];
+      if (!allData || allData.length === 0) {
+        console.log('No doctors found in the database');
+        return [];
+      }
+
+      console.log('Doctors data from Supabase:', allData);
+
+      // Parse fees JSON string if needed and convert to Doctor type
+      const parsedDoctors = allData.map(doctor => ({
+        ...doctor,
+        fees: typeof doctor.fees === 'string' 
+          ? JSON.parse(doctor.fees) 
+          : (doctor.fees as unknown as Fees)
+      })) as Doctor[];
+
+      // Shuffle the array randomly
+      const shuffled = [...parsedDoctors].sort(() => Math.random() - 0.5);
+      
+      // Return limited results if limit is specified
+      return limit ? shuffled.slice(0, limit) : shuffled;
+    } else {
+      // Default alphabetical ordering
+      query = query.order('name');
+      
+      if (limit) {
+        query = query.limit(limit);
+      }
+      
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching doctors:', error);
+        toast({
+          title: "خطأ",
+          description: error.message,
+          variant: "destructive",
+        });
+        return [];
+      }
+
+      if (!data || data.length === 0) {
+        console.log('No doctors found in the database');
+        return [];
+      }
+
+      console.log('Doctors data from Supabase:', data);
+
+      // Parse fees JSON string if needed and convert to Doctor type
+      return data.map(doctor => ({
+        ...doctor,
+        fees: typeof doctor.fees === 'string' 
+          ? JSON.parse(doctor.fees) 
+          : (doctor.fees as unknown as Fees)
+      })) as Doctor[];
     }
-
-    if (!data || data.length === 0) {
-      console.log('No doctors found in the database');
-      return [];
-    }
-
-    console.log('Doctors data from Supabase:', data);
-
-    // Parse fees JSON string if needed and convert to Doctor type
-    return data.map(doctor => ({
-      ...doctor,
-      fees: typeof doctor.fees === 'string' 
-        ? JSON.parse(doctor.fees) 
-        : (doctor.fees as unknown as Fees)
-    })) as Doctor[];
   } catch (error) {
     console.error('Error in getDoctors:', error);
     return [];

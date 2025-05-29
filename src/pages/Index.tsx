@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import HeroCarousel from '@/components/shared/HeroCarousel';
 import SpecialtyCard from '@/components/shared/SpecialtyCard';
@@ -21,11 +20,11 @@ const Index = () => {
   useEffect(() => {
     const loadData = async () => {
       const [specialtiesData, doctorsData] = await Promise.all([
-        getSpecialties(),
-        getDoctors()
+        getSpecialties(6, true), // Get 6 random specialties
+        getDoctors(6, true) // Get 6 random doctors
       ]);
-      setSpecialties(specialtiesData.slice(0, 6));
-      setDoctors(doctorsData.slice(0, 6));
+      setSpecialties(specialtiesData);
+      setDoctors(doctorsData);
     };
     
     loadData();
