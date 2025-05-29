@@ -18,6 +18,7 @@ export interface BMIResult {
 export interface CalorieResult {
   bmr: number;
   tdee: number;
+  targetCalories: number;
   macros: {
     protein: number;
     carbs: number;
@@ -48,6 +49,28 @@ export interface PregnancyResult {
   trimester: number;
   milestones: string[];
   recommendations: string[];
+}
+
+export interface OvulationResult {
+  ovulationDate: Date;
+  fertilityWindow: { start: Date; end: Date };
+  nextPeriod: Date;
+  cycle: string;
+  tips: string[];
+}
+
+export interface DentalResult {
+  riskLevel: 'low' | 'moderate' | 'high' | 'very-high';
+  category: string;
+  recommendations: string[];
+  warningSign: boolean;
+}
+
+export interface BreathingSession {
+  pattern: string;
+  duration: number;
+  benefits: string[];
+  instructions: string[];
 }
 
 export interface FormData {
