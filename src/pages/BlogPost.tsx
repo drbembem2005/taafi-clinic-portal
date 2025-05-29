@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getBlogPostBySlug, getBlogPosts, BlogPost } from '@/services/blogService';
@@ -130,23 +129,15 @@ const BlogPostPage = () => {
           <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl overflow-hidden">
             {/* Article Header */}
             <header className="p-4 md:p-8 lg:p-12 border-b border-gray-100">
-              <h1 className="text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 md:mb-8 leading-tight text-gray-900">
+              <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-8 leading-tight text-gray-900">
                 {post.title}
               </h1>
               
               {/* Meta Information */}
               <div className="flex flex-wrap items-center gap-3 md:gap-6 text-gray-600 mb-4 md:mb-8">
                 <div className="flex items-center gap-2 md:gap-3 bg-gray-50 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-sm md:text-base">
-                  <Calendar className="h-4 w-4 md:h-5 md:w-5 text-brand" />
-                  <span className="font-medium">{format(new Date(post.published_at), 'PPP', { locale: ar })}</span>
-                </div>
-                <div className="flex items-center gap-2 md:gap-3 bg-gray-50 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-sm md:text-base">
                   <Clock className="h-4 w-4 md:h-5 md:w-5 text-brand" />
                   <span className="font-medium">{readingTime} دقائق قراءة</span>
-                </div>
-                <div className="flex items-center gap-2 md:gap-3 bg-gray-50 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-sm md:text-base">
-                  <User className="h-4 w-4 md:h-5 md:w-5 text-brand" />
-                  <span className="font-medium">فريق طبي متخصص</span>
                 </div>
               </div>
 
