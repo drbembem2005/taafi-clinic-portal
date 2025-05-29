@@ -23,8 +23,21 @@ const Index = () => {
         getSpecialties(6, true), // Get 6 random specialties
         getDoctors(6, true) // Get 6 random doctors
       ]);
+      
+      // Create a specialty lookup map for quick access
+      const specialtyMap = specialtiesData.reduce((map, specialty) => {
+        map[specialty.id] = specialty.name;
+        return map;
+      }, {});
+      
+      // Add specialty name to each doctor
+      const doctorsWithSpecialty = doctorsData.map(doctor => ({
+        ...doctor,
+        specialty: specialtyMap[doctor.specialty_id] || 'غير محدد'
+      }));
+      
       setSpecialties(specialtiesData);
-      setDoctors(doctorsData);
+      setDoctors(doctorsWithSpecialty);
     };
     
     loadData();
@@ -165,7 +178,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
               >
-                <DoctorCard doctor={doctor} />
+                <DoctorCard doctor={doctor} compact={true} />
               </motion.div>
             ))}
           </div>
