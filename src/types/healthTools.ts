@@ -1,4 +1,3 @@
-
 export interface HealthToolResult {
   score?: number;
   category: string;
@@ -71,6 +70,59 @@ export interface BreathingSession {
   duration: number;
   benefits: string[];
   instructions: string[];
+}
+
+export interface WaistResult {
+  waistToHeightRatio: number;
+  riskLevel: 'low' | 'moderate' | 'high' | 'very-high';
+  category: string;
+  recommendations: string[];
+  idealRange: { min: number; max: number };
+}
+
+export interface StepsCaloriesResult {
+  caloriesBurned: number;
+  distance: number;
+  activeMinutes: number;
+  recommendations: string[];
+  weeklyProgress: string[];
+}
+
+export interface BloodPressureRiskResult {
+  riskLevel: 'low' | 'moderate' | 'high' | 'very-high';
+  category: string;
+  recommendations: string[];
+  lifestyle: string[];
+  needsAttention: boolean;
+}
+
+export interface HealthyHabitsResult {
+  overallScore: number;
+  categories: {
+    nutrition: number;
+    exercise: number;
+    sleep: number;
+    stress: number;
+    social: number;
+  };
+  recommendations: string[];
+  priority: string[];
+}
+
+export interface PregnancySymptomsResult {
+  status: 'normal' | 'monitor' | 'urgent';
+  category: string;
+  recommendations: string[];
+  warningSign: boolean;
+  nextSteps: string[];
+}
+
+export interface MedicalSpecialtyResult {
+  recommendedSpecialty: string;
+  urgency: 'low' | 'moderate' | 'high' | 'emergency';
+  reasoning: string;
+  questionsForDoctor: string[];
+  firstAid?: string[];
 }
 
 export interface FormData {
