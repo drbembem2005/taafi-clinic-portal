@@ -29,53 +29,108 @@ export const calculateBMI = (
   let category = '';
   let recommendations: string[] = [];
 
-  if (bmi < 18.5) {
-    category = 'نحافة';
+  // More nuanced BMI categorization with age and gender considerations
+  let lowerNormal = 18.5;
+  let upperNormal = 24.9;
+  let upperOverweight = 29.9;
+
+  // Adjust ranges for age (older adults can have slightly higher healthy BMI)
+  if (age > 65) {
+    lowerNormal = 22;
+    upperNormal = 27;
+    upperOverweight = 32;
+  } else if (age > 45) {
+    upperNormal = 25.5;
+    upperOverweight = 30.5;
+  }
+
+  // Gender-specific adjustments
+  if (gender === 'female') {
+    upperNormal += 0.5; // Women can have slightly higher BMI in healthy range
+  }
+
+  // Activity level adjustments for muscle mass
+  if (activityLevel === 'veryActive' || activityLevel === 'active') {
+    upperNormal += 1; // Athletes may have higher BMI due to muscle mass
+    upperOverweight += 1;
+  }
+
+  if (bmi < lowerNormal) {
+    category = bmi < 16 ? 'نحافة شديدة' : bmi < 17 ? 'نحافة متوسطة' : 'نحافة خفيفة';
     recommendations = [
+      'استشر طبيباً أو أخصائي تغذية لزيادة الوزن بشكل صحي',
       'تناول وجبات غنية بالسعرات الحرارية الصحية',
-      'زد من كمية البروتين في غذائك',
+      'زد من كمية البروتين والدهون الصحية في غذائك',
       'مارس تمارين القوة لبناء العضلات',
-      'استشر أخصائي تغذية لزيادة الوزن بشكل صحي'
+      'تناول وجبات صغيرة متكررة على مدار اليوم',
+      'أضف المكسرات والفواكه المجففة لنظامك الغذائي'
     ];
-  } else if (bmi < 25) {
-    category = 'وزن طبيعي';
+  } else if (bmi <= upperNormal) {
+    if (bmi < 20) {
+      category = 'وزن طبيعي (على الحد الأدنى)';
+    } else if (bmi < 23) {
+      category = 'وزن طبيعي مثالي';
+    } else {
+      category = 'وزن طبيعي (على الحد الأعلى)';
+    }
+    
     recommendations = [
-      'حافظ على نمط حياة صحي',
+      'ممتاز! حافظ على نمط حياة صحي',
       'مارس الرياضة بانتظام 150 دقيقة أسبوعياً',
       'تناول غذاء متوازن غني بالخضروات والفواكه',
-      'احرص على النوم الكافي 7-8 ساعات يومياً'
+      'احرص على النوم الكافي 7-8 ساعات يومياً',
+      'حافظ على شرب الماء بكميات كافية',
+      'تجنب الأطعمة المصنعة والسكريات المضافة'
     ];
-  } else if (bmi < 30) {
-    category = 'زيادة في الوزن';
+  } else if (bmi <= upperOverweight) {
+    if (bmi < 27) {
+      category = 'زيادة وزن خفيفة';
+    } else if (bmi < 29) {
+      category = 'زيادة وزن متوسطة';
+    } else {
+      category = 'زيادة وزن تقترب من السمنة';
+    }
+    
     recommendations = [
+      'ينصح بإنقاص الوزن تدريجياً بمعدل 0.5-1 كجم أسبوعياً',
       'مارس الرياضة بانتظام 300 دقيقة أسبوعياً',
-      'قلل من السعرات الحرارية 500 سعرة يومياً',
-      'ركز على الخضروات والبروتين الخالي من الدهون',
-      'استشر أخصائي تغذية لإنقاص الوزن بشكل صحي'
+      'قلل من السعرات الحرارية 300-500 سعرة يومياً',
+      'ركز على البروتين الخالي من الدهون والخضروات',
+      'تجنب المشروبات السكرية والوجبات السريعة',
+      'استشر أخصائي تغذية لخطة غذائية مناسبة'
     ];
   } else {
-    category = 'سمنة';
+    if (bmi < 35) {
+      category = 'سمنة من الدرجة الأولى';
+    } else if (bmi < 40) {
+      category = 'سمنة من الدرجة الثانية';
+    } else {
+      category = 'سمنة مفرطة (الدرجة الثالثة)';
+    }
+    
     recommendations = [
-      'استشر طبيبك لتقييم حالتك الصحية',
-      'اتبع نظام غذائي محسوب السعرات مع أخصائي',
-      'ابدأ بتمارين خفيفة وزد التدريج',
-      'فكر في استشارة أخصائي تغذية أو مدرب شخصي'
+      'استشر طبيبك فوراً لتقييم حالتك الصحية الشاملة',
+      'احصل على خطة غذائية مخصصة من أخصائي تغذية',
+      'ابدأ بتمارين خفيفة تدريجياً تحت إشراف طبي',
+      'راقب ضغط الدم ومستوى السكر بانتظام',
+      'فكر في استشارة جراح السمنة إذا لزم الأمر',
+      'انضم لمجموعات الدعم لإنقاص الوزن'
     ];
   }
 
-  // Enhanced ideal weight calculation based on age and activity level
-  let idealWeightMin = 18.5 * (heightInMeters * heightInMeters);
-  let idealWeightMax = 24.9 * (heightInMeters * heightInMeters);
+  // Enhanced ideal weight calculation with more precision
+  let idealWeightMin = lowerNormal * (heightInMeters * heightInMeters);
+  let idealWeightMax = upperNormal * (heightInMeters * heightInMeters);
 
-  // Adjust for age (older adults can have slightly higher BMI)
-  if (age > 65) {
-    idealWeightMin = 22 * (heightInMeters * heightInMeters);
-    idealWeightMax = 27 * (heightInMeters * heightInMeters);
+  // Fine-tune based on gender and age
+  if (gender === 'male') {
+    idealWeightMin += 2;
+    idealWeightMax += 2;
   }
 
-  // Adjust for activity level (athletes may have higher BMI due to muscle mass)
-  if (activityLevel === 'veryActive' || activityLevel === 'active') {
-    idealWeightMax = 26 * (heightInMeters * heightInMeters);
+  if (age < 25) {
+    idealWeightMin -= 1;
+    idealWeightMax -= 1;
   }
 
   return {
