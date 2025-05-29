@@ -9,6 +9,7 @@ import NotFound from '@/pages/NotFound';
 import Specialties from '@/pages/Specialties';
 import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
+import HealthTools from '@/pages/HealthTools';
 import { Toaster } from '@/components/ui/toaster';
 import { Route, Routes } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -50,6 +51,7 @@ const App = () => {
           <Route path="/contact" element={<Layout><Contact /></Layout>} />
           <Route path="/blog" element={<Layout><Blog /></Layout>} />
           <Route path="/blog/:slug" element={<Layout><BlogPost /></Layout>} />
+          <Route path="/health-tools" element={<Layout><HealthTools /></Layout>} />
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
         <Toaster />

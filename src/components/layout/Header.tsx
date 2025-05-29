@@ -12,6 +12,7 @@ const Header = () => {
     { name: 'عن العيادة', path: '/about' },
     { name: 'التخصصات', path: '/specialties' },
     { name: 'الأطباء', path: '/doctors' },
+    { name: 'مساعد تعافي الذكية', path: '/health-tools' },
     { name: 'الحجز', path: '/booking' },
     { name: 'المدونة', path: '/blog' },
     { name: 'اتصل بنا', path: '/contact' },
