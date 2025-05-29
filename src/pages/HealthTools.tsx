@@ -209,7 +209,6 @@ const HealthTools = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Enhanced Hero Section */}
       <section className="bg-gradient-to-l from-brand/10 via-blue-50 to-indigo-100 py-16 md:py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%231373b4\" fill-opacity=\"0.05\"%3E%3Ccircle cx=\"30\" cy=\"30\" r=\"2\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-30"></div>
         <div className="container mx-auto px-4 text-center relative z-10">
@@ -244,7 +243,6 @@ const HealthTools = () => {
         </div>
       </section>
 
-      {/* Enhanced Category Filter */}
       <section className="py-8 bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-20 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-2 md:gap-3">
@@ -276,7 +274,6 @@ const HealthTools = () => {
         </div>
       </section>
 
-      {/* Enhanced Tools Grid */}
       <section className="py-12 md:py-20">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
@@ -315,7 +312,6 @@ const HealthTools = () => {
         </div>
       </section>
 
-      {/* Enhanced CTA Section */}
       <section className="py-20 bg-gradient-to-r from-brand/10 via-blue-50 to-indigo-100 relative">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"100\" height=\"100\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%231373b4\" fill-opacity=\"0.03\"%3E%3Cpath d=\"M50 50l25-25v50l-25-25z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
         <div className="container mx-auto px-4 text-center relative z-10">
@@ -340,7 +336,6 @@ const HealthTools = () => {
         </div>
       </section>
 
-      {/* Health Tools Manager */}
       <HealthToolsManager 
         activeToolId={activeToolId}
         onCloseTool={closeTool}
