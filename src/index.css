@@ -74,10 +74,64 @@
 
   body {
     @apply bg-background text-foreground font-cairo;
+    line-height: 1.7;
+    font-size: 16px;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-cairo font-bold;
+    line-height: 1.3;
+  }
+
+  /* Enhanced Arabic Typography */
+  [dir="rtl"] {
+    font-family: 'Cairo', 'Amiri', 'Noto Sans Arabic', 'Tahoma', sans-serif;
+    text-align: right;
+  }
+
+  [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4, [dir="rtl"] h5, [dir="rtl"] h6 {
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  [dir="rtl"] p {
+    line-height: 1.8;
+    word-spacing: 0.1em;
+  }
+
+  /* Medical Content Specific Styles */
+  .medical-content {
+    font-family: 'Cairo', sans-serif;
+  }
+
+  .medical-content p {
+    text-align: justify;
+    hyphens: auto;
+  }
+
+  .medical-content h2:not(:first-child) {
+    margin-top: 3rem;
+  }
+
+  .medical-content h3:not(:first-child) {
+    margin-top: 2.5rem;
+  }
+
+  /* Custom Medical Callouts */
+  .medical-content .warning {
+    @apply bg-amber-50 border-r-4 border-amber-400 p-6 my-6 rounded-lg;
+  }
+
+  .medical-content .info {
+    @apply bg-blue-50 border-r-4 border-blue-400 p-6 my-6 rounded-lg;
+  }
+
+  .medical-content .success {
+    @apply bg-green-50 border-r-4 border-green-400 p-6 my-6 rounded-lg;
+  }
+
+  .medical-content .danger {
+    @apply bg-red-50 border-r-4 border-red-400 p-6 my-6 rounded-lg;
   }
 }
 
@@ -129,4 +183,101 @@
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Enhanced Blog Content Styling */
+.blog-content-wrapper {
+  font-family: 'Cairo', sans-serif;
+}
+
+.blog-content-wrapper img {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.blog-content-wrapper img:hover {
+  transform: scale(1.02);
+}
+
+/* Print Styles for Blog Content */
+@media print {
+  .blog-content-wrapper {
+    font-size: 12pt;
+    line-height: 1.6;
+    color: black;
+  }
+  
+  .blog-content-wrapper h1 {
+    font-size: 20pt;
+    margin-bottom: 12pt;
+  }
+  
+  .blog-content-wrapper h2 {
+    font-size: 16pt;
+    margin-top: 16pt;
+    margin-bottom: 8pt;
+  }
+  
+  .blog-content-wrapper h3 {
+    font-size: 14pt;
+    margin-top: 12pt;
+    margin-bottom: 6pt;
+  }
+  
+  .blog-content-wrapper p {
+    margin-bottom: 8pt;
+  }
+  
+  .blog-content-wrapper blockquote {
+    border-left: 4px solid #ccc;
+    padding-left: 12pt;
+    margin: 12pt 0;
+    font-style: italic;
+  }
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus Styles for Accessibility */
+.blog-content-wrapper a:focus {
+  @apply outline-2 outline-offset-2 outline-brand;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .blog-content-wrapper {
+    font-size: 16px;
+  }
+  
+  .blog-content-wrapper h1 {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+  
+  .blog-content-wrapper h2 {
+    font-size: 1.75rem;
+    line-height: 1.3;
+  }
+  
+  .blog-content-wrapper h3 {
+    font-size: 1.5rem;
+    line-height: 1.4;
+  }
+  
+  .blog-content-wrapper p {
+    font-size: 1.125rem;
+    line-height: 1.7;
+  }
+  
+  .blog-content-wrapper table {
+    font-size: 0.875rem;
+  }
+  
+  .blog-content-wrapper blockquote {
+    padding: 1rem;
+    font-size: 1rem;
+  }
 }
