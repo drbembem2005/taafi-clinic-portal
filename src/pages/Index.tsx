@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import HeroCarousel from '@/components/shared/HeroCarousel';
 import SpecialtyCard from '@/components/shared/SpecialtyCard';
@@ -11,33 +12,47 @@ import { ArrowLeft, Star, Award } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { getSpecialties } from '@/services/specialtyService';
-import { getDoctors } from '@/services/doctorService';
+import { getDoctors, getDoctorSchedule } from '@/services/doctorService';
 
 const Index = () => {
   const [specialties, setSpecialties] = useState([]);
   const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
-      const [specialtiesData, doctorsData] = await Promise.all([
-        getSpecialties(6, true), // Get 6 random specialties
-        getDoctors(6, true) // Get 6 random doctors
-      ]);
-      
-      // Create a specialty lookup map for quick access
-      const specialtyMap = specialtiesData.reduce((map, specialty) => {
-        map[specialty.id] = specialty.name;
-        return map;
-      }, {});
-      
-      // Add specialty name to each doctor
-      const doctorsWithSpecialty = doctorsData.map(doctor => ({
-        ...doctor,
-        specialty: specialtyMap[doctor.specialty_id] || 'غير محدد'
-      }));
-      
-      setSpecialties(specialtiesData);
-      setDoctors(doctorsWithSpecialty);
+      try {
+        setLoading(true);
+        const [specialtiesData, doctorsData] = await Promise.all([
+          getSpecialties(6, true), // Get 6 random specialties
+          getDoctors(6, true) // Get 6 random doctors
+        ]);
+        
+        // Create a specialty lookup map for quick access
+        const specialtyMap = specialtiesData.reduce((map, specialty) => {
+          map[specialty.id] = specialty.name;
+          return map;
+        }, {});
+        
+        // Fetch schedule data for each doctor and format properly
+        const doctorsWithSpecialtyAndSchedule = await Promise.all(
+          doctorsData.map(async (doctor) => {
+            const schedule = await getDoctorSchedule(doctor.id);
+            return {
+              ...doctor,
+              specialty: specialtyMap[doctor.specialty_id] || 'غير محدد',
+              schedule: schedule || {}
+            };
+          })
+        );
+        
+        setSpecialties(specialtiesData);
+        setDoctors(doctorsWithSpecialtyAndSchedule);
+      } catch (error) {
+        console.error('Error loading homepage data:', error);
+      } finally {
+        setLoading(false);
+      }
     };
     
     loadData();
@@ -170,18 +185,28 @@ const Index = () => {
             <div className="w-24 h-1 bg-brand mx-auto mt-6 rounded-full"></div>
           </motion.div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
-            {doctors.map((doctor, index) => (
-              <motion.div
-                key={doctor.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-              >
-                <DoctorCard doctor={doctor} compact={true} />
-              </motion.div>
-            ))}
-          </div>
+          {loading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
+              {[...Array(6)].map((_, index) => (
+                <div key={index} className="animate-pulse">
+                  <div className="bg-gray-200 h-64 rounded-xl"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
+              {doctors.map((doctor, index) => (
+                <motion.div
+                  key={doctor.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                >
+                  <DoctorCard doctor={doctor} compact={true} />
+                </motion.div>
+              ))}
+            </div>
+          )}
           
           <div className="text-center">
             <Link to="/doctors">
