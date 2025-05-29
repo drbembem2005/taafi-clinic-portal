@@ -1,7 +1,7 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import HealthToolsManager from '@/components/health-tools/HealthToolsManager';
 import { 
   Heart, 
   Calculator, 
@@ -179,13 +179,22 @@ const categoryColors = {
 };
 
 const HealthTools = () => {
-  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [activeToolId, setActiveToolId] = useState<string | null>(null);
 
   const filteredTools = selectedCategory 
     ? healthTools.filter(tool => tool.category === selectedCategory)
     : healthTools;
 
   const categories = Object.keys(categoryNames) as Array<keyof typeof categoryNames>;
+
+  const openTool = (toolId: string) => {
+    setActiveToolId(toolId);
+  };
+
+  const closeTool = () => {
+    setActiveToolId(null);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -257,10 +266,7 @@ const HealthTools = () => {
                     </p>
                     <Button 
                       className="w-full bg-brand hover:bg-brand-dark text-white rounded-xl py-3 font-medium transition-all duration-300 group-hover:shadow-lg"
-                      onClick={() => {
-                        // TODO: Open tool modal or navigate to tool page
-                        console.log(`Opening tool: ${tool.id}`);
-                      }}
+                      onClick={() => openTool(tool.id)}
                     >
                       ابدأ الآن
                     </Button>
@@ -291,6 +297,12 @@ const HealthTools = () => {
           </div>
         </div>
       </section>
+
+      {/* Health Tools Manager */}
+      <HealthToolsManager 
+        activeToolId={activeToolId}
+        onCloseTool={closeTool}
+      />
     </div>
   );
 };
