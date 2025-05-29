@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getBlogPostBySlug, getBlogPosts, BlogPost } from '@/services/blogService';
@@ -62,8 +63,8 @@ const BlogPostPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-4xl mx-auto">
+        <div className="w-full px-4 py-8">
+          <div className="max-w-5xl mx-auto">
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <Skeleton className="h-6 w-32 mb-4" />
               <Skeleton className="h-16 w-full mb-6" />
@@ -111,39 +112,41 @@ const BlogPostPage = () => {
   const readingTime = Math.ceil(wordCount / 200);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <div className="container mx-auto px-4 py-4 md:py-8">
-        <div className="max-w-4xl mx-auto">
-          {/* Back Navigation */}
-          <div className="mb-4 md:mb-8">
-            <Link 
-              to="/blog" 
-              className="inline-flex items-center gap-2 text-brand hover:text-brand-dark transition-colors font-medium text-base md:text-lg group"
-            >
-              <ArrowRight size={18} className="md:w-5 md:h-5 transform rotate-180 group-hover:-translate-x-1 transition-transform" />
-              <span>العودة إلى المدونة</span>
-            </Link>
-          </div>
-          
-          {/* Main Article Card */}
-          <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+      {/* Hero Section with Background Pattern */}
+      <div className="relative bg-gradient-to-l from-brand/10 via-blue-50 to-indigo-100 border-b border-gray-100">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%231373b4" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40"></div>
+        
+        <div className="relative w-full px-4 py-6 md:py-12">
+          <div className="max-w-5xl mx-auto">
+            {/* Back Navigation */}
+            <div className="mb-6 md:mb-8">
+              <Link 
+                to="/blog" 
+                className="inline-flex items-center gap-2 text-brand hover:text-brand-dark transition-colors font-medium text-base md:text-lg group bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-white/50"
+              >
+                <ArrowRight size={18} className="md:w-5 md:h-5 transform rotate-180 group-hover:-translate-x-1 transition-transform" />
+                <span>العودة إلى المدونة</span>
+              </Link>
+            </div>
+            
             {/* Article Header */}
-            <header className="p-4 md:p-8 lg:p-12 border-b border-gray-100">
-              <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-8 leading-tight text-gray-900">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl md:rounded-3xl shadow-xl border border-white/50 p-6 md:p-10">
+              <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 leading-tight text-gray-900">
                 {post.title}
               </h1>
               
               {/* Meta Information */}
-              <div className="flex flex-wrap items-center gap-3 md:gap-6 text-gray-600 mb-4 md:mb-8">
-                <div className="flex items-center gap-2 md:gap-3 bg-gray-50 px-3 py-1.5 md:px-4 md:py-2 rounded-full text-sm md:text-base">
+              <div className="flex flex-wrap items-center gap-3 md:gap-4 text-gray-600 mb-6 md:mb-8">
+                <div className="flex items-center gap-2 bg-brand/10 px-4 py-2 rounded-full text-sm md:text-base border border-brand/20">
                   <Clock className="h-4 w-4 md:h-5 md:w-5 text-brand" />
                   <span className="font-medium">{readingTime} دقائق قراءة</span>
                 </div>
               </div>
 
               {/* Excerpt */}
-              <div className="bg-gradient-to-l from-blue-50 to-brand/5 p-4 md:p-6 rounded-xl md:rounded-2xl border-r-4 border-brand mb-4 md:mb-8">
-                <p className="text-base md:text-xl text-gray-700 leading-relaxed font-medium">
+              <div className="bg-gradient-to-l from-blue-50 to-brand/5 p-6 md:p-8 rounded-2xl border border-brand/10 mb-6 md:mb-8">
+                <p className="text-lg md:text-xl text-gray-700 leading-relaxed font-medium">
                   {post.excerpt}
                 </p>
               </div>
@@ -153,39 +156,44 @@ const BlogPostPage = () => {
                 <Button
                   variant="outline"
                   onClick={handleShare}
-                  className="flex items-center gap-2 md:gap-3 px-4 py-2 md:px-6 md:py-3 rounded-xl border-2 border-brand text-brand hover:bg-brand hover:text-white transition-all font-medium text-sm md:text-base"
+                  className="flex items-center gap-3 px-6 py-3 rounded-xl border-2 border-brand text-brand hover:bg-brand hover:text-white transition-all font-medium shadow-sm"
                 >
-                  <Share2 className="h-4 w-4 md:h-5 md:w-5" />
+                  <Share2 className="h-5 w-5" />
                   <span>مشاركة المقال</span>
                 </Button>
               </div>
-            </header>
-            
-            {/* Featured Image */}
-            {post.image && (
-              <div className="px-4 md:px-8 lg:px-12 pt-4 md:pt-8">
-                <div className="rounded-xl md:rounded-2xl overflow-hidden shadow-lg">
-                  <img 
-                    src={post.image} 
-                    alt={post.title} 
-                    className="w-full h-auto object-cover"
-                  />
-                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Main Content */}
+      <div className="w-full px-4 py-8 md:py-12">
+        <div className="max-w-5xl mx-auto">
+          {/* Featured Image */}
+          {post.image && (
+            <div className="mb-8 md:mb-12">
+              <div className="rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl">
+                <img 
+                  src={post.image} 
+                  alt={post.title} 
+                  className="w-full h-64 md:h-80 lg:h-96 object-cover"
+                />
               </div>
-            )}
-            
-            {/* Article Content */}
-            <article className="p-4 md:p-8 lg:p-12">
-              <BlogContent content={post.content} />
-            </article>
+            </div>
+          )}
+          
+          {/* Article Content */}
+          <div className="bg-white rounded-2xl md:rounded-3xl shadow-xl p-6 md:p-10 lg:p-12 mb-8 md:mb-16 border border-gray-100">
+            <BlogContent content={post.content} />
           </div>
           
           {/* Related Posts */}
           {relatedPosts.length > 0 && (
-            <section className="mt-8 md:mt-16">
+            <section>
               <div className="text-center mb-8 md:mb-12">
                 <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900">مقالات ذات صلة</h2>
-                <div className="w-24 h-1 bg-brand mx-auto rounded-full"></div>
+                <div className="w-24 h-1 bg-gradient-to-r from-brand to-brand-light mx-auto rounded-full"></div>
               </div>
               
               <div className="grid md:grid-cols-3 gap-6 md:gap-8">
