@@ -22,10 +22,10 @@ const Index = () => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [specialtiesData, doctorsData] = await Promise.all([
-          getSpecialties(6, true), // Get 6 random specialties
-          getDoctors(6, true) // Get 6 random doctors
-        ]);
+        
+        // First, get all specialties (not random) to ensure we have all data
+        const specialtiesData = await getSpecialties(); // Get ALL specialties
+        const doctorsData = await getDoctors(6, true); // Get 6 random doctors
         
         // Fetch schedule data for each doctor and format properly using the same method as Doctors page
         const doctorsWithSpecialtyAndSchedule = await Promise.all(
@@ -42,7 +42,10 @@ const Index = () => {
           })
         );
         
-        setSpecialties(specialtiesData);
+        // Get 6 random specialties for display
+        const randomSpecialties = await getSpecialties(6, true);
+        
+        setSpecialties(randomSpecialties);
         setDoctors(doctorsWithSpecialtyAndSchedule);
       } catch (error) {
         console.error('Error loading homepage data:', error);
