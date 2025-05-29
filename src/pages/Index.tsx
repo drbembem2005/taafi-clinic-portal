@@ -1,5 +1,3 @@
-
-
 import { useEffect, useState } from 'react';
 import HeroCarousel from '@/components/shared/HeroCarousel';
 import SpecialtyCard from '@/components/shared/SpecialtyCard';
@@ -29,38 +27,20 @@ const Index = () => {
           getDoctors(6, true) // Get 6 random doctors
         ]);
         
-        console.log('Specialties data:', specialtiesData);
-        console.log('Doctors data:', doctorsData);
-        
-        // Create a specialty lookup map for quick access
-        const specialtyMap = specialtiesData.reduce((map, specialty) => {
-          map[specialty.id] = specialty.name;
-          return map;
-        }, {});
-        
-        console.log('Specialty map:', specialtyMap);
-        
-        // Fetch schedule data for each doctor and format properly
+        // Fetch schedule data for each doctor and format properly using the same method as Doctors page
         const doctorsWithSpecialtyAndSchedule = await Promise.all(
           doctorsData.map(async (doctor) => {
             const schedule = await getDoctorSchedule(doctor.id);
-            const specialtyName = specialtyMap[doctor.specialty_id];
-            
-            console.log(`Doctor ${doctor.name} (ID: ${doctor.id}):`, {
-              specialty_id: doctor.specialty_id,
-              specialtyName: specialtyName,
-              foundInMap: !!specialtyName
-            });
+            // Use the same specialty finding logic as in Doctors.tsx
+            const specialty = specialtiesData.find(s => s.id === doctor.specialty_id);
             
             return {
               ...doctor,
-              specialty: specialtyName || 'غير محدد',
+              specialty: specialty?.name || 'تخصص غير محدد',
               schedule: schedule || {}
             };
           })
         );
-        
-        console.log('Final doctors with specialty and schedule:', doctorsWithSpecialtyAndSchedule);
         
         setSpecialties(specialtiesData);
         setDoctors(doctorsWithSpecialtyAndSchedule);
@@ -275,4 +255,3 @@ const Index = () => {
 };
 
 export default Index;
-
