@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +17,9 @@ import {
   Zap,
   Users,
   Sparkles,
-  TrendingUp
+  TrendingUp,
+  ArrowRight,
+  ArrowLeft
 } from 'lucide-react';
 
 interface HealthTool {
@@ -27,6 +28,15 @@ interface HealthTool {
   description: string;
   icon: React.ComponentType<any>;
   category: 'calculation' | 'assessment' | 'mental' | 'pregnancy' | 'guidance';
+}
+
+interface HealthCategory {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ComponentType<any>;
+  color: string;
+  toolsCount: number;
 }
 
 const healthTools: HealthTool[] = [
@@ -165,39 +175,60 @@ const healthTools: HealthTool[] = [
   }
 ];
 
-const categoryNames = {
-  calculation: 'الحاسبات الطبية',
-  assessment: 'تقييم المخاطر الصحية',
-  mental: 'الصحة النفسية والاسترخاء',
-  pregnancy: 'صحة الحمل والإنجاب',
-  guidance: 'التوجيه الطبي'
-};
-
-const categoryColors = {
-  calculation: 'from-blue-500 to-cyan-500',
-  assessment: 'from-red-500 to-pink-500',
-  mental: 'from-purple-500 to-indigo-500',
-  pregnancy: 'from-pink-500 to-rose-500',
-  guidance: 'from-green-500 to-emerald-500'
-};
-
-const categoryIcons = {
-  calculation: Calculator,
-  assessment: Target,
-  mental: Brain,
-  pregnancy: Baby,
-  guidance: Stethoscope
-};
+const healthCategories: HealthCategory[] = [
+  {
+    id: 'calculation',
+    name: 'الحاسبات الطبية',
+    description: 'احسب مؤشراتك الصحية الأساسية مثل كتلة الجسم والسعرات الحرارية ومعدل النبض',
+    icon: Calculator,
+    color: 'from-blue-500 to-cyan-500',
+    toolsCount: healthTools.filter(t => t.category === 'calculation').length
+  },
+  {
+    id: 'assessment',
+    name: 'تقييم المخاطر الصحية',
+    description: 'اكتشف مخاطر الإصابة بالأمراض الشائعة مثل السكري وضغط الدم وتسوس الأسنان',
+    icon: Target,
+    color: 'from-red-500 to-pink-500',
+    toolsCount: healthTools.filter(t => t.category === 'assessment').length
+  },
+  {
+    id: 'mental',
+    name: 'الصحة النفسية والاسترخاء',
+    description: 'تقييم حالتك النفسية وتعلم تقنيات الاسترخاء والتنفس العميق لتحسين صحتك النفسية',
+    icon: Brain,
+    color: 'from-purple-500 to-indigo-500',
+    toolsCount: healthTools.filter(t => t.category === 'mental').length
+  },
+  {
+    id: 'pregnancy',
+    name: 'صحة الحمل والإنجاب',
+    description: 'أدوات متخصصة للحوامل لحساب موعد الولادة والتبويض ومتابعة أعراض الحمل',
+    icon: Baby,
+    color: 'from-pink-500 to-rose-500',
+    toolsCount: healthTools.filter(t => t.category === 'pregnancy').length
+  },
+  {
+    id: 'guidance',
+    name: 'التوجيه الطبي',
+    description: 'احصل على إرشادات طبية ذكية لاختيار التخصص المناسب وتقييم حاجتك لزيارة الطبيب',
+    icon: Stethoscope,
+    color: 'from-green-500 to-emerald-500',
+    toolsCount: healthTools.filter(t => t.category === 'guidance').length
+  }
+];
 
 const HealthTools = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeToolId, setActiveToolId] = useState<string | null>(null);
 
+  const selectedCategoryData = selectedCategory 
+    ? healthCategories.find(cat => cat.id === selectedCategory)
+    : null;
+
   const filteredTools = selectedCategory 
     ? healthTools.filter(tool => tool.category === selectedCategory)
-    : healthTools;
-
-  const categories = Object.keys(categoryNames) as Array<keyof typeof categoryNames>;
+    : [];
 
   const openTool = (toolId: string) => {
     setActiveToolId(toolId);
@@ -207,9 +238,13 @@ const HealthTools = () => {
     setActiveToolId(null);
   };
 
+  const goBackToCategories = () => {
+    setSelectedCategory(null);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      {/* Compact Header */}
+      {/* Header */}
       <section className="bg-gradient-to-l from-brand/10 via-blue-50 to-indigo-100 py-8 md:py-12 relative overflow-hidden">
         <div className="container mx-auto px-4 text-center relative z-10">
           <div className="max-w-4xl mx-auto">
@@ -221,12 +256,14 @@ const HealthTools = () => {
               <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-brand animate-pulse" />
             </div>
             <p className="text-sm md:text-base lg:text-lg text-gray-600 leading-relaxed mb-6">
-              استكشف مجموعة شاملة من الأدوات الصحية التفاعلية. 
-              احسب مؤشراتك الصحية، قيّم مخاطرك الطبية، واحصل على توجيهات صحية مخصصة
+              {selectedCategory 
+                ? `اختر الأداة المناسبة من فئة ${selectedCategoryData?.name}`
+                : 'اختر الفئة التي تحتاجها من الأدوات الصحية المتخصصة'
+              }
             </p>
             <div className="flex flex-wrap justify-center gap-2 text-xs md:text-sm">
               <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-brand font-medium shadow-md border border-white/20">
-                ✅ 19 أداة متطورة
+                ✅ {healthTools.length} أداة متطورة
               </span>
               <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-brand font-medium shadow-md border border-white/20">
                 🔒 آمن وسري 100%
@@ -239,78 +276,112 @@ const HealthTools = () => {
         </div>
       </section>
 
-      {/* Fixed Category Navigation */}
-      <section className="py-4 bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-20 shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex overflow-x-auto gap-2 scrollbar-hide pb-2">
+      {/* Back Button */}
+      {selectedCategory && (
+        <section className="py-4 bg-white/95 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-20 shadow-sm">
+          <div className="container mx-auto px-4">
             <Button
-              variant={selectedCategory === null ? "default" : "outline"}
-              onClick={() => setSelectedCategory(null)}
-              className="rounded-full px-3 py-2 font-medium shadow-md hover:shadow-lg transition-all duration-300 border-2 whitespace-nowrap flex-shrink-0"
+              variant="outline"
+              onClick={goBackToCategories}
+              className="rounded-full px-4 py-2 font-medium shadow-md hover:shadow-lg transition-all duration-300 border-2"
               size="sm"
             >
-              <Calculator className="ml-1 h-3 w-3" />
-              <span className="text-xs">الكل ({healthTools.length})</span>
+              <ArrowRight className="ml-2 h-4 w-4" />
+              العودة للفئات
             </Button>
-            {categories.map((category) => {
-              const IconComponent = categoryIcons[category];
-              return (
-                <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
-                  onClick={() => setSelectedCategory(category)}
-                  className="rounded-full px-3 py-2 font-medium shadow-md hover:shadow-lg transition-all duration-300 border-2 whitespace-nowrap flex-shrink-0"
-                  size="sm"
-                >
-                  <IconComponent className="ml-1 h-3 w-3" />
-                  <span className="text-xs">{categoryNames[category]} ({healthTools.filter(t => t.category === category).length})</span>
-                </Button>
-              );
-            })}
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Compact Tools Grid */}
-      <section className="py-6 md:py-8">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredTools.map((tool) => {
-              const IconComponent = tool.icon;
-              return (
-                <Card 
-                  key={tool.id} 
-                  className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border-0 shadow-md rounded-2xl bg-white/95 backdrop-blur-sm relative"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-brand/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <CardHeader className="pb-3 pt-4 relative z-10">
-                    <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br ${categoryColors[tool.category]} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 shadow-lg mx-auto`}>
-                      <IconComponent className="h-6 w-6 md:h-7 md:w-7 text-white" />
-                    </div>
-                    <CardTitle className="text-base md:text-lg font-bold text-gray-900 leading-tight text-center min-h-[2.5rem] flex items-center justify-center px-2">
-                      {tool.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0 relative z-10 px-4 pb-4">
-                    <p className="text-gray-600 leading-relaxed mb-4 text-sm text-center min-h-[3rem] flex items-center justify-center">
-                      {tool.description}
-                    </p>
-                    <Button 
-                      className="w-full bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white rounded-xl py-2.5 font-bold transition-all duration-300 group-hover:shadow-lg transform group-hover:scale-105 text-sm shadow-md"
-                      onClick={() => openTool(tool.id)}
-                    >
-                      <Zap className="ml-2 h-4 w-4" />
-                      ابدأ الآن
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
+      {/* Categories View */}
+      {!selectedCategory && (
+        <section className="py-8 md:py-12">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {healthCategories.map((category) => {
+                const IconComponent = category.icon;
+                return (
+                  <Card 
+                    key={category.id} 
+                    className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border-0 shadow-md rounded-2xl bg-white/95 backdrop-blur-sm relative cursor-pointer"
+                    onClick={() => setSelectedCategory(category.id)}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-brand/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <CardHeader className="pb-4 pt-6 relative z-10">
+                      <div className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg mx-auto`}>
+                        <IconComponent className="h-8 w-8 md:h-10 md:w-10 text-white" />
+                      </div>
+                      <CardTitle className="text-xl md:text-2xl font-bold text-gray-900 leading-tight text-center min-h-[3rem] flex items-center justify-center">
+                        {category.name}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0 relative z-10 px-6 pb-6">
+                      <p className="text-gray-600 leading-relaxed mb-6 text-center min-h-[4rem] text-sm md:text-base">
+                        {category.description}
+                      </p>
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-brand font-bold text-lg">
+                          {category.toolsCount} أداة
+                        </span>
+                        <ArrowLeft className="h-5 w-5 text-brand group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <Button 
+                        className="w-full bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white rounded-xl py-3 font-bold transition-all duration-300 group-hover:shadow-lg transform group-hover:scale-105 shadow-md"
+                      >
+                        <Zap className="ml-2 h-4 w-4" />
+                        استكشف الأدوات
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* Compact CTA Section */}
+      {/* Tools View */}
+      {selectedCategory && (
+        <section className="py-6 md:py-8">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredTools.map((tool) => {
+                const IconComponent = tool.icon;
+                return (
+                  <Card 
+                    key={tool.id} 
+                    className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border-0 shadow-md rounded-2xl bg-white/95 backdrop-blur-sm relative"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-brand/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <CardHeader className="pb-3 pt-4 relative z-10">
+                      <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl bg-gradient-to-br ${selectedCategoryData?.color} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 shadow-lg mx-auto`}>
+                        <IconComponent className="h-6 w-6 md:h-7 md:w-7 text-white" />
+                      </div>
+                      <CardTitle className="text-base md:text-lg font-bold text-gray-900 leading-tight text-center min-h-[2.5rem] flex items-center justify-center px-2">
+                        {tool.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0 relative z-10 px-4 pb-4">
+                      <p className="text-gray-600 leading-relaxed mb-4 text-sm text-center min-h-[3rem] flex items-center justify-center">
+                        {tool.description}
+                      </p>
+                      <Button 
+                        className="w-full bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white rounded-xl py-2.5 font-bold transition-all duration-300 group-hover:shadow-lg transform group-hover:scale-105 text-sm shadow-md"
+                        onClick={() => openTool(tool.id)}
+                      >
+                        <Zap className="ml-2 h-4 w-4" />
+                        ابدأ الآن
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* CTA Section */}
       <section className="py-12 bg-gradient-to-r from-brand/10 via-blue-50 to-indigo-100">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto">
