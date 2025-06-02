@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -161,6 +160,27 @@ const healthTools: HealthTool[] = [
     icon: Bone,
     category: 'assessment'
   },
+  {
+    id: 'eye-health-assessment',
+    title: 'تقييم صحة العين والرؤية',
+    description: 'تقييم أولي لصحة عينيك ومخاطر مشاكل الرؤية',
+    icon: Eye,
+    category: 'assessment'
+  },
+  {
+    id: 'heart-disease-risk',
+    title: 'تقييم خطر أمراض القلب',
+    description: 'تقييم مخاطر الإصابة بأمراض القلب والشرايين',
+    icon: Heart,
+    category: 'assessment'
+  },
+  {
+    id: 'insulin-resistance-test',
+    title: 'تقييم مقاومة الأنسولين',
+    description: 'تقييم مخاطر الإصابة بمقاومة الأنسولين والسكري المبكر',
+    icon: Activity,
+    category: 'assessment'
+  },
 
   // Mental Health & Relaxation
   {
@@ -189,6 +209,13 @@ const healthTools: HealthTool[] = [
     title: 'تقييم جودة النوم',
     description: 'تحليل شامل لجودة نومك ونصائح للتحسين والراحة',
     icon: Moon,
+    category: 'mental'
+  },
+  {
+    id: 'emotional-intelligence-test',
+    title: 'اختبار الذكاء العاطفي',
+    description: 'تقييم مهاراتك في فهم وإدارة المشاعر والتفاعل الاجتماعي',
+    icon: Brain,
     category: 'mental'
   },
 

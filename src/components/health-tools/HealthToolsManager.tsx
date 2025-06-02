@@ -25,6 +25,10 @@ import VitaminDCalculator from './VitaminDCalculator';
 import OsteoporosisRisk from './OsteoporosisRisk';
 import SleepQuality from './SleepQuality';
 import MuscleMassCalculator from './MuscleMassCalculator';
+import EyeHealthAssessment from './EyeHealthAssessment';
+import HeartDiseaseRisk from './HeartDiseaseRisk';
+import InsulinResistanceTest from './InsulinResistanceTest';
+import EmotionalIntelligenceTest from './EmotionalIntelligenceTest';
 
 const toolComponents: { [key: string]: React.ComponentType } = {
   'bmi-calculator': BMICalculator,
@@ -54,6 +58,10 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'osteoporosis-risk': OsteoporosisRisk,
   'sleep-quality': SleepQuality,
   'muscle-mass-calculator': MuscleMassCalculator,
+  'eye-health-assessment': EyeHealthAssessment,
+  'heart-disease-risk': HeartDiseaseRisk,
+  'insulin-resistance-test': InsulinResistanceTest,
+  'emotional-intelligence-test': EmotionalIntelligenceTest,
 };
 
 const toolTitles: { [key: string]: string } = {
@@ -84,6 +92,10 @@ const toolTitles: { [key: string]: string } = {
   'osteoporosis-risk': 'تقييم خطر هشاشة العظام',
   'sleep-quality': 'تقييم جودة النوم',
   'muscle-mass-calculator': 'حاسبة مؤشر الكتلة العضلية',
+  'eye-health-assessment': 'تقييم صحة العين والرؤية',
+  'heart-disease-risk': 'تقييم خطر أمراض القلب',
+  'insulin-resistance-test': 'تقييم مقاومة الأنسولين',
+  'emotional-intelligence-test': 'اختبار الذكاء العاطفي',
 };
 
 interface HealthToolsManagerProps {
