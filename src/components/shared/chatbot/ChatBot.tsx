@@ -24,7 +24,7 @@ const ChatBot = () => {
     if (isOpen && messages.length === 0) {
       const welcomeMessage: Message = {
         id: 1,
-        text: 'مرحباً بك في عيادات تعافي التخصصية! 👋\nأنا مساعدك الذكي، سأساعدك في حجز موعد أو الإجابة على استفساراتك.',
+        text: 'مرحباً بك في عيادات تعافي التخصصية! 👋\nأنا مساعدك الذكي، سأساعدك في:\n• حجز المواعيد\n• توجيهك للأدوات الصحية المناسبة\n• الإجابة على استفساراتك الطبية\n\nجرب أن تسألني عن أي عرض أو حالة صحية!',
         sender: 'bot',
         timestamp: new Date(),
         type: 'welcome'
@@ -46,14 +46,25 @@ const ChatBot = () => {
     }
   }, [isOpen, messages.length]);
 
-  // Listen for close chatbot event
+  // Listen for tool launch events
   useEffect(() => {
+    const handleToolLaunch = (event: CustomEvent) => {
+      const { toolId } = event.detail;
+      // Navigate to health tools page with the specific tool
+      window.location.href = `/health-tools?tool=${toolId}`;
+    };
+
     const handleCloseChatbot = () => {
       setIsOpen(false);
     };
 
+    window.addEventListener('launchHealthTool', handleToolLaunch as EventListener);
     window.addEventListener('closeChatbot', handleCloseChatbot);
-    return () => window.removeEventListener('closeChatbot', handleCloseChatbot);
+    
+    return () => {
+      window.removeEventListener('launchHealthTool', handleToolLaunch as EventListener);
+      window.removeEventListener('closeChatbot', handleCloseChatbot);
+    };
   }, []);
 
   const addMessage = (message: Omit<Message, 'id' | 'timestamp'>) => {
@@ -71,8 +82,8 @@ const ChatBot = () => {
     setIsLoading(true);
 
     try {
-      // Get response from chatbot service
-      const response = await chatbotService.handleAction('main');
+      // Get response from chatbot service using the new handleMessage method
+      const response = await chatbotService.handleMessage(text);
       setTimeout(() => {
         addMessage(response);
         setIsLoading(false);
@@ -96,10 +107,11 @@ const ChatBot = () => {
     const actionMap: { [key: string]: string } = {
       'القائمة الرئيسية': 'main',
       'حجز موعد': 'booking',
-      'حجز': 'booking'
+      'حجز': 'booking',
+      'الأدوات الصحية': 'health-tools'
     };
 
-    const mappedAction = actionMap[action] || 'main';
+    const mappedAction = actionMap[action] || action;
     
     addMessage({
       text: action,
@@ -118,6 +130,8 @@ const ChatBot = () => {
           setChatState('booking');
         } else if (mappedAction === 'main') {
           setChatState('main-menu');
+        } else if (mappedAction === 'health-tools') {
+          setChatState('health-tools');
         }
       }, 800);
     } catch (error) {
