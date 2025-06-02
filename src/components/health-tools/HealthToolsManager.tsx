@@ -29,6 +29,11 @@ import EyeHealthAssessment from './EyeHealthAssessment';
 import HeartDiseaseRisk from './HeartDiseaseRisk';
 import InsulinResistanceTest from './InsulinResistanceTest';
 import EmotionalIntelligenceTest from './EmotionalIntelligenceTest';
+import StressTest from './StressTest';
+import MeditationTimer from './MeditationTimer';
+import ConfidenceTest from './ConfidenceTest';
+import WorkLifeBalance from './WorkLifeBalance';
+import PersonalityTest from './PersonalityTest';
 
 const toolComponents: { [key: string]: React.ComponentType } = {
   'bmi-calculator': BMICalculator,
@@ -62,6 +67,13 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'heart-disease-risk': HeartDiseaseRisk,
   'insulin-resistance-test': InsulinResistanceTest,
   'emotional-intelligence-test': EmotionalIntelligenceTest,
+  
+  // أدوات الصحة النفسية الجديدة
+  'stress-test': StressTest,
+  'meditation-timer': MeditationTimer,
+  'confidence-test': ConfidenceTest,
+  'work-life-balance': WorkLifeBalance,
+  'personality-test': PersonalityTest,
 };
 
 const toolTitles: { [key: string]: string } = {
@@ -96,6 +108,13 @@ const toolTitles: { [key: string]: string } = {
   'heart-disease-risk': 'تقييم خطر أمراض القلب',
   'insulin-resistance-test': 'تقييم مقاومة الأنسولين',
   'emotional-intelligence-test': 'اختبار الذكاء العاطفي',
+  
+  // العناوين الجديدة
+  'stress-test': 'اختبار الضغط النفسي والتوتر',
+  'meditation-timer': 'مؤقت التأمل المرشد',
+  'confidence-test': 'اختبار الثقة بالنفس',
+  'work-life-balance': 'حاسبة التوازن بين العمل والحياة',
+  'personality-test': 'اختبار أنماط الشخصية',
 };
 
 interface HealthToolsManagerProps {

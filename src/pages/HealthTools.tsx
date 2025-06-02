@@ -24,7 +24,10 @@ import {
   Calendar,
   Moon,
   Dumbbell,
-  Bone
+  Bone,
+  AlertTriangle,
+  Trophy,
+  User
 } from 'lucide-react';
 
 interface HealthTool {
@@ -182,7 +185,7 @@ const healthTools: HealthTool[] = [
     category: 'assessment'
   },
 
-  // Mental Health & Relaxation
+  // Mental Health & Relaxation - الأدوات الجديدة
   {
     id: 'anxiety-test',
     title: 'اختبار القلق (مبسط)',
@@ -216,6 +219,41 @@ const healthTools: HealthTool[] = [
     title: 'اختبار الذكاء العاطفي',
     description: 'تقييم مهاراتك في فهم وإدارة المشاعر والتفاعل الاجتماعي',
     icon: Brain,
+    category: 'mental'
+  },
+  {
+    id: 'stress-test',
+    title: 'اختبار الضغط النفسي والتوتر',
+    description: 'تقييم مستوى التوتر اليومي مع استراتيجيات التعامل المتقدمة',
+    icon: AlertTriangle,
+    category: 'mental'
+  },
+  {
+    id: 'meditation-timer',
+    title: 'مؤقت التأمل المرشد',
+    description: 'جلسات تأمل بأوقات مختلفة مع إرشادات وتقنيات متنوعة',
+    icon: Timer,
+    category: 'mental'
+  },
+  {
+    id: 'confidence-test',
+    title: 'اختبار الثقة بالنفس',
+    description: 'تقييم مستوى ثقتك بنفسك مع خطة شخصية للتطوير',
+    icon: Trophy,
+    category: 'mental'
+  },
+  {
+    id: 'work-life-balance',
+    title: 'حاسبة التوازن بين العمل والحياة',
+    description: 'تقييم التوازن في حياتك المهنية والشخصية مع خطة للتحسين',
+    icon: Scale,
+    category: 'mental'
+  },
+  {
+    id: 'personality-test',
+    title: 'اختبار أنماط الشخصية',
+    description: 'اكتشف نمط شخصيتك وفهم طريقة تفكيرك وتفاعلك مع العالم',
+    icon: User,
     category: 'mental'
   },
 
@@ -286,7 +324,7 @@ const healthCategories: HealthCategory[] = [
   {
     id: 'mental',
     name: 'الصحة النفسية والاسترخاء',
-    description: 'تقييم حالتك النفسية وجودة النوم وتعلم تقنيات الاسترخاء والتنفس العميق لتحسين صحتك النفسية',
+    description: 'تقييم حالتك النفسية وجودة النوم وتعلم تقنيات الاسترخاء والتأمل والتوازن في الحياة',
     icon: Brain,
     color: 'from-purple-500 to-indigo-500',
     toolsCount: healthTools.filter(t => t.category === 'mental').length
