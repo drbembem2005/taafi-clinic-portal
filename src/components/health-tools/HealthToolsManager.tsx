@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import HealthToolModal from './HealthToolModal';
 import BMICalculator from './BMICalculator';
@@ -19,6 +18,10 @@ import DentalVisitAssessment from './DentalVisitAssessment';
 import BloodPressureRiskTest from './BloodPressureRiskTest';
 import HealthyHabitsAssessment from './HealthyHabitsAssessment';
 import PregnancySymptomsChecker from './PregnancySymptomsChecker';
+import BiologicalAgeCalculator from './BiologicalAgeCalculator';
+import MaleFertilityCalculator from './MaleFertilityCalculator';
+import MetabolismCalculator from './MetabolismCalculator';
+import VitaminDCalculator from './VitaminDCalculator';
 
 const toolComponents: { [key: string]: React.ComponentType } = {
   'bmi-calculator': BMICalculator,
@@ -39,7 +42,12 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'healthy-habits': HealthyHabitsAssessment,
   'pregnancy-symptoms': PregnancySymptomsChecker,
   'medical-specialty-guide': MedicalSpecialtyGuide,
-  'specialty-finder': MedicalSpecialtyGuide, // Using same component for both
+  'specialty-finder': MedicalSpecialtyGuide,
+  
+  'biological-age': BiologicalAgeCalculator,
+  'male-fertility': MaleFertilityCalculator,
+  'metabolism-calculator': MetabolismCalculator,
+  'vitamin-d-calculator': VitaminDCalculator,
 };
 
 const toolTitles: { [key: string]: string } = {
@@ -62,6 +70,11 @@ const toolTitles: { [key: string]: string } = {
   'pregnancy-symptoms': 'فاحص أعراض الحمل',
   'medical-specialty-guide': 'مرشد التخصصات الطبية',
   'specialty-finder': 'باحث التخصصات الطبية',
+  
+  'biological-age': 'حاسبة العمر البيولوجي',
+  'male-fertility': 'حاسبة مؤشر الخصوبة للرجال',
+  'metabolism-calculator': 'حاسبة الأيض والحرق',
+  'vitamin-d-calculator': 'حاسبة فيتامين د المطلوب',
 };
 
 interface HealthToolsManagerProps {

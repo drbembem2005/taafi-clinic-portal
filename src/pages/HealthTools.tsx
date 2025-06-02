@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,9 @@ import {
   Sparkles,
   TrendingUp,
   ArrowRight,
-  ArrowLeft
+  ArrowLeft,
+  Sun,
+  Calendar
 } from 'lucide-react';
 
 interface HealthTool {
@@ -40,6 +43,7 @@ interface HealthCategory {
 }
 
 const healthTools: HealthTool[] = [
+  // Medical Calculators
   {
     id: 'bmi-calculator',
     title: 'حاسبة كتلة الجسم (BMI)',
@@ -83,6 +87,36 @@ const healthTools: HealthTool[] = [
     category: 'calculation'
   },
   {
+    id: 'biological-age',
+    title: 'حاسبة العمر البيولوجي',
+    description: 'اكتشف عمرك الحقيقي بناءً على نمط حياتك وعاداتك الصحية',
+    icon: Calendar,
+    category: 'calculation'
+  },
+  {
+    id: 'male-fertility',
+    title: 'حاسبة مؤشر الخصوبة للرجال',
+    description: 'تقييم عوامل نمط الحياة المؤثرة على صحة الحيوانات المنوية',
+    icon: Users,
+    category: 'calculation'
+  },
+  {
+    id: 'metabolism-calculator',
+    title: 'حاسبة الأيض والحرق',
+    description: 'احسب معدل الأيض الأساسي وسرعة حرق السعرات الحرارية',
+    icon: Zap,
+    category: 'calculation'
+  },
+  {
+    id: 'vitamin-d-calculator',
+    title: 'حاسبة فيتامين د المطلوب',
+    description: 'احسب احتياجك من فيتامين د بناءً على التعرض للشمس ونمط الحياة',
+    icon: Sun,
+    category: 'calculation'
+  },
+
+  // Health Risk Assessments
+  {
     id: 'diabetes-risk',
     title: 'اختبار خطر السكري من النوع الثاني',
     description: 'تقييم شامل لمخاطر الإصابة بمرض السكري مع خطة وقائية',
@@ -110,13 +144,8 @@ const healthTools: HealthTool[] = [
     icon: Eye,
     category: 'assessment'
   },
-  {
-    id: 'dental-visit-needed',
-    title: 'هل تحتاج لزيارة طبيب الأسنان؟',
-    description: 'اكتشف إذا كانت أعراضك تستدعي زيارة فورية للطبيب مع إرشادات الإسعاف',
-    icon: Stethoscope,
-    category: 'guidance'
-  },
+
+  // Mental Health & Relaxation
   {
     id: 'anxiety-test',
     title: 'اختبار القلق (مبسط)',
@@ -138,6 +167,8 @@ const healthTools: HealthTool[] = [
     icon: Timer,
     category: 'mental'
   },
+
+  // Pregnancy & Reproductive Health
   {
     id: 'pregnancy-calculator',
     title: 'حاسبة الحمل / موعد الولادة',
@@ -159,6 +190,15 @@ const healthTools: HealthTool[] = [
     icon: Baby,
     category: 'pregnancy'
   },
+
+  // Medical Guidance
+  {
+    id: 'dental-visit-needed',
+    title: 'هل تحتاج لزيارة طبيب الأسنان؟',
+    description: 'اكتشف إذا كانت أعراضك تستدعي زيارة فورية للطبيب مع إرشادات الإسعاف',
+    icon: Stethoscope,
+    category: 'guidance'
+  },
   {
     id: 'medical-specialty-guide',
     title: 'هل تحتاج زيارة طبيب باطنة أم تخصص آخر؟',
@@ -179,7 +219,7 @@ const healthCategories: HealthCategory[] = [
   {
     id: 'calculation',
     name: 'الحاسبات الطبية',
-    description: 'احسب مؤشراتك الصحية الأساسية مثل كتلة الجسم والسعرات الحرارية ومعدل النبض',
+    description: 'احسب مؤشراتك الصحية الأساسية مثل كتلة الجسم والسعرات الحرارية ومعدل النبض والعمر البيولوجي',
     icon: Calculator,
     color: 'from-blue-500 to-cyan-500',
     toolsCount: healthTools.filter(t => t.category === 'calculation').length
@@ -203,7 +243,7 @@ const healthCategories: HealthCategory[] = [
   {
     id: 'pregnancy',
     name: 'صحة الحمل والإنجاب',
-    description: 'أدوات متخصصة للحوامل لحساب موعد الولادة والتبويض ومتابعة أعراض الحمل',
+    description: 'أدوات متخصصة للحوامل لحساب موعد الولادة والتبويض ومتابعة أعراض الحمل والخصوبة',
     icon: Baby,
     color: 'from-pink-500 to-rose-500',
     toolsCount: healthTools.filter(t => t.category === 'pregnancy').length
