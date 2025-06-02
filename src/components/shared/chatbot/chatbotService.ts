@@ -1,9 +1,24 @@
+
 import { getDoctors, getDoctorsBySpecialtyId } from '@/services/doctorService';
 import { getSpecialties } from '@/services/specialtyService';
 import { Message, ActionLink, QuickOption } from './types';
 import { healthToolsData, healthCategories } from '@/data/healthToolsData';
+import { Calculator, Target, Brain, Baby, Stethoscope } from 'lucide-react';
 
 class ChatbotService {
+  // Helper function to get emoji for icon components
+  private getIconEmoji(IconComponent: any): string {
+    const iconMap = new Map([
+      [Calculator, '🧮'],
+      [Target, '🎯'],
+      [Brain, '🧠'],
+      [Baby, '👶'],
+      [Stethoscope, '🩺']
+    ]);
+    
+    return iconMap.get(IconComponent) || '🔧';
+  }
+
   async handleMessage(message: string): Promise<Omit<Message, 'id' | 'timestamp'>> {
     const lowercaseMessage = message.toLowerCase();
     
@@ -202,7 +217,7 @@ class ChatbotService {
         options: [
           ...healthCategories.map(cat => ({ 
             id: cat.id, 
-            text: `${cat.icon === 'Calculator' ? '🧮' : cat.icon === 'Target' ? '🎯' : cat.icon === 'Brain' ? '🧠' : cat.icon === 'Baby' ? '👶' : '🩺'} ${cat.name}`, 
+            text: `${this.getIconEmoji(cat.icon)} ${cat.name}`, 
             action: `category-${cat.id}` 
           })),
           { id: 'main', text: '← القائمة الرئيسية', action: 'main' }
