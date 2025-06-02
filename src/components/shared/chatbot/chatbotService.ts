@@ -101,10 +101,13 @@ class ChatbotService {
   }
 
   async handleAction(action: string): Promise<Omit<Message, 'id' | 'timestamp'>> {
+    console.log('ChatbotService: Handling action:', action);
+    
     const [actionType, actionId] = action.split('-');
 
     switch (actionType) {
       case 'tool':
+        console.log('ChatbotService: Launching tool:', actionId);
         return this.handleToolLaunch(actionId);
       
       case 'health':
@@ -112,6 +115,9 @@ class ChatbotService {
           return this.getHealthToolsMenuResponse();
         }
         break;
+      
+      case 'category':
+        return this.getCategoryToolsResponse(actionId);
       
       case 'specialties':
         return this.getSpecialtiesResponse();
@@ -138,17 +144,24 @@ class ChatbotService {
         return this.getPricesResponse();
       
       default:
+        if (action === 'health-tools') {
+          return this.getHealthToolsMenuResponse();
+        }
         return this.getMainMenuResponse();
     }
   }
 
   private handleToolLaunch(toolId: string): Promise<Omit<Message, 'id' | 'timestamp'>> {
+    console.log('ChatbotService: handleToolLaunch called with toolId:', toolId);
     const tool = healthToolsData.find(t => t.id === toolId);
     
     if (tool) {
+      console.log('ChatbotService: Tool found, dispatching events...');
       // Trigger tool launch event
       setTimeout(() => {
+        console.log('ChatbotService: Dispatching launchHealthTool event');
         window.dispatchEvent(new CustomEvent('launchHealthTool', { detail: { toolId } }));
+        console.log('ChatbotService: Dispatching closeChatbot event');
         window.dispatchEvent(new CustomEvent('closeChatbot'));
       }, 500);
       
@@ -165,7 +178,37 @@ class ChatbotService {
       });
     }
     
+    console.log('ChatbotService: Tool not found, returning main menu');
     return this.getMainMenuResponse();
+  }
+
+  private getCategoryToolsResponse(categoryId: string): Promise<Omit<Message, 'id' | 'timestamp'>> {
+    const categoryTools = healthToolsData.filter(tool => tool.category === categoryId);
+    const categoryNames = {
+      'calculation': 'الحاسبات الطبية',
+      'assessment': 'تقييم المخاطر الصحية',
+      'mental': 'الصحة النفسية والاسترخاء',
+      'pregnancy': 'صحة الحمل والإنجاب',
+      'guidance': 'التوجيه الطبي'
+    };
+
+    return Promise.resolve({
+      text: `أدوات ${categoryNames[categoryId as keyof typeof categoryNames] || 'الفئة المحددة'}:`,
+      sender: 'bot',
+      type: 'symptom-tools',
+      data: {
+        tools: categoryTools,
+        options: [
+          ...categoryTools.map(tool => ({ 
+            id: `tool-${tool.id}`, 
+            text: `🔧 ${tool.title}`, 
+            action: `tool-${tool.id}` 
+          })),
+          { id: 'health-tools', text: '🔙 الفئات', action: 'health-tools' },
+          { id: 'main', text: '← القائمة الرئيسية', action: 'main' }
+        ]
+      }
+    });
   }
 
   private getHealthToolsMenuResponse(): Promise<Omit<Message, 'id' | 'timestamp'>> {
@@ -341,6 +384,7 @@ class ChatbotService {
 
   // Handle external actions
   async handleExternalAction(action: string): Promise<void> {
+    console.log('ChatbotService: Handling external action:', action);
     switch (action) {
       case 'external-map':
         window.open('https://maps.app.goo.gl/YC86Q6hMdknLVbK49', '_blank');

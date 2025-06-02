@@ -49,19 +49,23 @@ const ChatBot = () => {
   // Listen for tool launch events
   useEffect(() => {
     const handleToolLaunch = (event: CustomEvent) => {
+      console.log('ChatBot: Received launchHealthTool event:', event.detail);
       const { toolId } = event.detail;
       // Navigate to health tools page with the specific tool
       window.location.href = `/health-tools?tool=${toolId}`;
     };
 
     const handleCloseChatbot = () => {
+      console.log('ChatBot: Received closeChatbot event');
       setIsOpen(false);
     };
 
+    console.log('ChatBot: Adding event listeners');
     window.addEventListener('launchHealthTool', handleToolLaunch as EventListener);
     window.addEventListener('closeChatbot', handleCloseChatbot);
     
     return () => {
+      console.log('ChatBot: Removing event listeners');
       window.removeEventListener('launchHealthTool', handleToolLaunch as EventListener);
       window.removeEventListener('closeChatbot', handleCloseChatbot);
     };
@@ -103,6 +107,8 @@ const ChatBot = () => {
   };
 
   const handleQuickAction = async (action: string) => {
+    console.log('ChatBot: Quick action clicked:', action);
+    
     // Map quick action text to actual actions
     const actionMap: { [key: string]: string } = {
       'القائمة الرئيسية': 'main',
@@ -112,6 +118,7 @@ const ChatBot = () => {
     };
 
     const mappedAction = actionMap[action] || action;
+    console.log('ChatBot: Mapped action:', mappedAction);
     
     addMessage({
       text: action,
