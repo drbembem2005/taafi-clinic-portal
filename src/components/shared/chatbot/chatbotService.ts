@@ -1,20 +1,7 @@
 import { getDoctors, getDoctorsBySpecialtyId } from '@/services/doctorService';
 import { getSpecialties } from '@/services/specialtyService';
 import { Message, ActionLink, QuickOption } from './types';
-
-// Health tools data for AI recommendations
-const healthToolsData = [
-  { id: 'bmi-calculator', title: 'حاسبة مؤشر كتلة الجسم', category: 'calculation', keywords: ['وزن', 'كتلة', 'سمنة', 'نحافة', 'bmi'] },
-  { id: 'stress-test', title: 'اختبار الضغط النفسي', category: 'mental', keywords: ['توتر', 'ضغط', 'قلق', 'نفسي', 'stress'] },
-  { id: 'diabetes-risk', title: 'اختبار خطر السكري', category: 'assessment', keywords: ['سكري', 'سكر', 'diabetes', 'غلوكوز'] },
-  { id: 'pregnancy-calculator', title: 'حاسبة الحمل', category: 'pregnancy', keywords: ['حمل', 'ولادة', 'حامل', 'pregnancy'] },
-  { id: 'meditation-timer', title: 'مؤقت التأمل', category: 'mental', keywords: ['تأمل', 'استرخاء', 'هدوء', 'meditation'] },
-  { id: 'heart-rate-calculator', title: 'حاسبة معدل النبض', category: 'calculation', keywords: ['نبض', 'قلب', 'heart', 'pulse'] },
-  { id: 'anxiety-test', title: 'اختبار القلق', category: 'mental', keywords: ['قلق', 'anxiety', 'خوف', 'توتر'] },
-  { id: 'calories-calculator', title: 'حاسبة السعرات', category: 'calculation', keywords: ['سعرات', 'calories', 'طعام', 'حرق'] },
-  { id: 'depression-test', title: 'اختبار الاكتئاب', category: 'mental', keywords: ['اكتئاب', 'depression', 'حزن', 'مزاج'] },
-  { id: 'water-calculator', title: 'حاسبة الماء اليومي', category: 'calculation', keywords: ['ماء', 'water', 'سوائل', 'ترطيب'] }
-];
+import { healthToolsData, healthCategories } from '@/data/healthToolsData';
 
 class ChatbotService {
   async handleMessage(message: string): Promise<Omit<Message, 'id' | 'timestamp'>> {
@@ -38,7 +25,7 @@ class ChatbotService {
 
   private findRecommendedTool(message: string) {
     return healthToolsData.find(tool => 
-      tool.keywords.some(keyword => message.includes(keyword))
+      tool.keywords?.some(keyword => message.includes(keyword))
     );
   }
 
@@ -184,16 +171,10 @@ class ChatbotService {
 
   private getCategoryToolsResponse(categoryId: string): Promise<Omit<Message, 'id' | 'timestamp'>> {
     const categoryTools = healthToolsData.filter(tool => tool.category === categoryId);
-    const categoryNames = {
-      'calculation': 'الحاسبات الطبية',
-      'assessment': 'تقييم المخاطر الصحية',
-      'mental': 'الصحة النفسية والاسترخاء',
-      'pregnancy': 'صحة الحمل والإنجاب',
-      'guidance': 'التوجيه الطبي'
-    };
+    const category = healthCategories.find(cat => cat.id === categoryId);
 
     return Promise.resolve({
-      text: `أدوات ${categoryNames[categoryId as keyof typeof categoryNames] || 'الفئة المحددة'}:`,
+      text: `أدوات ${category?.name || 'الفئة المحددة'}:`,
       sender: 'bot',
       type: 'symptom-tools',
       data: {
@@ -212,24 +193,16 @@ class ChatbotService {
   }
 
   private getHealthToolsMenuResponse(): Promise<Omit<Message, 'id' | 'timestamp'>> {
-    const categories = [
-      { id: 'calculation', name: 'الحاسبات الطبية', icon: '🧮' },
-      { id: 'assessment', name: 'تقييم المخاطر', icon: '🎯' },
-      { id: 'mental', name: 'الصحة النفسية', icon: '🧠' },
-      { id: 'pregnancy', name: 'صحة الحمل', icon: '👶' },
-      { id: 'guidance', name: 'التوجيه الطبي', icon: '🩺' }
-    ];
-
     return Promise.resolve({
       text: 'اختر الفئة التي تريدها من الأدوات الصحية:',
       sender: 'bot',
       type: 'health-categories',
       data: {
-        categories,
+        categories: healthCategories,
         options: [
-          ...categories.map(cat => ({ 
+          ...healthCategories.map(cat => ({ 
             id: cat.id, 
-            text: `${cat.icon} ${cat.name}`, 
+            text: `${cat.icon === 'Calculator' ? '🧮' : cat.icon === 'Target' ? '🎯' : cat.icon === 'Brain' ? '🧠' : cat.icon === 'Baby' ? '👶' : '🩺'} ${cat.name}`, 
             action: `category-${cat.id}` 
           })),
           { id: 'main', text: '← القائمة الرئيسية', action: 'main' }

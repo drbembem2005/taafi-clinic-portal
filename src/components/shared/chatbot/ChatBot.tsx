@@ -1,7 +1,7 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import ChatHeader from './ChatHeader';
 import ChatMessages from './ChatMessages';
@@ -18,6 +18,7 @@ const ChatBot = () => {
   const [chatState, setChatState] = useState<ChatBotState>('welcome');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   // Initialize with welcome message and main menu
   useEffect(() => {
@@ -51,8 +52,10 @@ const ChatBot = () => {
     const handleToolLaunch = (event: CustomEvent) => {
       console.log('ChatBot: Received launchHealthTool event:', event.detail);
       const { toolId } = event.detail;
+      // Close the chatbot first
+      setIsOpen(false);
       // Navigate to health tools page with the specific tool
-      window.location.href = `/health-tools?tool=${toolId}`;
+      navigate(`/health-tools?tool=${toolId}`);
     };
 
     const handleCloseChatbot = () => {
@@ -69,7 +72,7 @@ const ChatBot = () => {
       window.removeEventListener('launchHealthTool', handleToolLaunch as EventListener);
       window.removeEventListener('closeChatbot', handleCloseChatbot);
     };
-  }, []);
+  }, [navigate]);
 
   const addMessage = (message: Omit<Message, 'id' | 'timestamp'>) => {
     const newMessage: Message = {
