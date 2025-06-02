@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,6 +46,7 @@ interface SearchHealthTool {
   description: string;
   category: string;
   keywords?: string[];
+  icon: React.ComponentType<any>;
 }
 
 interface HealthCategory {
@@ -402,7 +402,8 @@ const HealthTools = () => {
       title: tool.title,
       description: tool.description,
       category: tool.category,
-      keywords: tool.keywords
+      keywords: tool.keywords,
+      icon: tool.icon
     }))
   );
 
@@ -454,7 +455,8 @@ const HealthTools = () => {
       title: tool.title,
       description: tool.description,
       category: tool.category,
-      keywords: tool.keywords
+      keywords: tool.keywords,
+      icon: tool.icon
     }));
   }, [selectedCategory]);
 
