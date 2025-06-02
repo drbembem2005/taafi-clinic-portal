@@ -22,7 +22,10 @@ import {
   ArrowRight,
   ArrowLeft,
   Sun,
-  Calendar
+  Calendar,
+  Moon,
+  Dumbbell,
+  Bone
 } from 'lucide-react';
 
 interface HealthTool {
@@ -114,6 +117,13 @@ const healthTools: HealthTool[] = [
     icon: Sun,
     category: 'calculation'
   },
+  {
+    id: 'muscle-mass-calculator',
+    title: 'حاسبة مؤشر الكتلة العضلية',
+    description: 'احسب كتلتك العضلية ونسبة العضلات إلى الدهون في الجسم',
+    icon: Dumbbell,
+    category: 'calculation'
+  },
 
   // Health Risk Assessments
   {
@@ -144,6 +154,13 @@ const healthTools: HealthTool[] = [
     icon: Eye,
     category: 'assessment'
   },
+  {
+    id: 'osteoporosis-risk',
+    title: 'تقييم خطر هشاشة العظام',
+    description: 'تقييم مخاطر الإصابة بهشاشة العظام وكسور المستقبل',
+    icon: Bone,
+    category: 'assessment'
+  },
 
   // Mental Health & Relaxation
   {
@@ -165,6 +182,13 @@ const healthTools: HealthTool[] = [
     title: 'مؤقت تمارين التنفس العميق',
     description: 'تمارين تنفس مرشدة للاسترخاء وتقليل التوتر مع أنماط متنوعة',
     icon: Timer,
+    category: 'mental'
+  },
+  {
+    id: 'sleep-quality',
+    title: 'تقييم جودة النوم',
+    description: 'تحليل شامل لجودة نومك ونصائح للتحسين والراحة',
+    icon: Moon,
     category: 'mental'
   },
 
@@ -227,7 +251,7 @@ const healthCategories: HealthCategory[] = [
   {
     id: 'assessment',
     name: 'تقييم المخاطر الصحية',
-    description: 'اكتشف مخاطر الإصابة بالأمراض الشائعة مثل السكري وضغط الدم وتسوس الأسنان',
+    description: 'اكتشف مخاطر الإصابة بالأمراض الشائعة مثل السكري وضغط الدم وتسوس الأسنان وهشاشة العظام',
     icon: Target,
     color: 'from-red-500 to-pink-500',
     toolsCount: healthTools.filter(t => t.category === 'assessment').length
@@ -235,7 +259,7 @@ const healthCategories: HealthCategory[] = [
   {
     id: 'mental',
     name: 'الصحة النفسية والاسترخاء',
-    description: 'تقييم حالتك النفسية وتعلم تقنيات الاسترخاء والتنفس العميق لتحسين صحتك النفسية',
+    description: 'تقييم حالتك النفسية وجودة النوم وتعلم تقنيات الاسترخاء والتنفس العميق لتحسين صحتك النفسية',
     icon: Brain,
     color: 'from-purple-500 to-indigo-500',
     toolsCount: healthTools.filter(t => t.category === 'mental').length

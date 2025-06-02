@@ -22,6 +22,9 @@ import BiologicalAgeCalculator from './BiologicalAgeCalculator';
 import MaleFertilityCalculator from './MaleFertilityCalculator';
 import MetabolismCalculator from './MetabolismCalculator';
 import VitaminDCalculator from './VitaminDCalculator';
+import OsteoporosisRisk from './OsteoporosisRisk';
+import SleepQuality from './SleepQuality';
+import MuscleMassCalculator from './MuscleMassCalculator';
 
 const toolComponents: { [key: string]: React.ComponentType } = {
   'bmi-calculator': BMICalculator,
@@ -48,6 +51,9 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'male-fertility': MaleFertilityCalculator,
   'metabolism-calculator': MetabolismCalculator,
   'vitamin-d-calculator': VitaminDCalculator,
+  'osteoporosis-risk': OsteoporosisRisk,
+  'sleep-quality': SleepQuality,
+  'muscle-mass-calculator': MuscleMassCalculator,
 };
 
 const toolTitles: { [key: string]: string } = {
@@ -75,6 +81,9 @@ const toolTitles: { [key: string]: string } = {
   'male-fertility': 'حاسبة مؤشر الخصوبة للرجال',
   'metabolism-calculator': 'حاسبة الأيض والحرق',
   'vitamin-d-calculator': 'حاسبة فيتامين د المطلوب',
+  'osteoporosis-risk': 'تقييم خطر هشاشة العظام',
+  'sleep-quality': 'تقييم جودة النوم',
+  'muscle-mass-calculator': 'حاسبة مؤشر الكتلة العضلية',
 };
 
 interface HealthToolsManagerProps {
