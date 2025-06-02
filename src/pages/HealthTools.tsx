@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,6 +38,14 @@ interface HealthTool {
   description: string;
   icon: React.ComponentType<any>;
   category: 'calculation' | 'assessment' | 'mental' | 'pregnancy' | 'guidance';
+  keywords?: string[];
+}
+
+interface SearchHealthTool {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
   keywords?: string[];
 }
 
@@ -387,7 +396,15 @@ const healthCategories: HealthCategory[] = [
 const HealthTools = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeToolId, setActiveToolId] = useState<string | null>(null);
-  const [filteredTools, setFilteredTools] = useState(healthTools);
+  const [filteredTools, setFilteredTools] = useState<SearchHealthTool[]>(
+    healthTools.map(tool => ({
+      id: tool.id,
+      title: tool.title,
+      description: tool.description,
+      category: tool.category,
+      keywords: tool.keywords
+    }))
+  );
 
   // Check for URL parameter to auto-open tool
   React.useEffect(() => {
@@ -406,6 +423,10 @@ const HealthTools = () => {
     ? filteredTools.filter(tool => tool.category === selectedCategory)
     : filteredTools;
 
+  const handleFilteredToolsChange = (tools: SearchHealthTool[]) => {
+    setFilteredTools(tools);
+  };
+
   const openTool = (toolId: string) => {
     setActiveToolId(toolId);
   };
@@ -421,6 +442,21 @@ const HealthTools = () => {
   const goBackToCategories = () => {
     setSelectedCategory(null);
   };
+
+  // Convert healthTools to SearchHealthTool format for search component
+  const searchTools: SearchHealthTool[] = React.useMemo(() => {
+    const baseTools = selectedCategory 
+      ? healthTools.filter(t => t.category === selectedCategory)
+      : healthTools;
+    
+    return baseTools.map(tool => ({
+      id: tool.id,
+      title: tool.title,
+      description: tool.description,
+      category: tool.category,
+      keywords: tool.keywords
+    }));
+  }, [selectedCategory]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -477,8 +513,8 @@ const HealthTools = () => {
       <section className="py-6 bg-white/50">
         <div className="container mx-auto px-4">
           <HealthToolsSearch
-            tools={selectedCategory ? healthTools.filter(t => t.category === selectedCategory) : healthTools}
-            onFilteredToolsChange={setFilteredTools}
+            tools={searchTools}
+            onFilteredToolsChange={handleFilteredToolsChange}
             selectedCategory={selectedCategory}
             onCategoryChange={setSelectedCategory}
           />

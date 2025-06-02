@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Search, Filter, X, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface HealthTool {
+interface SearchHealthTool {
   id: string;
   title: string;
   description: string;
@@ -15,8 +15,8 @@ interface HealthTool {
 }
 
 interface HealthToolsSearchProps {
-  tools: HealthTool[];
-  onFilteredToolsChange: (tools: HealthTool[]) => void;
+  tools: SearchHealthTool[];
+  onFilteredToolsChange: (tools: SearchHealthTool[]) => void;
   selectedCategory?: string;
   onCategoryChange?: (category: string | null) => void;
 }
