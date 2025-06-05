@@ -365,16 +365,16 @@ const FoodAnalyzer = () => {
                     ))}
                   </div>
                 </CardContent>
-              )}
-            </Card>
-          )}
-        </div>
+              </Card>
+            )}
+          </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2 justify-center">
-          <Button onClick={resetAnalysis} variant="outline">
-            تحليل صورة جديدة
-          </Button>
+          {/* Action Buttons */}
+          <div className="flex gap-2 justify-center">
+            <Button onClick={resetAnalysis} variant="outline">
+              تحليل صورة جديدة
+            </Button>
+          </div>
         </div>
       )}
     </div>
