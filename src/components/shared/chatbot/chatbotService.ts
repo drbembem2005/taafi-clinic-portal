@@ -1,4 +1,3 @@
-
 import { getDoctors, getDoctorsBySpecialtyId } from '@/services/doctorService';
 import { getSpecialties } from '@/services/specialtyService';
 import { Message, ActionLink, QuickOption } from './types';
@@ -51,7 +50,11 @@ class ChatbotService {
       'وزن': ['bmi-calculator', 'calories-calculator'],
       'نوم': ['sleep-quality', 'stress-test'],
       'قلب': ['heart-rate-calculator', 'heart-disease-risk'],
-      'تنفس': ['breathing-timer', 'anxiety-test']
+      'تنفس': ['breathing-timer', 'anxiety-test'],
+      'طعام': ['food-analyzer', 'calories-calculator'],
+      'أكل': ['food-analyzer', 'bmi-calculator'],
+      'غذاء': ['food-analyzer', 'calories-calculator'],
+      'وجبة': ['food-analyzer', 'calories-calculator']
     };
 
     const recommendations = [];

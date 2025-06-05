@@ -1,4 +1,3 @@
-
 import { 
   Calculator, 
   Target, 
@@ -21,7 +20,8 @@ import {
   User,
   Eye,
   TrendingUp,
-  Moon
+  Moon,
+  Camera
 } from 'lucide-react';
 
 export interface HealthToolData {
@@ -29,7 +29,7 @@ export interface HealthToolData {
   title: string;
   description: string;
   icon: any;
-  category: 'calculation' | 'assessment' | 'mental' | 'pregnancy' | 'guidance';
+  category: 'calculation' | 'assessment' | 'mental' | 'pregnancy' | 'guidance' | 'nutrition';
   keywords?: string[];
 }
 
@@ -322,6 +322,16 @@ export const healthToolsData: HealthToolData[] = [
     icon: Stethoscope,
     category: 'guidance',
     keywords: ['تخصص', 'specialty', 'أعراض', 'طبيب']
+  },
+
+  // Add new food analyzer tool
+  {
+    id: 'food-analyzer',
+    title: 'محلل الطعام الذكي',
+    description: 'حلل صور طعامك للحصول على تقرير غذائي مفصل بالذكاء الاصطناعي',
+    category: 'nutrition',
+    icon: Camera,
+    keywords: ['طعام', 'تحليل', 'غذاء', 'سعرات', 'بروتين', 'كربوهيدرات', 'فيتامين', 'تصوير', 'ذكي']
   }
 ];
 
@@ -365,5 +375,13 @@ export const healthCategories = [
     icon: Stethoscope,
     color: 'from-green-500 to-emerald-500',
     toolsCount: healthToolsData.filter(t => t.category === 'guidance').length
+  },
+  {
+    id: 'nutrition',
+    name: 'الصحة الغذائية',
+    description: 'أدوات لتحليل وتحليل الأطعمة وتحديد الأغذية الصحية',
+    icon: Camera,
+    color: 'from-yellow-500 to-lime-500',
+    toolsCount: healthToolsData.filter(t => t.category === 'nutrition').length
   }
 ];
