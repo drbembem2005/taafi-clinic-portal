@@ -26,8 +26,6 @@ const MessageBubble = ({
   const isUser = message.sender === 'user';
 
   const handleOptionClick = async (action: string, text: string) => {
-    console.log('MessageBubble: Option clicked:', { action, text });
-    
     if (action.startsWith('external-') || action.startsWith('contact-')) {
       await chatbotService.handleExternalAction(action);
       return;
@@ -37,17 +35,12 @@ const MessageBubble = ({
     onSetLoading(true);
 
     try {
-      console.log('MessageBubble: Calling chatbotService.handleAction with:', action);
       const response = await chatbotService.handleAction(action);
-      console.log('MessageBubble: Got response:', response);
-      
       setTimeout(() => {
         onAddMessage(response);
         onSetLoading(false);
         
-        // Update chat state based on action
         const [actionType] = action.split('-');
-        console.log('MessageBubble: Updating chat state based on actionType:', actionType);
         switch (actionType) {
           case 'specialties':
             onSetChatState('specialties');
@@ -64,23 +57,12 @@ const MessageBubble = ({
           case 'main':
             onSetChatState('main-menu');
             break;
-          case 'health':
-          case 'category':
-            onSetChatState('health-tools');
-            break;
-          case 'tool':
-            // Tool will be launched, no state change needed
-            console.log('MessageBubble: Tool action detected, no state change needed');
-            break;
           default:
-            if (action === 'health-tools') {
-              onSetChatState('health-tools');
-            }
             break;
         }
       }, 800);
     } catch (error) {
-      console.error('MessageBubble: Error handling action:', error);
+      console.error('Error handling action:', error);
       onSetLoading(false);
     }
   };
@@ -193,37 +175,6 @@ const MessageBubble = ({
                 }
               }}
             />
-          </motion.div>
-        )}
-
-        {/* Tool Cards for symptom-tools and tool-recommendation */}
-        {(message.type === 'symptom-tools' || message.type === 'tool-recommendation') && message.data?.tools && (
-          <motion.div 
-            className="w-full space-y-2"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            {message.data.tools.map((tool, index) => (
-              <motion.div
-                key={`tool-${tool.id}-${message.id}`}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4 + index * 0.1 }}
-                className="bg-white/90 rounded-xl p-3 border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => handleOptionClick(`tool-${tool.id}`, tool.title)}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white text-sm">🔧</span>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-sm text-gray-900">{tool.title}</h4>
-                    <p className="text-xs text-gray-600 mt-1">انقر لتشغيل الأداة</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
           </motion.div>
         )}
 

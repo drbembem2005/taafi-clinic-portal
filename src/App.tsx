@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import Index from '@/pages/Index';
 import About from '@/pages/About';
@@ -9,8 +10,6 @@ import Specialties from '@/pages/Specialties';
 import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
 import HealthTools from '@/pages/HealthTools';
-import HealthToolsCategories from '@/pages/HealthToolsCategories';
-import HealthToolsCategory from '@/pages/HealthToolsCategory';
 import { Toaster } from '@/components/ui/toaster';
 import { Route, Routes } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -53,8 +52,6 @@ const App = () => {
           <Route path="/blog" element={<Layout><Blog /></Layout>} />
           <Route path="/blog/:slug" element={<Layout><BlogPost /></Layout>} />
           <Route path="/health-tools" element={<Layout><HealthTools /></Layout>} />
-          <Route path="/health-tools/categories" element={<Layout><HealthToolsCategories /></Layout>} />
-          <Route path="/health-tools/category/:categoryId" element={<Layout><HealthToolsCategory /></Layout>} />
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>
         <Toaster />

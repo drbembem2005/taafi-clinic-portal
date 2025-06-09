@@ -1,7 +1,7 @@
+
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import ChatHeader from './ChatHeader';
 import ChatMessages from './ChatMessages';
@@ -18,7 +18,6 @@ const ChatBot = () => {
   const [chatState, setChatState] = useState<ChatBotState>('welcome');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  const navigate = useNavigate();
 
   // Initialize with welcome message and main menu
   useEffect(() => {
@@ -50,29 +49,23 @@ const ChatBot = () => {
   // Listen for tool launch events
   useEffect(() => {
     const handleToolLaunch = (event: CustomEvent) => {
-      console.log('ChatBot: Received launchHealthTool event:', event.detail);
       const { toolId } = event.detail;
-      // Close the chatbot first
-      setIsOpen(false);
       // Navigate to health tools page with the specific tool
-      navigate(`/health-tools?tool=${toolId}`);
+      window.location.href = `/health-tools?tool=${toolId}`;
     };
 
     const handleCloseChatbot = () => {
-      console.log('ChatBot: Received closeChatbot event');
       setIsOpen(false);
     };
 
-    console.log('ChatBot: Adding event listeners');
     window.addEventListener('launchHealthTool', handleToolLaunch as EventListener);
     window.addEventListener('closeChatbot', handleCloseChatbot);
     
     return () => {
-      console.log('ChatBot: Removing event listeners');
       window.removeEventListener('launchHealthTool', handleToolLaunch as EventListener);
       window.removeEventListener('closeChatbot', handleCloseChatbot);
     };
-  }, [navigate]);
+  }, []);
 
   const addMessage = (message: Omit<Message, 'id' | 'timestamp'>) => {
     const newMessage: Message = {
@@ -110,8 +103,6 @@ const ChatBot = () => {
   };
 
   const handleQuickAction = async (action: string) => {
-    console.log('ChatBot: Quick action clicked:', action);
-    
     // Map quick action text to actual actions
     const actionMap: { [key: string]: string } = {
       'القائمة الرئيسية': 'main',
@@ -121,7 +112,6 @@ const ChatBot = () => {
     };
 
     const mappedAction = actionMap[action] || action;
-    console.log('ChatBot: Mapped action:', mappedAction);
     
     addMessage({
       text: action,
