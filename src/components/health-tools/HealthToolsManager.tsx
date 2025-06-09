@@ -34,7 +34,6 @@ import MeditationTimer from './MeditationTimer';
 import ConfidenceTest from './ConfidenceTest';
 import WorkLifeBalance from './WorkLifeBalance';
 import PersonalityTest from './PersonalityTest';
-import FoodAnalyzer from './FoodAnalyzer';
 
 const toolComponents: { [key: string]: React.ComponentType } = {
   'bmi-calculator': BMICalculator,
@@ -75,9 +74,6 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'confidence-test': ConfidenceTest,
   'work-life-balance': WorkLifeBalance,
   'personality-test': PersonalityTest,
-  
-  // New food analyzer tool
-  'food-analyzer': FoodAnalyzer,
 };
 
 const toolTitles: { [key: string]: string } = {
@@ -119,9 +115,6 @@ const toolTitles: { [key: string]: string } = {
   'confidence-test': 'اختبار الثقة بالنفس',
   'work-life-balance': 'حاسبة التوازن بين العمل والحياة',
   'personality-test': 'اختبار أنماط الشخصية',
-  
-  // New title
-  'food-analyzer': 'محلل الطعام الذكي',
 };
 
 interface HealthToolsManagerProps {
