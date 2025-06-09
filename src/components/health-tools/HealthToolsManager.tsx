@@ -35,6 +35,12 @@ import ConfidenceTest from './ConfidenceTest';
 import WorkLifeBalance from './WorkLifeBalance';
 import PersonalityTest from './PersonalityTest';
 
+// New interactive audio tools
+import YogaTrainer from './YogaTrainer';
+import ProgressiveMuscleRelaxation from './ProgressiveMuscleRelaxation';
+import HearingTest from './HearingTest';
+import SleepStories from './SleepStories';
+
 const toolComponents: { [key: string]: React.ComponentType } = {
   'bmi-calculator': BMICalculator,
   'calories-calculator': CalorieCalculator,
@@ -74,6 +80,12 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'confidence-test': ConfidenceTest,
   'work-life-balance': WorkLifeBalance,
   'personality-test': PersonalityTest,
+  
+  // New interactive audio tools
+  'yoga-trainer': YogaTrainer,
+  'progressive-muscle-relaxation': ProgressiveMuscleRelaxation,
+  'hearing-test': HearingTest,
+  'sleep-stories': SleepStories,
 };
 
 const toolTitles: { [key: string]: string } = {
@@ -115,6 +127,12 @@ const toolTitles: { [key: string]: string } = {
   'confidence-test': 'اختبار الثقة بالنفس',
   'work-life-balance': 'حاسبة التوازن بين العمل والحياة',
   'personality-test': 'اختبار أنماط الشخصية',
+  
+  // New interactive audio tools titles
+  'yoga-trainer': 'مدرب اليوجا الصوتي',
+  'progressive-muscle-relaxation': 'الاسترخاء التدريجي للعضلات',
+  'hearing-test': 'اختبار السمع التفاعلي',
+  'sleep-stories': 'قصص النوم المهدئة',
 };
 
 interface HealthToolsManagerProps {
