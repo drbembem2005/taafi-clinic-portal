@@ -28,7 +28,8 @@ import {
   Bone,
   AlertTriangle,
   Trophy,
-  User
+  User,
+  Volume2
 } from 'lucide-react';
 
 interface HealthTool {
@@ -295,6 +296,40 @@ const healthTools: HealthTool[] = [
     icon: User,
     category: 'mental',
     keywords: ['شخصية', 'personality', 'نمط', 'تفكير']
+  },
+
+  // NEW INTERACTIVE AUDIO TOOLS
+  {
+    id: 'yoga-trainer',
+    title: 'مدرب اليوجا الصوتي',
+    description: 'جلسات يوجا تفاعلية مع إرشادات صوتية متدرجة لجميع المستويات',
+    icon: Activity,
+    category: 'mental',
+    keywords: ['يوجا', 'yoga', 'تمارين', 'استرخاء', 'مدرب صوتي']
+  },
+  {
+    id: 'progressive-muscle-relaxation',
+    title: 'الاسترخاء التدريجي للعضلات',
+    description: 'تقنية الاسترخاء التدريجي مع توجيه صوتي لتخفيف التوتر',
+    icon: Activity,
+    category: 'mental',
+    keywords: ['استرخاء', 'عضلات', 'relaxation', 'توتر', 'تدريجي']
+  },
+  {
+    id: 'hearing-test',
+    title: 'اختبار السمع التفاعلي',
+    description: 'فحص قدرة السمع عبر ترددات مختلفة مع تقييم شامل ونصائح',
+    icon: Volume2,
+    category: 'assessment',
+    keywords: ['سمع', 'hearing', 'أذن', 'صوت', 'تردد']
+  },
+  {
+    id: 'sleep-stories',
+    title: 'قصص النوم المهدئة',
+    description: 'قصص مهدئة بأصوات طبيعية لمساعدتك على النوم العميق',
+    icon: Moon,
+    category: 'mental',
+    keywords: ['نوم', 'قصص', 'sleep', 'هدوء', 'استرخاء']
   },
 
   // Pregnancy & Reproductive Health
