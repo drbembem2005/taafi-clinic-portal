@@ -409,10 +409,16 @@ const HealthTools = () => {
 
   // Check for URL parameter to auto-open tool
   React.useEffect(() => {
+    console.log('🔍 HealthTools: Checking URL parameters');
     const urlParams = new URLSearchParams(window.location.search);
     const toolParam = urlParams.get('tool');
+    console.log('🎯 Found tool parameter:', toolParam);
+    
     if (toolParam && healthTools.find(t => t.id === toolParam)) {
+      console.log('✅ Valid tool found, opening:', toolParam);
       setActiveToolId(toolParam);
+    } else if (toolParam) {
+      console.warn('⚠️ Invalid tool ID in URL:', toolParam);
     }
   }, []);
 
@@ -429,10 +435,17 @@ const HealthTools = () => {
   };
 
   const openTool = (toolId: string) => {
+    console.log('🚀 HealthTools: Opening tool:', toolId);
     setActiveToolId(toolId);
+    
+    // Update URL to include tool parameter
+    const url = new URL(window.location.href);
+    url.searchParams.set('tool', toolId);
+    window.history.pushState({}, '', url);
   };
 
   const closeTool = () => {
+    console.log('❌ HealthTools: Closing tool');
     setActiveToolId(null);
     // Remove tool parameter from URL
     const url = new URL(window.location.href);

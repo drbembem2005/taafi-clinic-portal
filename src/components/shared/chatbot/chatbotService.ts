@@ -101,6 +101,7 @@ class ChatbotService {
   }
 
   async handleAction(action: string): Promise<Omit<Message, 'id' | 'timestamp'>> {
+    console.log('🔧 ChatbotService: Handling action:', action);
     const [actionType, actionId] = action.split('-');
 
     switch (actionType) {
@@ -143,14 +144,19 @@ class ChatbotService {
   }
 
   private handleToolLaunch(toolId: string): Promise<Omit<Message, 'id' | 'timestamp'>> {
+    console.log('🚀 ChatbotService: Launching tool:', toolId);
     const tool = healthToolsData.find(t => t.id === toolId);
     
     if (tool) {
-      // Trigger tool launch event
+      // Navigate to health tools page with tool parameter
+      const healthToolsUrl = `/health-tools?tool=${toolId}`;
+      console.log('🔗 Navigating to:', healthToolsUrl);
+      
+      // Close chatbot and navigate
       setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('launchHealthTool', { detail: { toolId } }));
         window.dispatchEvent(new CustomEvent('closeChatbot'));
-      }, 500);
+        window.location.href = healthToolsUrl;
+      }, 1000);
       
       return Promise.resolve({
         text: `🚀 جاري تشغيل "${tool.title}"...\n\nستتم إعادة توجيهك للأداة الآن للحصول على تقييم مخصص ونصائح مفيدة.`,
@@ -163,9 +169,19 @@ class ChatbotService {
           ]
         }
       });
+    } else {
+      console.error('❌ Tool not found:', toolId);
+      return Promise.resolve({
+        text: 'عذراً، لم أتمكن من العثور على هذه الأداة. جرب البحث عن أداة أخرى.',
+        sender: 'bot',
+        data: {
+          options: [
+            { id: 'health-tools', text: '🔍 تصفح الأدوات', action: 'health-tools' },
+            { id: 'main', text: '← القائمة الرئيسية', action: 'main' }
+          ]
+        }
+      });
     }
-    
-    return this.getMainMenuResponse();
   }
 
   private getHealthToolsMenuResponse(): Promise<Omit<Message, 'id' | 'timestamp'>> {

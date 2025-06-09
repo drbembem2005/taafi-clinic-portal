@@ -1,4 +1,3 @@
-
 import { motion } from 'framer-motion';
 import { User, Bot, Clock } from 'lucide-react';
 import { Avatar } from '@/components/ui/avatar';
@@ -26,11 +25,36 @@ const MessageBubble = ({
   const isUser = message.sender === 'user';
 
   const handleOptionClick = async (action: string, text: string) => {
+    console.log('🔧 MessageBubble: Handling action:', action, 'with text:', text);
+    
+    // Handle tool launch actions
+    if (action.startsWith('tool-')) {
+      const toolId = action.replace('tool-', '');
+      console.log('🚀 MessageBubble: Launching tool:', toolId);
+      
+      onAddMessage({ text, sender: 'user' });
+      onSetLoading(true);
+
+      try {
+        const response = await chatbotService.handleAction(action);
+        setTimeout(() => {
+          onAddMessage(response);
+          onSetLoading(false);
+        }, 800);
+      } catch (error) {
+        console.error('❌ Error launching tool:', error);
+        onSetLoading(false);
+      }
+      return;
+    }
+
+    // Handle external and contact actions
     if (action.startsWith('external-') || action.startsWith('contact-')) {
       await chatbotService.handleExternalAction(action);
       return;
     }
 
+    // Handle regular chatbot actions
     onAddMessage({ text, sender: 'user' });
     onSetLoading(true);
 
@@ -56,6 +80,9 @@ const MessageBubble = ({
             break;
           case 'main':
             onSetChatState('main-menu');
+            break;
+          case 'health':
+            onSetChatState('health-tools');
             break;
           default:
             break;
