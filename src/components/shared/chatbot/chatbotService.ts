@@ -1,105 +1,12 @@
-
 import { getDoctors, getDoctorsBySpecialtyId } from '@/services/doctorService';
 import { getSpecialties } from '@/services/specialtyService';
-import { Message, ActionLink, QuickOption } from './types';
-import { healthToolsData, healthCategories } from '@/data/healthToolsData';
-import { Calculator, Target, Brain, Baby, Stethoscope } from 'lucide-react';
+import { Message } from './types';
+import { healthToolsHandler } from './services/healthToolsHandler';
+import { messageProcessor } from './services/messageProcessor';
 
 class ChatbotService {
-  // Helper function to get emoji for icon components
-  private getIconEmoji(IconComponent: any): string {
-    const iconMap = new Map([
-      [Calculator, '🧮'],
-      [Target, '🎯'],
-      [Brain, '🧠'],
-      [Baby, '👶'],
-      [Stethoscope, '🩺']
-    ]);
-    
-    return iconMap.get(IconComponent) || '🔧';
-  }
-
   async handleMessage(message: string): Promise<Omit<Message, 'id' | 'timestamp'>> {
-    const lowercaseMessage = message.toLowerCase();
-    
-    // Check for health tool recommendations
-    const recommendedTool = this.findRecommendedTool(lowercaseMessage);
-    if (recommendedTool) {
-      return this.getToolRecommendationResponse(recommendedTool, message);
-    }
-    
-    // Check for symptom-based recommendations
-    const symptomTools = this.getSymptomBasedRecommendations(lowercaseMessage);
-    if (symptomTools.length > 0) {
-      return this.getSymptomToolsResponse(symptomTools);
-    }
-    
-    // Default to main menu
-    return this.getMainMenuResponse();
-  }
-
-  private findRecommendedTool(message: string) {
-    return healthToolsData.find(tool => 
-      tool.keywords?.some(keyword => message.includes(keyword))
-    );
-  }
-
-  private getSymptomBasedRecommendations(message: string) {
-    const symptomMap = {
-      'صداع': ['stress-test', 'anxiety-test'],
-      'تعب': ['stress-test', 'sleep-quality'],
-      'وزن': ['bmi-calculator', 'calories-calculator'],
-      'نوم': ['sleep-quality', 'stress-test'],
-      'قلب': ['heart-rate-calculator', 'heart-disease-risk'],
-      'تنفس': ['breathing-timer', 'anxiety-test']
-    };
-
-    const recommendations = [];
-    for (const [symptom, tools] of Object.entries(symptomMap)) {
-      if (message.includes(symptom)) {
-        recommendations.push(...tools);
-      }
-    }
-
-    return [...new Set(recommendations)].slice(0, 3);
-  }
-
-  private getToolRecommendationResponse(tool: any, originalMessage: string): Promise<Omit<Message, 'id' | 'timestamp'>> {
-    return Promise.resolve({
-      text: `بناءً على رسالتك، أنصحك بتجربة "${tool.title}". هذه الأداة ستساعدك في التقييم والحصول على نصائح مخصصة.`,
-      sender: 'bot',
-      type: 'tool-recommendation',
-      data: {
-        tool,
-        options: [
-          { id: 'launch-tool', text: `🚀 تشغيل ${tool.title}`, action: `tool-${tool.id}` },
-          { id: 'more-tools', text: '🔍 أدوات أخرى', action: 'health-tools' },
-          { id: 'main', text: '← القائمة الرئيسية', action: 'main' }
-        ]
-      }
-    });
-  }
-
-  private getSymptomToolsResponse(toolIds: string[]): Promise<Omit<Message, 'id' | 'timestamp'>> {
-    const tools = healthToolsData.filter(tool => toolIds.includes(tool.id));
-    
-    return Promise.resolve({
-      text: 'بناءً على الأعراض التي ذكرتها، إليك الأدوات التي قد تفيدك:',
-      sender: 'bot',
-      type: 'symptom-tools',
-      data: {
-        tools,
-        options: [
-          ...tools.map(tool => ({ 
-            id: `tool-${tool.id}`, 
-            text: `🔧 ${tool.title}`, 
-            action: `tool-${tool.id}` 
-          })),
-          { id: 'more-tools', text: '🔍 جميع الأدوات', action: 'health-tools' },
-          { id: 'main', text: '← القائمة الرئيسية', action: 'main' }
-        ]
-      }
-    });
+    return messageProcessor.processMessage(message);
   }
 
   async handleAction(action: string): Promise<Omit<Message, 'id' | 'timestamp'>> {
@@ -110,16 +17,16 @@ class ChatbotService {
     switch (actionType) {
       case 'tool':
         console.log('ChatbotService: Launching tool:', actionId);
-        return this.handleToolLaunch(actionId);
+        return healthToolsHandler.handleToolLaunch(actionId);
       
       case 'health':
         if (actionId === 'tools') {
-          return this.getHealthToolsMenuResponse();
+          return healthToolsHandler.getHealthToolsMenuResponse();
         }
         break;
       
       case 'category':
-        return this.getCategoryToolsResponse(actionId);
+        return healthToolsHandler.getCategoryToolsResponse(actionId);
       
       case 'specialties':
         return this.getSpecialtiesResponse();
@@ -147,83 +54,10 @@ class ChatbotService {
       
       default:
         if (action === 'health-tools') {
-          return this.getHealthToolsMenuResponse();
+          return healthToolsHandler.getHealthToolsMenuResponse();
         }
         return this.getMainMenuResponse();
     }
-  }
-
-  private handleToolLaunch(toolId: string): Promise<Omit<Message, 'id' | 'timestamp'>> {
-    console.log('ChatbotService: handleToolLaunch called with toolId:', toolId);
-    const tool = healthToolsData.find(t => t.id === toolId);
-    
-    if (tool) {
-      console.log('ChatbotService: Tool found, dispatching events...');
-      // Trigger tool launch event
-      setTimeout(() => {
-        console.log('ChatbotService: Dispatching launchHealthTool event');
-        window.dispatchEvent(new CustomEvent('launchHealthTool', { detail: { toolId } }));
-        console.log('ChatbotService: Dispatching closeChatbot event');
-        window.dispatchEvent(new CustomEvent('closeChatbot'));
-      }, 500);
-      
-      return Promise.resolve({
-        text: `🚀 جاري تشغيل "${tool.title}"...\n\nستتم إعادة توجيهك للأداة الآن للحصول على تقييم مخصص ونصائح مفيدة.`,
-        sender: 'bot',
-        type: 'tool-launch',
-        data: {
-          tool,
-          options: [
-            { id: 'main', text: '← القائمة الرئيسية', action: 'main' }
-          ]
-        }
-      });
-    }
-    
-    console.log('ChatbotService: Tool not found, returning main menu');
-    return this.getMainMenuResponse();
-  }
-
-  private getCategoryToolsResponse(categoryId: string): Promise<Omit<Message, 'id' | 'timestamp'>> {
-    const categoryTools = healthToolsData.filter(tool => tool.category === categoryId);
-    const category = healthCategories.find(cat => cat.id === categoryId);
-
-    return Promise.resolve({
-      text: `أدوات ${category?.name || 'الفئة المحددة'}:`,
-      sender: 'bot',
-      type: 'symptom-tools',
-      data: {
-        tools: categoryTools,
-        options: [
-          ...categoryTools.map(tool => ({ 
-            id: `tool-${tool.id}`, 
-            text: `🔧 ${tool.title}`, 
-            action: `tool-${tool.id}` 
-          })),
-          { id: 'health-tools', text: '🔙 الفئات', action: 'health-tools' },
-          { id: 'main', text: '← القائمة الرئيسية', action: 'main' }
-        ]
-      }
-    });
-  }
-
-  private getHealthToolsMenuResponse(): Promise<Omit<Message, 'id' | 'timestamp'>> {
-    return Promise.resolve({
-      text: 'اختر الفئة التي تريدها من الأدوات الصحية:',
-      sender: 'bot',
-      type: 'health-categories',
-      data: {
-        categories: healthCategories,
-        options: [
-          ...healthCategories.map(cat => ({ 
-            id: cat.id, 
-            text: `${this.getIconEmoji(cat.icon)} ${cat.name}`, 
-            action: `category-${cat.id}` 
-          })),
-          { id: 'main', text: '← القائمة الرئيسية', action: 'main' }
-        ]
-      }
-    });
   }
 
   private async getSpecialtiesResponse(): Promise<Omit<Message, 'id' | 'timestamp'>> {
@@ -370,7 +204,6 @@ class ChatbotService {
     });
   }
 
-  // Handle external actions
   async handleExternalAction(action: string): Promise<void> {
     console.log('ChatbotService: Handling external action:', action);
     switch (action) {

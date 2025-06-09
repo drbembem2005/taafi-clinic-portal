@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,7 @@ import {
   Zap,
   Stethoscope
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface SearchHealthTool {
   id: string;
@@ -35,6 +35,7 @@ const HealthTools = () => {
       icon: tool.icon
     }))
   );
+  const navigate = useNavigate();
 
   // Check for URL parameter to auto-open tool
   React.useEffect(() => {
@@ -116,7 +117,7 @@ const HealthTools = () => {
                 : 'ابحث واستكشف الأدوات الصحية المتخصصة التي تحتاجها'
               }
             </p>
-            <div className="flex flex-wrap justify-center gap-2 text-xs md:text-sm">
+            <div className="flex flex-wrap justify-center gap-2 text-xs md:text-sm mb-4">
               <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-brand font-medium shadow-md border border-white/20">
                 ✅ {healthToolsData.length} أداة متطورة
               </span>
@@ -126,6 +127,15 @@ const HealthTools = () => {
               <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-brand font-medium shadow-md border border-white/20">
                 📱 متوافق مع الجوال
               </span>
+            </div>
+            {/* Quick Navigation */}
+            <div className="flex justify-center gap-3">
+              <Button 
+                onClick={() => navigate('/health-tools/categories')}
+                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl px-4 py-2 font-bold transition-all duration-300 shadow-md text-sm"
+              >
+                🏥 تصفح بالفئات
+              </Button>
             </div>
           </div>
         </div>
