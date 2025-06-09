@@ -10,7 +10,10 @@ import {
   Brain, 
   Baby, 
   Scale,
-  ArrowLeft
+  ArrowLeft,
+  Calendar,
+  Zap,
+  Sun
 } from 'lucide-react';
 
 const featuredTools = [
@@ -22,11 +25,18 @@ const featuredTools = [
     gradient: 'from-blue-500 to-cyan-500'
   },
   {
-    id: 'calories-calculator',
-    title: 'حاسبة السعرات اليومية',
-    description: 'احسب احتياجك اليومي من السعرات الحرارية',
-    icon: Calculator,
-    gradient: 'from-blue-500 to-cyan-500'
+    id: 'biological-age',
+    title: 'حاسبة العمر البيولوجي',
+    description: 'اكتشف عمرك الحقيقي بناءً على نمط حياتك',
+    icon: Calendar,
+    gradient: 'from-purple-500 to-indigo-500'
+  },
+  {
+    id: 'metabolism-calculator',
+    title: 'حاسبة الأيض والحرق',
+    description: 'احسب معدل الأيض وسرعة حرق السعرات',
+    icon: Zap,
+    gradient: 'from-orange-500 to-red-500'
   },
   {
     id: 'diabetes-risk',
@@ -36,11 +46,11 @@ const featuredTools = [
     gradient: 'from-red-500 to-pink-500'
   },
   {
-    id: 'anxiety-test',
-    title: 'اختبار القلق المبسط',
-    description: 'تقييم مستوى القلق والتوتر لديك',
-    icon: Brain,
-    gradient: 'from-purple-500 to-indigo-500'
+    id: 'vitamin-d-calculator',
+    title: 'حاسبة فيتامين د',
+    description: 'احسب احتياجك من فيتامين د حسب تعرضك للشمس',
+    icon: Sun,
+    gradient: 'from-yellow-500 to-orange-500'
   },
   {
     id: 'pregnancy-calculator',
@@ -48,13 +58,6 @@ const featuredTools = [
     description: 'احسبي موعد الولادة المتوقع بدقة',
     icon: Baby,
     gradient: 'from-pink-500 to-rose-500'
-  },
-  {
-    id: 'steps-calories',
-    title: 'حاسبة خطوات المشي',
-    description: 'احسب السعرات المحروقة من خطوات المشي',
-    icon: Activity,
-    gradient: 'from-green-500 to-emerald-500'
   }
 ];
 
@@ -119,7 +122,7 @@ const HealthToolsSection = () => {
               size="lg" 
               className="bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white px-8 py-4 rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
             >
-              <span>عرض جميع الأدوات الصحية (19 أداة)</span>
+              <span>عرض جميع الأدوات الصحية ({featuredTools.length + 15} أداة)</span>
               <ArrowLeft className="mr-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>

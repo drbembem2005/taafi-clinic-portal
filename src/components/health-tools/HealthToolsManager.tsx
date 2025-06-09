@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import HealthToolModal from './HealthToolModal';
 import BMICalculator from './BMICalculator';
@@ -19,6 +18,22 @@ import DentalVisitAssessment from './DentalVisitAssessment';
 import BloodPressureRiskTest from './BloodPressureRiskTest';
 import HealthyHabitsAssessment from './HealthyHabitsAssessment';
 import PregnancySymptomsChecker from './PregnancySymptomsChecker';
+import BiologicalAgeCalculator from './BiologicalAgeCalculator';
+import MaleFertilityCalculator from './MaleFertilityCalculator';
+import MetabolismCalculator from './MetabolismCalculator';
+import VitaminDCalculator from './VitaminDCalculator';
+import OsteoporosisRisk from './OsteoporosisRisk';
+import SleepQuality from './SleepQuality';
+import MuscleMassCalculator from './MuscleMassCalculator';
+import EyeHealthAssessment from './EyeHealthAssessment';
+import HeartDiseaseRisk from './HeartDiseaseRisk';
+import InsulinResistanceTest from './InsulinResistanceTest';
+import EmotionalIntelligenceTest from './EmotionalIntelligenceTest';
+import StressTest from './StressTest';
+import MeditationTimer from './MeditationTimer';
+import ConfidenceTest from './ConfidenceTest';
+import WorkLifeBalance from './WorkLifeBalance';
+import PersonalityTest from './PersonalityTest';
 
 const toolComponents: { [key: string]: React.ComponentType } = {
   'bmi-calculator': BMICalculator,
@@ -39,7 +54,26 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'healthy-habits': HealthyHabitsAssessment,
   'pregnancy-symptoms': PregnancySymptomsChecker,
   'medical-specialty-guide': MedicalSpecialtyGuide,
-  'specialty-finder': MedicalSpecialtyGuide, // Using same component for both
+  'specialty-finder': MedicalSpecialtyGuide,
+  
+  'biological-age': BiologicalAgeCalculator,
+  'male-fertility': MaleFertilityCalculator,
+  'metabolism-calculator': MetabolismCalculator,
+  'vitamin-d-calculator': VitaminDCalculator,
+  'osteoporosis-risk': OsteoporosisRisk,
+  'sleep-quality': SleepQuality,
+  'muscle-mass-calculator': MuscleMassCalculator,
+  'eye-health-assessment': EyeHealthAssessment,
+  'heart-disease-risk': HeartDiseaseRisk,
+  'insulin-resistance-test': InsulinResistanceTest,
+  'emotional-intelligence-test': EmotionalIntelligenceTest,
+  
+  // أدوات الصحة النفسية الجديدة
+  'stress-test': StressTest,
+  'meditation-timer': MeditationTimer,
+  'confidence-test': ConfidenceTest,
+  'work-life-balance': WorkLifeBalance,
+  'personality-test': PersonalityTest,
 };
 
 const toolTitles: { [key: string]: string } = {
@@ -62,6 +96,25 @@ const toolTitles: { [key: string]: string } = {
   'pregnancy-symptoms': 'فاحص أعراض الحمل',
   'medical-specialty-guide': 'مرشد التخصصات الطبية',
   'specialty-finder': 'باحث التخصصات الطبية',
+  
+  'biological-age': 'حاسبة العمر البيولوجي',
+  'male-fertility': 'حاسبة مؤشر الخصوبة للرجال',
+  'metabolism-calculator': 'حاسبة الأيض والحرق',
+  'vitamin-d-calculator': 'حاسبة فيتامين د المطلوب',
+  'osteoporosis-risk': 'تقييم خطر هشاشة العظام',
+  'sleep-quality': 'تقييم جودة النوم',
+  'muscle-mass-calculator': 'حاسبة مؤشر الكتلة العضلية',
+  'eye-health-assessment': 'تقييم صحة العين والرؤية',
+  'heart-disease-risk': 'تقييم خطر أمراض القلب',
+  'insulin-resistance-test': 'تقييم مقاومة الأنسولين',
+  'emotional-intelligence-test': 'اختبار الذكاء العاطفي',
+  
+  // العناوين الجديدة
+  'stress-test': 'اختبار الضغط النفسي والتوتر',
+  'meditation-timer': 'مؤقت التأمل المرشد',
+  'confidence-test': 'اختبار الثقة بالنفس',
+  'work-life-balance': 'حاسبة التوازن بين العمل والحياة',
+  'personality-test': 'اختبار أنماط الشخصية',
 };
 
 interface HealthToolsManagerProps {

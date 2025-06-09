@@ -1,5 +1,5 @@
 
-export type ChatBotState = 'welcome' | 'main-menu' | 'specialties' | 'doctors' | 'booking';
+export type ChatBotState = 'welcome' | 'main-menu' | 'specialties' | 'doctors' | 'booking' | 'health-tools';
 
 export interface QuickOption {
   id: string;
@@ -21,7 +21,7 @@ export interface Message {
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
-  type?: 'welcome' | 'options' | 'specialties' | 'doctors' | 'booking' | 'booking-form' | 'info';
+  type?: 'welcome' | 'options' | 'specialties' | 'doctors' | 'booking' | 'booking-form' | 'info' | 'tool-recommendation' | 'symptom-tools' | 'tool-launch' | 'health-categories';
   data?: {
     specialties?: any[];
     doctors?: any[];
@@ -34,5 +34,8 @@ export interface Message {
     doctorId?: number;
     doctorName?: string;
     specialtyId?: number;
+    tool?: any;
+    tools?: any[];
+    categories?: any[];
   };
 }

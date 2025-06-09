@@ -1,0 +1,33 @@
+
+{
+  "name": "عيادات تعافي التخصصية",
+  "short_name": "تعافي",
+  "description": "عيادات تعافي التخصصية - أفضل رعاية طبية في مصر",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/lovable-uploads/d6fc17dc-87c4-4be4-b217-48c01b58e6c1.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/lovable-uploads/d6fc17dc-87c4-4be4-b217-48c01b58e6c1.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["medical", "health", "lifestyle"],
+  "lang": "ar",
+  "dir": "rtl"
+}
