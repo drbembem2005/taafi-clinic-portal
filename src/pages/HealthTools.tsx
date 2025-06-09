@@ -437,20 +437,11 @@ const HealthTools = () => {
   const openTool = (toolId: string) => {
     console.log('🚀 HealthTools: Opening tool:', toolId);
     setActiveToolId(toolId);
-    
-    // Update URL to include tool parameter
-    const url = new URL(window.location.href);
-    url.searchParams.set('tool', toolId);
-    window.history.pushState({}, '', url);
   };
 
   const closeTool = () => {
     console.log('❌ HealthTools: Closing tool');
     setActiveToolId(null);
-    // Remove tool parameter from URL
-    const url = new URL(window.location.href);
-    url.searchParams.delete('tool');
-    window.history.replaceState({}, '', url);
   };
 
   const goBackToCategories = () => {
