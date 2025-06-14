@@ -4,6 +4,7 @@ import SpecialtyCard from '@/components/shared/SpecialtyCard';
 import DoctorCard from '@/components/shared/DoctorCard';
 import ClinicFeatures from '@/components/shared/ClinicFeatures';
 import HealthToolsSection from '@/components/shared/HealthToolsSection';
+import TelemedicineSection from '@/components/shared/TelemedicineSection';
 import BookingSteps from '@/components/shared/BookingSteps';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -124,6 +125,9 @@ const Index = () => {
 
       {/* Booking Steps Section */}
       <BookingSteps />
+
+      {/* Telemedicine Section - NEW */}
+      <TelemedicineSection />
 
       {/* Medical Specialties Section */}
       <section className="py-16 md:py-24 bg-white">

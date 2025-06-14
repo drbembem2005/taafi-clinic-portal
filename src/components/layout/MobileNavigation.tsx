@@ -1,5 +1,5 @@
 
-import { Home, User, ListChecks, Calendar, BookOpen, Phone } from "lucide-react";
+import { Home, User, ListChecks, Calendar, BookOpen, Phone, Video } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 const MobileNavigation = () => {
@@ -37,19 +37,19 @@ const MobileNavigation = () => {
         </Link>
         
         <Link 
+          to="/telemedicine" 
+          className={`flex flex-col items-center p-2 rounded-md ${isActive('/telemedicine') ? 'text-brand' : 'text-gray-500'}`}
+        >
+          <Video size={20} />
+          <span className="text-xs mt-1">الكشف الأونلاين</span>
+        </Link>
+        
+        <Link 
           to="/booking" 
           className={`flex flex-col items-center p-2 rounded-md ${isActive('/booking') ? 'text-brand' : 'text-gray-500'}`}
         >
           <Calendar size={20} />
           <span className="text-xs mt-1">الحجز</span>
-        </Link>
-        
-        <Link 
-          to="/blog" 
-          className={`flex flex-col items-center p-2 rounded-md ${isActive('/blog') ? 'text-brand' : 'text-gray-500'}`}
-        >
-          <BookOpen size={20} />
-          <span className="text-xs mt-1">المدونة</span>
         </Link>
         
         <Link 
