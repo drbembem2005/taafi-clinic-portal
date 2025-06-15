@@ -229,7 +229,7 @@ const HealthToolsManager = ({ activeToolId, onCloseTool }: HealthToolsManagerPro
       onClose={handleCloseTool}
       title={toolTitles[activeToolId] || 'أداة صحية'}
     >
-      <ToolComponent onComplete={handleToolComplete} />
+      <ToolComponent />
     </HealthToolModal>
   );
 };
