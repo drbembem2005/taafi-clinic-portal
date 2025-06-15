@@ -1,4 +1,3 @@
-
 # Umami Analytics Configuration Guide
 # Last Updated: 2025-06-15
 
@@ -12,7 +11,6 @@ This document outlines all custom events tracked in the application, designed to
 Configure the following main events as Goals in Umami to track key user actions:
 - `Health Tool: Complete`
 - `Booking: Success`
-- `Search: Query`
 - `Contact: WhatsApp Click`
 - `Contact: Phone Call`
 
@@ -20,7 +18,6 @@ Configure the following main events as Goals in Umami to track key user actions:
 Umami will automatically collect event data. You can use these properties to filter reports:
 - `tool_id`, `tool_name`, `category` (for Health Tools)
 - `step_name`, `specialty`, `doctor` (for Booking Funnel)
-- `query`, `results_count` (for Search)
 - `page`, `context`, `element_id` (for Clicks)
 - `method` (for Contact Actions)
 
@@ -28,7 +25,6 @@ Umami will automatically collect event data. You can use these properties to fil
 Consider adding cards to your Umami dashboard for:
 - Top Health Tools used (`Health Tool: Open` event filtered by `tool_name`).
 - Booking Funnel drop-off (using a funnel report on `Booking Funnel: Step...` events).
-- Top search queries (`Search: Query` event).
 - Page views for key pages (`/booking`, `/health-tools`, etc.).
 
 ---
@@ -71,34 +67,16 @@ Track user interaction with the health calculators and assessments.
     - `duration`: (number)
     - `has_result`: (boolean)
 
-### 2.3. Search Events
-Track user searches within the health tools page.
-- **Trigger Location:** `src/components/health-tools/HealthToolsSearch.tsx`
-
-- **Event: `Search: Query`**
-  - **Description:** Fires when a user types a query in the health tools search bar.
-  - **Event Data:**
-    - `query`: (string) The search term.
-    - `category`: (string|undefined) The category filter applied, if any.
-    - `results_count`: (number) Number of results found.
-    - `page`: (string) Currently hardcoded to "health-tools".
-
-### 2.4. Click Events
+### 2.3. Click Events
 Track specific, high-value clicks.
-- **Trigger Location:** `src/pages/HealthTools.tsx`, `src/components/health-tools/HealthToolsSearch.tsx`
+- **Trigger Location:** `src/pages/HealthTools.tsx`
 
 - **Event: `Click: Health Tools Category`**
-  - **Description:** Fires when a user selects a category from the main page or the filter menu.
+  - **Description:** Fires when a user selects a category from the main page.
   - **Event Data:**
     - `element_id`: (string) The category ID, e.g., "calculation".
     - `page`: (string) "health-tools".
-    - `context`: (string) e.g., "main-category-selection" or "category-filter".
-
-- **Event: `Click: Clear Filters`**
-  - **Description:** Fires when the user clears search/filter selections.
-  - **Event Data:**
-    - `page`: (string) "health-tools".
-    - `context`: (string) "filter-action".
+    - `context`: (string) "main-category-selection".
 
 - **Event: `Click: Health Tool Button`**
   - **Description:** Fires when a user clicks the "ابدأ الآن" button to open a tool.
@@ -107,7 +85,7 @@ Track specific, high-value clicks.
     - `page`: (string) "health-tools".
     - `context`: (string) The tool name, e.g., "tools-page-حاسبة كتلة الجسم (BMI)".
 
-### 2.5. Booking Funnel Events
+### 2.4. Booking Funnel Events
 Track user progression through the appointment booking wizard.
 - **Trigger Location:** `src/components/booking/BookingWizardContainer.tsx`
 
@@ -127,7 +105,7 @@ Track user progression through the appointment booking wizard.
     - `specialty`: (string)
     - `doctor`: (string)
 
-### 2.6. Contact Events
+### 2.5. Contact Events
 Track clicks on floating contact buttons.
 - **Trigger Location:** `src/components/shared/FloatingActionButtons.tsx`
 
@@ -147,6 +125,7 @@ Track clicks on floating contact buttons.
 
 The following events are defined in `src/utils/analytics.ts` but are not currently implemented or triggered anywhere in the application. They can be integrated in the future.
 
+- `Search: Query`
 - `Search: Result Click`
 - `Click: CTA`
 - `Doctor: View Profile`
