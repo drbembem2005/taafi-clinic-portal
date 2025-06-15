@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import HealthToolsManager from '@/components/health-tools/HealthToolsManager';
+import HealthToolsSearch from '@/components/health-tools/HealthToolsSearch';
 import { 
   Heart, 
   Calculator, 
@@ -30,7 +31,7 @@ import {
   User
 } from 'lucide-react';
 
-import { trackUserInteraction } from '@/utils/analytics';
+import { analytics, trackUserInteraction } from '@/utils/analytics';
 
 interface HealthTool {
   id: string;
@@ -39,6 +40,15 @@ interface HealthTool {
   icon: React.ComponentType<any>;
   category: 'calculation' | 'assessment' | 'mental' | 'pregnancy' | 'guidance';
   keywords?: string[];
+}
+
+interface SearchHealthTool {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  keywords?: string[];
+  icon: React.ComponentType<any>;
 }
 
 interface HealthCategory {
@@ -388,6 +398,16 @@ const healthCategories: HealthCategory[] = [
 const HealthTools = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeToolId, setActiveToolId] = useState<string | null>(null);
+  const [filteredTools, setFilteredTools] = useState<SearchHealthTool[]>(
+    healthTools.map(tool => ({
+      id: tool.id,
+      title: tool.title,
+      description: tool.description,
+      category: tool.category,
+      keywords: tool.keywords,
+      icon: tool.icon
+    }))
+  );
 
   // Check for URL parameter to auto-open tool
   React.useEffect(() => {
@@ -409,8 +429,12 @@ const HealthTools = () => {
     : null;
 
   const toolsToDisplay = selectedCategory 
-    ? healthTools.filter(tool => tool.category === selectedCategory)
-    : [];
+    ? filteredTools.filter(tool => tool.category === selectedCategory)
+    : filteredTools;
+
+  const handleFilteredToolsChange = (tools: SearchHealthTool[]) => {
+    setFilteredTools(tools);
+  };
 
   const openTool = (toolId: string) => {
     console.log('🚀 HealthTools: Opening tool:', toolId);
@@ -425,6 +449,22 @@ const HealthTools = () => {
   const goBackToCategories = () => {
     setSelectedCategory(null);
   };
+
+  // Convert healthTools to SearchHealthTool format for search component
+  const searchTools: SearchHealthTool[] = React.useMemo(() => {
+    const baseTools = selectedCategory 
+      ? healthTools.filter(t => t.category === selectedCategory)
+      : healthTools;
+    
+    return baseTools.map(tool => ({
+      id: tool.id,
+      title: tool.title,
+      description: tool.description,
+      category: tool.category,
+      keywords: tool.keywords,
+      icon: tool.icon
+    }));
+  }, [selectedCategory]);
 
   const handleCategorySelect = (categoryId: string) => {
     // Track category selection
@@ -467,7 +507,7 @@ const HealthTools = () => {
             <p className="text-sm md:text-base lg:text-lg text-gray-600 leading-relaxed mb-6">
               {selectedCategory 
                 ? `اختر الأداة المناسبة من فئة ${selectedCategoryData?.name}`
-                : 'استكشف الأدوات الصحية المتخصصة التي تحتاجها حسب الفئة'
+                : 'ابحث واستكشف الأدوات الصحية المتخصصة التي تحتاجها'
               }
             </p>
             <div className="flex flex-wrap justify-center gap-2 text-xs md:text-sm">
@@ -501,6 +541,18 @@ const HealthTools = () => {
           </div>
         </section>
       )}
+
+      {/* Search and Filter */}
+      <section className="py-6 bg-white/50">
+        <div className="container mx-auto px-4">
+          <HealthToolsSearch
+            tools={searchTools}
+            onFilteredToolsChange={handleFilteredToolsChange}
+            selectedCategory={selectedCategory}
+            onCategoryChange={setSelectedCategory}
+          />
+        </div>
+      </section>
 
       {/* Categories View */}
       {!selectedCategory && (

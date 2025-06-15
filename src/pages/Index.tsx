@@ -24,12 +24,15 @@ const Index = () => {
       try {
         setLoading(true);
         
-        const specialtiesData = await getSpecialties();
-        const doctorsData = await getDoctors(6, true);
+        // First, get all specialties (not random) to ensure we have all data
+        const specialtiesData = await getSpecialties(); // Get ALL specialties
+        const doctorsData = await getDoctors(6, true); // Get 6 random doctors
         
+        // Fetch schedule data for each doctor and format properly using the same method as Doctors page
         const doctorsWithSpecialtyAndSchedule = await Promise.all(
           doctorsData.map(async (doctor) => {
             const schedule = await getDoctorSchedule(doctor.id);
+            // Use the same specialty finding logic as in Doctors.tsx
             const specialty = specialtiesData.find(s => s.id === doctor.specialty_id);
             
             return {
@@ -40,6 +43,7 @@ const Index = () => {
           })
         );
         
+        // Get 6 random specialties for display
         const randomSpecialties = await getSpecialties(6, true);
         
         setSpecialties(randomSpecialties);
@@ -54,25 +58,25 @@ const Index = () => {
     loadData();
   }, []);
 
-  function handleSpecialtyCardClick(specialtyName: string) {
+  const handleSpecialtyCardClick = (specialtyName: string) => {
     analytics.trackSpecialtyView(specialtyName, 'homepage');
-  }
+  };
 
-  function handleDoctorCardClick(doctorName: string, specialty: string) {
+  const handleDoctorCardClick = (doctorName: string, specialty: string) => {
     analytics.trackDoctorView(doctorName, specialty, 'homepage');
-  }
+  };
 
-  function handleViewAllSpecialtiesClick() {
+  const handleViewAllSpecialtiesClick = () => {
     trackUserInteraction.ctaClick('View All Specialties', 'homepage');
-  }
+  };
 
-  function handleViewAllDoctorsClick() {
+  const handleViewAllDoctorsClick = () => {
     trackUserInteraction.ctaClick('View All Doctors', 'homepage');
-  }
+  };
 
-  function handleBookingCTAClick() {
+  const handleBookingCTAClick = () => {
     trackUserInteraction.ctaClick('Book Appointment CTA', 'homepage');
-  }
+  };
 
   return (
     <div className="min-h-screen">
@@ -165,7 +169,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                onClick={() => handleSpecialtyCardClick && handleSpecialtyCardClick(specialty.name)}
+                onClick={() => handleSpecialtyCardClick(specialty.name)}
               >
                 <SpecialtyCard specialty={specialty} />
               </motion.div>
@@ -173,7 +177,7 @@ const Index = () => {
           </div>
           
           <div className="text-center">
-            <Link to="/specialties" onClick={() => handleViewAllSpecialtiesClick && handleViewAllSpecialtiesClick()}>
+            <Link to="/specialties" onClick={handleViewAllSpecialtiesClick}>
               <Button 
                 size="lg" 
                 className="bg-brand hover:bg-brand-dark text-white px-8 py-4 rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
@@ -218,7 +222,7 @@ const Index = () => {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
-                  onClick={() => handleDoctorCardClick && handleDoctorCardClick(doctor.name, doctor.specialty)}
+                  onClick={() => handleDoctorCardClick(doctor.name, doctor.specialty)}
                 >
                   <DoctorCard doctor={doctor} compact={true} />
                 </motion.div>
@@ -227,7 +231,7 @@ const Index = () => {
           )}
           
           <div className="text-center">
-            <Link to="/doctors" onClick={() => handleViewAllDoctorsClick && handleViewAllDoctorsClick()}>
+            <Link to="/doctors" onClick={handleViewAllDoctorsClick}>
               <Button 
                 size="lg" 
                 className="bg-brand hover:bg-brand-dark text-white px-8 py-4 rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
@@ -261,7 +265,7 @@ const Index = () => {
             <p className="text-lg text-gray-600 mb-8 leading-relaxed">
               نحن هنا لخدمتك على مدار الساعة. احجز موعدك الآن واستمتع بخدمة طبية متميزة
             </p>
-            <Link to="/booking" onClick={() => handleBookingCTAClick && handleBookingCTAClick()}>
+            <Link to="/booking" onClick={handleBookingCTAClick}>
               <Button 
                 size="lg" 
                 className="bg-brand hover:bg-brand-dark text-white px-10 py-4 rounded-xl font-medium text-xl shadow-lg hover:shadow-xl transition-all duration-300"
