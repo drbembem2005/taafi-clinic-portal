@@ -1,0 +1,157 @@
+
+# Umami Analytics Configuration Guide
+# Last Updated: 2025-06-15
+
+This document outlines all custom events tracked in the application, designed to be used with Umami analytics. Use this guide to configure goals, custom reports, and dashboards.
+
+---
+
+## 1. Quick Setup Recommendations
+
+### Goals
+Configure the following main events as Goals in Umami to track key user actions:
+- `Health Tool: Complete`
+- `Booking: Success`
+- `Search: Query`
+- `Contact: WhatsApp Click`
+- `Contact: Phone Call`
+
+### Custom Properties (Event Data)
+Umami will automatically collect event data. You can use these properties to filter reports:
+- `tool_id`, `tool_name`, `category` (for Health Tools)
+- `step_name`, `specialty`, `doctor` (for Booking Funnel)
+- `query`, `results_count` (for Search)
+- `page`, `context`, `element_id` (for Clicks)
+- `method` (for Contact Actions)
+
+### Dashboard
+Consider adding cards to your Umami dashboard for:
+- Top Health Tools used (`Health Tool: Open` event filtered by `tool_name`).
+- Booking Funnel drop-off (using a funnel report on `Booking Funnel: Step...` events).
+- Top search queries (`Search: Query` event).
+- Page views for key pages (`/booking`, `/health-tools`, etc.).
+
+---
+
+## 2. Event Reference
+
+Below is a detailed list of all events tracked in the codebase.
+
+### 2.1. Page View Tracking (Default)
+Umami automatically tracks page views. This is triggered on every route change.
+- **Trigger Location:** `src/components/utils/ScrollToTop.tsx`
+- **Data Captured:** URL Path (e.g., `/health-tools`, `/booking`)
+
+### 2.2. Health Tool Events
+Track user interaction with the health calculators and assessments.
+- **Trigger Location:** `src/components/health-tools/HealthToolsManager.tsx`
+
+- **Event: `Health Tool: Open`**
+  - **Description:** Fires when a user opens any health tool modal.
+  - **Event Data:**
+    - `tool_id`: (string) e.g., "bmi-calculator"
+    - `tool_name`: (string) e.g., "حاسبة كتلة الجسم"
+    - `category`: (string) e.g., "calculation"
+
+- **Event: `Health Tool: Abandoned`**
+  - **Description:** Fires when a user closes a health tool modal after spending more than 5 seconds without completing it.
+  - **Event Data:**
+    - `tool_id`: (string) e.g., "bmi-calculator"
+    - `tool_name`: (string) e.g., "حاسبة كتلة الجسم"
+    - `category`: (string) e.g., "calculation"
+    - `duration`: (number) Time spent in the tool in milliseconds.
+
+- **Event: `Health Tool: Complete`**
+  - **Description:** Fires when a user successfully completes a health tool.
+  - **NOTE:** This event is defined but is **not currently active**. The `onComplete` callback needs to be implemented within each individual health tool component to trigger it.
+  - **Event Data:**
+    - `tool_id`: (string)
+    - `tool_name`: (string)
+    - `category`: (string)
+    - `duration`: (number)
+    - `has_result`: (boolean)
+
+### 2.3. Search Events
+Track user searches within the health tools page.
+- **Trigger Location:** `src/components/health-tools/HealthToolsSearch.tsx`
+
+- **Event: `Search: Query`**
+  - **Description:** Fires when a user types a query in the health tools search bar.
+  - **Event Data:**
+    - `query`: (string) The search term.
+    - `category`: (string|undefined) The category filter applied, if any.
+    - `results_count`: (number) Number of results found.
+    - `page`: (string) Currently hardcoded to "health-tools".
+
+### 2.4. Click Events
+Track specific, high-value clicks.
+- **Trigger Location:** `src/pages/HealthTools.tsx`, `src/components/health-tools/HealthToolsSearch.tsx`
+
+- **Event: `Click: Health Tools Category`**
+  - **Description:** Fires when a user selects a category from the main page or the filter menu.
+  - **Event Data:**
+    - `element_id`: (string) The category ID, e.g., "calculation".
+    - `page`: (string) "health-tools".
+    - `context`: (string) e.g., "main-category-selection" or "category-filter".
+
+- **Event: `Click: Clear Filters`**
+  - **Description:** Fires when the user clears search/filter selections.
+  - **Event Data:**
+    - `page`: (string) "health-tools".
+    - `context`: (string) "filter-action".
+
+- **Event: `Click: Health Tool Button`**
+  - **Description:** Fires when a user clicks the "ابدأ الآن" button to open a tool.
+  - **Event Data:**
+    - `element_id`: (string) The tool ID, e.g., "bmi-calculator".
+    - `page`: (string) "health-tools".
+    - `context`: (string) The tool name, e.g., "tools-page-حاسبة كتلة الجسم (BMI)".
+
+### 2.5. Booking Funnel Events
+Track user progression through the appointment booking wizard.
+- **Trigger Location:** `src/components/booking/BookingWizardContainer.tsx`
+
+- **Event: `Booking Funnel: Step {X} ({StepName})`**
+  - **Description:** Fires when a user moves to the next step in the booking wizard.
+  - **Examples:** `Booking Funnel: Step 1 (Specialty Selection)`, `Booking Funnel: Step 2 (Doctor Selection)`
+  - **Event Data:**
+    - `step`: (number) 1, 2, 3, or 4.
+    - `step_name`: (string) e.g., "Specialty Selection".
+    - `specialty`: (string|undefined) Selected specialty name.
+    - `doctor`: (string|undefined) Selected doctor name.
+
+- **Event: `Booking: Success`**
+  - **Description:** Fires upon successful submission of the booking form.
+  - **Event Data:**
+    - `booking_ref`: (string) The unique reference for the booking.
+    - `specialty`: (string)
+    - `doctor`: (string)
+
+### 2.6. Contact Events
+Track clicks on floating contact buttons.
+- **Trigger Location:** `src/components/shared/FloatingActionButtons.tsx`
+
+- **Event: `Contact: WhatsApp Click`**
+  - **Description:** Fires when the WhatsApp floating button is clicked.
+  - **Event Data:**
+    - `method`: (string) "whatsapp"
+
+- **Event: `Contact: Phone Call`**
+  - **Description:** Fires when the phone call floating button is clicked.
+  - **Event Data:**
+    - `method`: (string) "phone"
+
+---
+
+## 3. Inactive & Future Events
+
+The following events are defined in `src/utils/analytics.ts` but are not currently implemented or triggered anywhere in the application. They can be integrated in the future.
+
+- `Search: Result Click`
+- `Click: CTA`
+- `Doctor: View Profile`
+- `Specialty: View`
+- `Booking: Abandoned`
+- `User Journey: {Step}`
+- `Error: {Type}`
+- `Performance: {Metric}`
