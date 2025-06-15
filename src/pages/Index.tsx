@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { getSpecialties } from '@/services/specialtyService';
 import { getDoctors, getDoctorSchedule } from '@/services/doctorService';
+import { analytics, trackUserInteraction } from '@/utils/analytics';
 
 const Index = () => {
   const [specialties, setSpecialties] = useState([]);
@@ -56,6 +57,26 @@ const Index = () => {
     
     loadData();
   }, []);
+
+  const handleSpecialtyCardClick = (specialtyName: string) => {
+    analytics.trackSpecialtyView(specialtyName, 'homepage');
+  };
+
+  const handleDoctorCardClick = (doctorName: string, specialty: string) => {
+    analytics.trackDoctorView(doctorName, specialty, 'homepage');
+  };
+
+  const handleViewAllSpecialtiesClick = () => {
+    trackUserInteraction.ctaClick('View All Specialties', 'homepage');
+  };
+
+  const handleViewAllDoctorsClick = () => {
+    trackUserInteraction.ctaClick('View All Doctors', 'homepage');
+  };
+
+  const handleBookingCTAClick = () => {
+    trackUserInteraction.ctaClick('Book Appointment CTA', 'homepage');
+  };
 
   return (
     <div className="min-h-screen">
@@ -148,6 +169,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
+                onClick={() => handleSpecialtyCardClick(specialty.name)}
               >
                 <SpecialtyCard specialty={specialty} />
               </motion.div>
@@ -155,7 +177,7 @@ const Index = () => {
           </div>
           
           <div className="text-center">
-            <Link to="/specialties">
+            <Link to="/specialties" onClick={handleViewAllSpecialtiesClick}>
               <Button 
                 size="lg" 
                 className="bg-brand hover:bg-brand-dark text-white px-8 py-4 rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
@@ -200,6 +222,7 @@ const Index = () => {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
+                  onClick={() => handleDoctorCardClick(doctor.name, doctor.specialty)}
                 >
                   <DoctorCard doctor={doctor} compact={true} />
                 </motion.div>
@@ -208,7 +231,7 @@ const Index = () => {
           )}
           
           <div className="text-center">
-            <Link to="/doctors">
+            <Link to="/doctors" onClick={handleViewAllDoctorsClick}>
               <Button 
                 size="lg" 
                 className="bg-brand hover:bg-brand-dark text-white px-8 py-4 rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
@@ -242,7 +265,7 @@ const Index = () => {
             <p className="text-lg text-gray-600 mb-8 leading-relaxed">
               نحن هنا لخدمتك على مدار الساعة. احجز موعدك الآن واستمتع بخدمة طبية متميزة
             </p>
-            <Link to="/booking">
+            <Link to="/booking" onClick={handleBookingCTAClick}>
               <Button 
                 size="lg" 
                 className="bg-brand hover:bg-brand-dark text-white px-10 py-4 rounded-xl font-medium text-xl shadow-lg hover:shadow-xl transition-all duration-300"

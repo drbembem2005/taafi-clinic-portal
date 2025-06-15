@@ -1,16 +1,18 @@
-
 import { Phone, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { analytics } from '@/utils/analytics';
 
 const FloatingActionButtons = () => {
   const isMobile = useIsMobile();
 
   const openWhatsApp = () => {
+    analytics.trackContactAction('WhatsApp Click', 'whatsapp');
     window.open('https://wa.me/201119007403', '_blank');
   };
 
   const makePhoneCall = () => {
+    analytics.trackContactAction('Phone Call', 'phone');
     window.location.href = 'tel:+201091003965';
   };
 

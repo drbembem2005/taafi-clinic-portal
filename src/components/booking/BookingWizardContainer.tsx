@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SpecialtySelection from './SpecialtySelection';
@@ -12,6 +11,7 @@ import { Specialty } from '@/services/specialtyService';
 import { Doctor } from '@/services/doctorService';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { analytics } from '@/utils/analytics';
 
 export interface BookingFormData {
   user_name: string;
@@ -48,6 +48,36 @@ const BookingWizardContainer = () => {
 
   // Navigation methods
   const goToNextStep = () => {
+    // Track booking funnel steps with centralized analytics
+    if (currentStep === 1) {
+      analytics.trackBookingFunnelStep({
+        step: 1,
+        stepName: 'Specialty Selection',
+        specialty: selectedSpecialty?.name
+      });
+    } else if (currentStep === 2) {
+      analytics.trackBookingFunnelStep({
+        step: 2,
+        stepName: 'Doctor Selection',
+        specialty: selectedSpecialty?.name,
+        doctor: selectedDoctor?.name
+      });
+    } else if (currentStep === 3) {
+      analytics.trackBookingFunnelStep({
+        step: 3,
+        stepName: 'Time Selection',
+        specialty: selectedSpecialty?.name,
+        doctor: selectedDoctor?.name
+      });
+    } else if (currentStep === 4) {
+      analytics.trackBookingFunnelStep({
+        step: 4,
+        stepName: 'Contact Info',
+        specialty: selectedSpecialty?.name,
+        doctor: selectedDoctor?.name
+      });
+    }
+
     setCurrentStep(prev => prev + 1);
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -108,6 +138,11 @@ const BookingWizardContainer = () => {
 
   // Handle booking success
   const handleBookingSuccess = (reference: string) => {
+    analytics.trackBookingSuccess(
+      reference,
+      selectedSpecialty?.name || '',
+      selectedDoctor?.name || ''
+    );
     setBookingReference(reference);
     setBookingComplete(true);
   };
