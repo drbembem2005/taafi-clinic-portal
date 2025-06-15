@@ -1,5 +1,4 @@
 
-```tsx
 import { Phone, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -55,4 +54,3 @@ const FloatingActionButtons = () => {
 };
 
 export default FloatingActionButtons;
-```

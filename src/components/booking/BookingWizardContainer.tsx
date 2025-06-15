@@ -1,5 +1,4 @@
 
-```tsx
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SpecialtySelection from './SpecialtySelection';
@@ -385,4 +384,3 @@ const BookingWizardContainer = () => {
 };
 
 export default BookingWizardContainer;
-```
