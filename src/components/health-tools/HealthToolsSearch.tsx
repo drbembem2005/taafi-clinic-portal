@@ -1,5 +1,3 @@
-
-```tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -131,7 +129,7 @@ const HealthToolsSearch = ({ tools, onFilteredToolsChange, selectedCategory, onC
                 <Filter className="h-5 w-5 text-gray-500" />
                 تصفية حسب الفئة
               </CardTitle>
-              {isMobile && <ChevronDown className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />}
+              {isMobile && <ChevronDown className={"h-5 w-5 text-gray-500 transition-transform duration-200 " + (open ? 'rotate-180' : '')} />}
             </div>
           </CollapsibleTrigger>
           <CollapsibleContent>
@@ -140,7 +138,7 @@ const HealthToolsSearch = ({ tools, onFilteredToolsChange, selectedCategory, onC
                 <div className="flex flex-col gap-2 p-4">
                   <Button
                     variant="ghost"
-                    className={`flex justify-between w-full rounded-full hover:bg-gray-100 transition-colors ${selectedFilter === 'all' ? 'text-brand font-semibold' : 'text-gray-700'}`}
+                    className={"flex justify-between w-full rounded-full hover:bg-gray-100 transition-colors " + (selectedFilter === 'all' ? 'text-brand font-semibold' : 'text-gray-700')}
                     onClick={handleClearFilters}
                   >
                     <span>الكل</span>
@@ -150,7 +148,7 @@ const HealthToolsSearch = ({ tools, onFilteredToolsChange, selectedCategory, onC
                     <Button
                       key={category}
                       variant="ghost"
-                      className={`flex justify-between w-full rounded-full hover:bg-gray-100 transition-colors ${selectedFilter === category ? 'text-brand font-semibold' : 'text-gray-700'}`}
+                      className={"flex justify-between w-full rounded-full hover:bg-gray-100 transition-colors " + (selectedFilter === category ? 'text-brand font-semibold' : 'text-gray-700')}
                       onClick={() => handleCategorySelect(category)}
                     >
                       <span>{category}</span>
@@ -168,4 +166,3 @@ const HealthToolsSearch = ({ tools, onFilteredToolsChange, selectedCategory, onC
 };
 
 export default HealthToolsSearch;
-```
