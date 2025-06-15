@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,7 @@ interface HealthToolsSearchProps {
 const HealthToolsSearch = ({ tools, onFilteredToolsChange, selectedCategory, onCategoryChange }: HealthToolsSearchProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<string | 'all'>(selectedCategory || 'all');
-  const searchTimeoutRef = useRef<number | null>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setSelectedFilter(selectedCategory || 'all');

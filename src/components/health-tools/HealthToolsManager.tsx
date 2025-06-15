@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import HealthToolModal from './HealthToolModal';
+import { trackHealthTool } from '@/utils/analytics';
 import BMICalculator from './BMICalculator';
 import CalorieCalculator from './CalorieCalculator';
 import DiabetesRiskTest from './DiabetesRiskTest';
@@ -212,13 +213,24 @@ const HealthToolsManager = ({ activeToolId, onCloseTool }: HealthToolsManagerPro
     }
   };
 
+  if (!activeToolId) {
+    return null;
+  }
+
+  const ToolComponent = toolComponents[activeToolId];
+  
+  if (!ToolComponent) {
+    return null;
+  }
+
   return (
     <HealthToolModal
       isOpen={!!activeToolId}
       onClose={handleCloseTool}
-      toolId={activeToolId}
-      onComplete={handleToolComplete}
-    />
+      title={toolTitles[activeToolId] || 'أداة صحية'}
+    >
+      <ToolComponent onComplete={handleToolComplete} />
+    </HealthToolModal>
   );
 };
 
