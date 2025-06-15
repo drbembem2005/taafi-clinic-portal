@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import HealthToolModal from './HealthToolModal';
 import BMICalculator from './BMICalculator';
 import CalorieCalculator from './CalorieCalculator';
@@ -123,102 +123,21 @@ interface HealthToolsManagerProps {
 }
 
 const HealthToolsManager = ({ activeToolId, onCloseTool }: HealthToolsManagerProps) => {
-  const [toolStartTime, setToolStartTime] = useState<number | null>(null);
+  if (!activeToolId || !toolComponents[activeToolId]) {
+    return null;
+  }
 
-  // Track tool opening
-  useEffect(() => {
-    if (activeToolId) {
-      const startTime = Date.now();
-      setToolStartTime(startTime);
-      
-      // Find tool details for tracking
-      const allTools = [
-        { id: 'bmi-calculator', name: 'حاسبة كتلة الجسم', category: 'calculation' },
-        { id: 'biological-age', name: 'حاسبة العمر البيولوجي', category: 'calculation' },
-        { id: 'metabolism-calculator', name: 'حاسبة الأيض والحرق', category: 'calculation' },
-        { id: 'diabetes-risk', name: 'اختبار خطر السكري', category: 'assessment' },
-        { id: 'vitamin-d-calculator', name: 'حاسبة فيتامين د', category: 'calculation' },
-        { id: 'pregnancy-calculator', name: 'حاسبة الحمل والولادة', category: 'pregnancy' },
-        { id: 'calories-calculator', name: 'حاسبة السعرات اليومية', category: 'calculation' },
-        { id: 'water-calculator', name: 'حاسبة نسبة الماء اليومية', category: 'calculation' },
-        { id: 'heart-rate-calculator', name: 'حاسبة معدل النبض الطبيعي', category: 'calculation' },
-        { id: 'anxiety-test', name: 'اختبار القلق', category: 'mental' },
-        { id: 'depression-test', name: 'اختبار الاكتئاب', category: 'mental' },
-        { id: 'breathing-timer', name: 'مؤقت تمارين التنفس', category: 'mental' },
-        { id: 'sleep-quality', name: 'تقييم جودة النوم', category: 'mental' }
-      ];
-      
-      const tool = allTools.find(t => t.id === activeToolId);
-      if (tool) {
-        trackHealthTool.open(tool.id, tool.name, tool.category);
-      }
-    }
-  }, [activeToolId]);
-
-  const handleCloseTool = () => {
-    // Track tool abandonment if it was closed without completion
-    if (activeToolId && toolStartTime) {
-      const duration = Date.now() - toolStartTime;
-      const allTools = [
-        { id: 'bmi-calculator', name: 'حاسبة كتلة الجسم', category: 'calculation' },
-        { id: 'biological-age', name: 'حاسبة العمر البيولوجي', category: 'calculation' },
-        { id: 'metabolism-calculator', name: 'حاسبة الأيض والحرق', category: 'calculation' },
-        { id: 'diabetes-risk', name: 'اختبار خطر السكري', category: 'assessment' },
-        { id: 'vitamin-d-calculator', name: 'حاسبة فيتامين د', category: 'calculation' },
-        { id: 'pregnancy-calculator', name: 'حاسبة الحمل والولادة', category: 'pregnancy' },
-        { id: 'calories-calculator', name: 'حاسبة السعرات اليومية', category: 'calculation' },
-        { id: 'water-calculator', name: 'حاسبة نسبة الماء اليومية', category: 'calculation' },
-        { id: 'heart-rate-calculator', name: 'حاسبة معدل النبض الطبيعي', category: 'calculation' },
-        { id: 'anxiety-test', name: 'اختبار القلق', category: 'mental' },
-        { id: 'depression-test', name: 'اختبار الاكتئاب', category: 'mental' },
-        { id: 'breathing-timer', name: 'مؤقت تمارين التنفس', category: 'mental' },
-        { id: 'sleep-quality', name: 'تقييم جودة النوم', category: 'mental' }
-      ];
-      
-      const tool = allTools.find(t => t.id === activeToolId);
-      if (tool && duration > 5000) { // Only track if spent more than 5 seconds
-        trackHealthTool.abandon(tool.id, tool.name, tool.category, duration);
-      }
-    }
-    
-    setToolStartTime(null);
-    onCloseTool();
-  };
-
-  // Track tool completion
-  const handleToolComplete = (result: any) => {
-    if (activeToolId && toolStartTime) {
-      const duration = Date.now() - toolStartTime;
-      const allTools = [
-        { id: 'bmi-calculator', name: 'حاسبة كتلة الجسم', category: 'calculation' },
-        { id: 'biological-age', name: 'حاسبة العمر البيولوجي', category: 'calculation' },
-        { id: 'metabolism-calculator', name: 'حاسبة الأيض والحرق', category: 'calculation' },
-        { id: 'diabetes-risk', name: 'اختبار خطر السكري', category: 'assessment' },
-        { id: 'vitamin-d-calculator', name: 'حاسبة فيتامين د', category: 'calculation' },
-        { id: 'pregnancy-calculator', name: 'حاسبة الحمل والولادة', category: 'pregnancy' },
-        { id: 'calories-calculator', name: 'حاسبة السعرات اليومية', category: 'calculation' },
-        { id: 'water-calculator', name: 'حاسبة نسبة الماء اليومية', category: 'calculation' },
-        { id: 'heart-rate-calculator', name: 'حاسبة معدل النبض الطبيعي', category: 'calculation' },
-        { id: 'anxiety-test', name: 'اختبار القلق', category: 'mental' },
-        { id: 'depression-test', name: 'اختبار الاكتئاب', category: 'mental' },
-        { id: 'breathing-timer', name: 'مؤقت تمارين التنفس', category: 'mental' },
-        { id: 'sleep-quality', name: 'تقييم جودة النوم', category: 'mental' }
-      ];
-      
-      const tool = allTools.find(t => t.id === activeToolId);
-      if (tool) {
-        trackHealthTool.complete(tool.id, tool.name, tool.category, duration, result);
-      }
-    }
-  };
+  const ToolComponent = toolComponents[activeToolId];
+  const toolTitle = toolTitles[activeToolId] || 'أداة صحية';
 
   return (
     <HealthToolModal
-      isOpen={!!activeToolId}
-      onClose={handleCloseTool}
-      toolId={activeToolId}
-      onComplete={handleToolComplete}
-    />
+      isOpen={Boolean(activeToolId)}
+      onClose={onCloseTool}
+      title={toolTitle}
+    >
+      <ToolComponent />
+    </HealthToolModal>
   );
 };
 

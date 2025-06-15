@@ -31,8 +31,6 @@ import {
   User
 } from 'lucide-react';
 
-import { analytics, trackUserInteraction } from '@/utils/analytics';
-
 interface HealthTool {
   id: string;
   title: string;
@@ -466,31 +464,6 @@ const HealthTools = () => {
     }));
   }, [selectedCategory]);
 
-  const handleCategorySelect = (categoryId: string) => {
-    // Track category selection
-    trackUserInteraction.click(
-      'Health Tools Category',
-      'health-tools',
-      categoryId,
-      'main-category-selection'
-    );
-    
-    setSelectedCategory(categoryId);
-  };
-
-  const handleToolOpen = (toolId: string, toolName: string) => {
-    // Track tool opening from tools page
-    trackUserInteraction.click(
-      'Health Tool Button',
-      'health-tools',
-      toolId,
-      `tools-page-${toolName}`
-    );
-    
-    console.log('🚀 HealthTools: Opening tool:', toolId);
-    setActiveToolId(toolId);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Header */}
@@ -565,7 +538,7 @@ const HealthTools = () => {
                   <Card 
                     key={category.id} 
                     className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border-0 shadow-md rounded-2xl bg-white/95 backdrop-blur-sm relative cursor-pointer"
-                    onClick={() => handleCategorySelect(category.id)}
+                    onClick={() => setSelectedCategory(category.id)}
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-brand/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <CardHeader className="pb-4 pt-6 relative z-10">
@@ -628,7 +601,7 @@ const HealthTools = () => {
                       </p>
                       <Button 
                         className="w-full bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white rounded-xl py-2.5 font-bold transition-all duration-300 group-hover:shadow-lg transform group-hover:scale-105 text-sm shadow-md"
-                        onClick={() => handleToolOpen(tool.id, tool.title)}
+                        onClick={() => openTool(tool.id)}
                       >
                         <Zap className="ml-2 h-4 w-4" />
                         ابدأ الآن
