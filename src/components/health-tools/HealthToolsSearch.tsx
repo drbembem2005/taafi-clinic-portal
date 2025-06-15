@@ -1,11 +1,14 @@
 
+```tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Search, XCircle, Filter, CheckCircle } from 'lucide-react';
+import { Search, XCircle, Filter, CheckCircle, ChevronDown } from 'lucide-react';
 import { trackUserInteraction } from '@/utils/analytics';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 
 interface HealthToolsSearchProps {
   tools: any[];
@@ -18,6 +21,8 @@ const HealthToolsSearch = ({ tools, onFilteredToolsChange, selectedCategory, onC
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<string | 'all'>(selectedCategory || 'all');
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMobile = useIsMobile();
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
     setSelectedFilter(selectedCategory || 'all');
@@ -86,6 +91,10 @@ const HealthToolsSearch = ({ tools, onFilteredToolsChange, selectedCategory, onC
     onFilteredToolsChange(tools);
   };
 
+  const open = isMobile ? isFilterOpen : true;
+  const onOpenChange = isMobile ? setIsFilterOpen : () => {};
+  const triggerDisabled = !isMobile;
+
   return (
     <div className="flex flex-col gap-4">
       {/* Search Input */}
@@ -114,41 +123,49 @@ const HealthToolsSearch = ({ tools, onFilteredToolsChange, selectedCategory, onC
       </div>
 
       {/* Category Filters */}
-      <Card className="border-0 shadow-md rounded-2xl">
-        <CardHeader className="py-3 px-4">
-          <CardTitle className="text-lg font-bold flex items-center gap-2">
-            <Filter className="h-5 w-5 text-gray-500" />
-            تصفية حسب الفئة
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          <ScrollArea className="h-40">
-            <div className="flex flex-col gap-2 p-4">
-              <Button
-                variant="ghost"
-                className={`flex justify-between w-full rounded-full hover:bg-gray-100 transition-colors ${selectedFilter === 'all' ? 'text-brand font-semibold' : 'text-gray-700'}`}
-                onClick={handleClearFilters}
-              >
-                <span>الكل</span>
-                {selectedFilter === 'all' && <CheckCircle className="h-4 w-4 text-brand" />}
-              </Button>
-              {[...new Set(tools.map(tool => tool.category))].map((category: any) => (
-                <Button
-                  key={category}
-                  variant="ghost"
-                  className={`flex justify-between w-full rounded-full hover:bg-gray-100 transition-colors ${selectedFilter === category ? 'text-brand font-semibold' : 'text-gray-700'}`}
-                  onClick={() => handleCategorySelect(category)}
-                >
-                  <span>{category}</span>
-                  {selectedFilter === category && <CheckCircle className="h-4 w-4 text-brand" />}
-                </Button>
-              ))}
+      <Card className="border-0 shadow-md rounded-2xl overflow-hidden">
+        <Collapsible open={open} onOpenChange={onOpenChange}>
+          <CollapsibleTrigger disabled={triggerDisabled} className="w-full text-left p-0 disabled:cursor-default">
+            <div className="flex justify-between items-center py-3 px-4">
+              <CardTitle className="text-lg font-bold flex items-center gap-2">
+                <Filter className="h-5 w-5 text-gray-500" />
+                تصفية حسب الفئة
+              </CardTitle>
+              {isMobile && <ChevronDown className={`h-5 w-5 text-gray-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />}
             </div>
-          </ScrollArea>
-        </CardContent>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="p-0 border-t border-gray-100">
+              <ScrollArea className="h-40">
+                <div className="flex flex-col gap-2 p-4">
+                  <Button
+                    variant="ghost"
+                    className={`flex justify-between w-full rounded-full hover:bg-gray-100 transition-colors ${selectedFilter === 'all' ? 'text-brand font-semibold' : 'text-gray-700'}`}
+                    onClick={handleClearFilters}
+                  >
+                    <span>الكل</span>
+                    {selectedFilter === 'all' && <CheckCircle className="h-4 w-4 text-brand" />}
+                  </Button>
+                  {[...new Set(tools.map(tool => tool.category))].map((category: any) => (
+                    <Button
+                      key={category}
+                      variant="ghost"
+                      className={`flex justify-between w-full rounded-full hover:bg-gray-100 transition-colors ${selectedFilter === category ? 'text-brand font-semibold' : 'text-gray-700'}`}
+                      onClick={() => handleCategorySelect(category)}
+                    >
+                      <span>{category}</span>
+                      {selectedFilter === category && <CheckCircle className="h-4 w-4 text-brand" />}
+                    </Button>
+                  ))}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </CollapsibleContent>
+        </Collapsible>
       </Card>
     </div>
   );
 };
 
 export default HealthToolsSearch;
+```
