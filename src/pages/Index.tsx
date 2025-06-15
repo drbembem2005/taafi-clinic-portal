@@ -54,25 +54,25 @@ const Index = () => {
     loadData();
   }, []);
 
-  const handleSpecialtyCardClick = (specialtyName: string) => {
+  function handleSpecialtyCardClick(specialtyName: string) {
     analytics.trackSpecialtyView(specialtyName, 'homepage');
-  };
+  }
 
-  const handleDoctorCardClick = (doctorName: string, specialty: string) => {
+  function handleDoctorCardClick(doctorName: string, specialty: string) {
     analytics.trackDoctorView(doctorName, specialty, 'homepage');
-  };
+  }
 
-  const handleViewAllSpecialtiesClick = () => {
+  function handleViewAllSpecialtiesClick() {
     trackUserInteraction.ctaClick('View All Specialties', 'homepage');
-  };
+  }
 
-  const handleViewAllDoctorsClick = () => {
+  function handleViewAllDoctorsClick() {
     trackUserInteraction.ctaClick('View All Doctors', 'homepage');
-  };
+  }
 
-  const handleBookingCTAClick = () => {
+  function handleBookingCTAClick() {
     trackUserInteraction.ctaClick('Book Appointment CTA', 'homepage');
-  };
+  }
 
   return (
     <div className="min-h-screen">
@@ -165,7 +165,7 @@ const Index = () => {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                onClick={() => handleSpecialtyCardClick(specialty.name)}
+                onClick={() => handleSpecialtyCardClick && handleSpecialtyCardClick(specialty.name)}
               >
                 <SpecialtyCard specialty={specialty} />
               </motion.div>
@@ -173,7 +173,7 @@ const Index = () => {
           </div>
           
           <div className="text-center">
-            <Link to="/specialties" onClick={handleViewAllSpecialtiesClick}>
+            <Link to="/specialties" onClick={() => handleViewAllSpecialtiesClick && handleViewAllSpecialtiesClick()}>
               <Button 
                 size="lg" 
                 className="bg-brand hover:bg-brand-dark text-white px-8 py-4 rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
@@ -218,7 +218,7 @@ const Index = () => {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
-                  onClick={() => handleDoctorCardClick(doctor.name, doctor.specialty)}
+                  onClick={() => handleDoctorCardClick && handleDoctorCardClick(doctor.name, doctor.specialty)}
                 >
                   <DoctorCard doctor={doctor} compact={true} />
                 </motion.div>
@@ -227,7 +227,7 @@ const Index = () => {
           )}
           
           <div className="text-center">
-            <Link to="/doctors" onClick={handleViewAllDoctorsClick}>
+            <Link to="/doctors" onClick={() => handleViewAllDoctorsClick && handleViewAllDoctorsClick()}>
               <Button 
                 size="lg" 
                 className="bg-brand hover:bg-brand-dark text-white px-8 py-4 rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
@@ -261,7 +261,7 @@ const Index = () => {
             <p className="text-lg text-gray-600 mb-8 leading-relaxed">
               نحن هنا لخدمتك على مدار الساعة. احجز موعدك الآن واستمتع بخدمة طبية متميزة
             </p>
-            <Link to="/booking" onClick={handleBookingCTAClick}>
+            <Link to="/booking" onClick={() => handleBookingCTAClick && handleBookingCTAClick()}>
               <Button 
                 size="lg" 
                 className="bg-brand hover:bg-brand-dark text-white px-10 py-4 rounded-xl font-medium text-xl shadow-lg hover:shadow-xl transition-all duration-300"
