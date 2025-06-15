@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SpecialtySelection from './SpecialtySelection';
@@ -12,6 +11,7 @@ import { Specialty } from '@/services/specialtyService';
 import { Doctor } from '@/services/doctorService';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { analytics } from '@/utils/analytics';
 
 export interface BookingFormData {
   user_name: string;
@@ -24,12 +24,6 @@ export interface BookingFormData {
   booking_time: string;
   booking_method: 'whatsapp' | 'phone' | 'online';
 }
-
-const trackEvent = (eventName: string, eventData?: Record<string, any>) => {
-  if (typeof window !== 'undefined' && (window as any).umami) {
-    (window as any).umami.track(eventName, eventData);
-  }
-};
 
 const BookingWizardContainer = () => {
   // State for wizard steps - now we have 5 steps instead of 4
@@ -54,15 +48,34 @@ const BookingWizardContainer = () => {
 
   // Navigation methods
   const goToNextStep = () => {
-    // Track booking funnel steps
+    // Track booking funnel steps with centralized analytics
     if (currentStep === 1) {
-      trackEvent('Booking Funnel: Step 1 Complete (Specialty)', { specialty: selectedSpecialty?.name });
+      analytics.trackBookingFunnelStep({
+        step: 1,
+        stepName: 'Specialty Selection',
+        specialty: selectedSpecialty?.name
+      });
     } else if (currentStep === 2) {
-      trackEvent('Booking Funnel: Step 2 Complete (Doctor)', { doctor: selectedDoctor?.name });
+      analytics.trackBookingFunnelStep({
+        step: 2,
+        stepName: 'Doctor Selection',
+        specialty: selectedSpecialty?.name,
+        doctor: selectedDoctor?.name
+      });
     } else if (currentStep === 3) {
-      trackEvent('Booking Funnel: Step 3 Complete (Time)', { date: formattedDate, time: formData.booking_time });
+      analytics.trackBookingFunnelStep({
+        step: 3,
+        stepName: 'Time Selection',
+        specialty: selectedSpecialty?.name,
+        doctor: selectedDoctor?.name
+      });
     } else if (currentStep === 4) {
-      trackEvent('Booking Funnel: Step 4 Complete (Contact Info)');
+      analytics.trackBookingFunnelStep({
+        step: 4,
+        stepName: 'Contact Info',
+        specialty: selectedSpecialty?.name,
+        doctor: selectedDoctor?.name
+      });
     }
 
     setCurrentStep(prev => prev + 1);
@@ -125,11 +138,11 @@ const BookingWizardContainer = () => {
 
   // Handle booking success
   const handleBookingSuccess = (reference: string) => {
-    trackEvent('Booking Success', {
-      booking_ref: reference,
-      specialty: selectedSpecialty?.name,
-      doctor: selectedDoctor?.name,
-    });
+    analytics.trackBookingSuccess(
+      reference,
+      selectedSpecialty?.name || '',
+      selectedDoctor?.name || ''
+    );
     setBookingReference(reference);
     setBookingComplete(true);
   };

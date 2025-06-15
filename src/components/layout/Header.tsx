@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { motion } from 'framer-motion';
+import { trackUserInteraction } from '@/utils/analytics';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,9 +27,7 @@ const Header = () => {
   };
 
   const handleBookingClick = () => {
-    if (typeof window !== 'undefined' && (window as any).umami) {
-      (window as any).umami.track('Click: Book Now', { component: 'Header' });
-    }
+    trackUserInteraction.ctaClick('Book Now Header', 'header');
   };
   
   const handleMobileBookingClick = () => {

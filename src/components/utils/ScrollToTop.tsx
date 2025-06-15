@@ -1,6 +1,7 @@
 
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { analytics } from '@/utils/analytics';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -12,10 +13,8 @@ const ScrollToTop = () => {
       behavior: 'smooth'
     });
 
-    // Manually track page views with Umami for SPA navigation
-    if (typeof window !== 'undefined' && (window as any).umami) {
-      (window as any).umami.track(pathname);
-    }
+    // Track page views with centralized analytics
+    analytics.trackPageView(pathname);
   }, [pathname]);
 
   return null;
