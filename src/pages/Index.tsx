@@ -13,6 +13,12 @@ import { Link } from 'react-router-dom';
 import { getSpecialties } from '@/services/specialtyService';
 import { getDoctors, getDoctorSchedule } from '@/services/doctorService';
 
+const trackEvent = (eventName: string, eventData?: Record<string, any>) => {
+  if (typeof window !== 'undefined' && (window as any).umami) {
+    (window as any).umami.track(eventName, eventData);
+  }
+};
+
 const Index = () => {
   const [specialties, setSpecialties] = useState([]);
   const [doctors, setDoctors] = useState([]);
@@ -155,7 +161,7 @@ const Index = () => {
           </div>
           
           <div className="text-center">
-            <Link to="/specialties">
+            <Link to="/specialties" onClick={() => trackEvent('Click: View All Specialties', { page: 'Homepage' })}>
               <Button 
                 size="lg" 
                 className="bg-brand hover:bg-brand-dark text-white px-8 py-4 rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
@@ -208,7 +214,7 @@ const Index = () => {
           )}
           
           <div className="text-center">
-            <Link to="/doctors">
+            <Link to="/doctors" onClick={() => trackEvent('Click: View All Doctors', { page: 'Homepage' })}>
               <Button 
                 size="lg" 
                 className="bg-brand hover:bg-brand-dark text-white px-8 py-4 rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
@@ -242,7 +248,7 @@ const Index = () => {
             <p className="text-lg text-gray-600 mb-8 leading-relaxed">
               نحن هنا لخدمتك على مدار الساعة. احجز موعدك الآن واستمتع بخدمة طبية متميزة
             </p>
-            <Link to="/booking">
+            <Link to="/booking" onClick={() => trackEvent('Click: Book Appointment CTA', { page: 'Homepage' })}>
               <Button 
                 size="lg" 
                 className="bg-brand hover:bg-brand-dark text-white px-10 py-4 rounded-xl font-medium text-xl shadow-lg hover:shadow-xl transition-all duration-300"

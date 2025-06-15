@@ -1,4 +1,5 @@
 
+```tsx
 import { Phone, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -7,10 +8,16 @@ const FloatingActionButtons = () => {
   const isMobile = useIsMobile();
 
   const openWhatsApp = () => {
+    if (typeof window !== 'undefined' && (window as any).umami) {
+      (window as any).umami.track('Click: FAB WhatsApp');
+    }
     window.open('https://wa.me/201119007403', '_blank');
   };
 
   const makePhoneCall = () => {
+    if (typeof window !== 'undefined' && (window as any).umami) {
+      (window as any).umami.track('Click: FAB Phone Call');
+    }
     window.location.href = 'tel:+201091003965';
   };
 
@@ -48,3 +55,4 @@ const FloatingActionButtons = () => {
 };
 
 export default FloatingActionButtons;
+```

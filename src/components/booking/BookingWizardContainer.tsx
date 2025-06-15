@@ -1,4 +1,5 @@
 
+```tsx
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SpecialtySelection from './SpecialtySelection';
@@ -25,6 +26,12 @@ export interface BookingFormData {
   booking_method: 'whatsapp' | 'phone' | 'online';
 }
 
+const trackEvent = (eventName: string, eventData?: Record<string, any>) => {
+  if (typeof window !== 'undefined' && (window as any).umami) {
+    (window as any).umami.track(eventName, eventData);
+  }
+};
+
 const BookingWizardContainer = () => {
   // State for wizard steps - now we have 5 steps instead of 4
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -48,6 +55,17 @@ const BookingWizardContainer = () => {
 
   // Navigation methods
   const goToNextStep = () => {
+    // Track booking funnel steps
+    if (currentStep === 1) {
+      trackEvent('Booking Funnel: Step 1 Complete (Specialty)', { specialty: selectedSpecialty?.name });
+    } else if (currentStep === 2) {
+      trackEvent('Booking Funnel: Step 2 Complete (Doctor)', { doctor: selectedDoctor?.name });
+    } else if (currentStep === 3) {
+      trackEvent('Booking Funnel: Step 3 Complete (Time)', { date: formattedDate, time: formData.booking_time });
+    } else if (currentStep === 4) {
+      trackEvent('Booking Funnel: Step 4 Complete (Contact Info)');
+    }
+
     setCurrentStep(prev => prev + 1);
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -108,6 +126,11 @@ const BookingWizardContainer = () => {
 
   // Handle booking success
   const handleBookingSuccess = (reference: string) => {
+    trackEvent('Booking Success', {
+      booking_ref: reference,
+      specialty: selectedSpecialty?.name,
+      doctor: selectedDoctor?.name,
+    });
     setBookingReference(reference);
     setBookingComplete(true);
   };
@@ -362,3 +385,4 @@ const BookingWizardContainer = () => {
 };
 
 export default BookingWizardContainer;
+```
