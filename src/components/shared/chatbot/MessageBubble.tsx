@@ -26,15 +26,11 @@ const MessageBubble = ({
   const isUser = message.sender === 'user';
 
   const handleOptionClick = async (action: string, text: string) => {
-    console.log('🔧 MessageBubble: Handling action:', action, 'with text:', text);
-    
-    // Handle external and contact actions
     if (action.startsWith('external-') || action.startsWith('contact-')) {
       await chatbotService.handleExternalAction(action);
       return;
     }
 
-    // Handle regular chatbot actions
     onAddMessage({ text, sender: 'user' });
     onSetLoading(true);
 

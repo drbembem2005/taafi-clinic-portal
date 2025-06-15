@@ -1,8 +1,8 @@
+
 import { useState } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { motion } from 'framer-motion';
-import { trackUserInteraction } from '@/utils/analytics';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,15 +24,6 @@ const Header = () => {
         ? 'text-brand-dark font-bold border-b-2 border-brand'
         : 'text-gray-700 hover:text-brand hover:bg-blue-50'
     }`;
-  };
-
-  const handleBookingClick = () => {
-    trackUserInteraction.ctaClick('Book Now Header', 'header');
-  };
-  
-  const handleMobileBookingClick = () => {
-    handleBookingClick();
-    setIsOpen(false);
   };
 
   return (
@@ -95,11 +86,9 @@ const Header = () => {
                 {item.name}
               </NavLink>
             ))}
-            <Link to="/booking" onClick={handleBookingClick}>
-              <Button variant="default" className="bg-brand hover:bg-brand-dark text-white px-5 py-2 rounded-md mr-4">
-                احجز الآن
-              </Button>
-            </Link>
+            <Button variant="default" className="bg-brand hover:bg-brand-dark text-white px-5 py-2 rounded-md mr-4">
+              احجز الآن
+            </Button>
           </nav>
         </div>
 
@@ -124,11 +113,9 @@ const Header = () => {
                   {item.name}
                 </NavLink>
               ))}
-              <Link to="/booking" onClick={handleMobileBookingClick}>
-                <Button variant="default" className="bg-brand hover:bg-brand-dark text-white w-full py-2 mt-4">
-                  احجز الآن
-                </Button>
-              </Link>
+              <Button variant="default" className="bg-brand hover:bg-brand-dark text-white w-full py-2 mt-4">
+                احجز الآن
+              </Button>
             </div>
           </motion.nav>
         )}

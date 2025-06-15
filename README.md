@@ -1,187 +1,136 @@
 
-# عيادات تعافي التخصصية - نظام الحجوزات الطبية
+# Welcome to your Lovable project
 
-## وصف عام للمشروع
+## Project info
 
-نظام حجوزات طبية متكامل لعيادات تعافي التخصصية، يوفر منصة شاملة لحجز المواعيد الطبية مع الأطباء المتخصصين. يتميز النظام بواجهة مستخدم عصرية وسهلة الاستخدام، مع دعم كامل للغة العربية وتجربة مستخدم محسنة على جميع الأجهزة.
+**URL**: https://lovable.dev/projects/b9f3e6f7-d255-4ca5-9c38-7ccafc078662
 
-### الميزات الرئيسية:
-- **نظام حجوزات ذكي**: حجز المواعيد بسهولة مع الأطباء المتخصصين
-- **شات بوت تفاعلي**: مساعد ذكي للإجابة على الاستفسارات وتسهيل عملية الحجز
-- **أدوات صحية متقدمة**: مجموعة شاملة من الحاسبات والاختبارات الصحية
-- **واجهة متجاوبة**: تصميم محسن لجميع أحجام الشاشات
-- **دعم متعدد اللغات**: واجهة باللغة العربية مع دعم RTL
+## How can I edit this code?
 
-## التقنيات المستخدمة
+There are several ways of editing your application.
 
-### Frontend Technologies:
-- **React 18** - مكتبة بناء واجهات المستخدم
-- **TypeScript** - لتطوير آمن ومنظم
-- **Vite** - أداة البناء والتطوير السريع
-- **Tailwind CSS** - إطار عمل CSS للتصميم
-- **Framer Motion** - مكتبة الحركات والتفاعلات
-- **React Router DOM** - إدارة التنقل والمسارات
-- **React Hook Form** - إدارة النماذج والتحقق
-- **Zod** - التحقق من صحة البيانات
+**Use Lovable**
 
-### UI Components:
-- **Shadcn/ui** - مكونات واجهة المستخدم المعاد استخدامها
-- **Radix UI** - مكونات UI أساسية قابلة للوصول
-- **Lucide React** - مجموعة الأيقونات
-- **Recharts** - مكتبة الرسوم البيانية
+Simply visit the [Lovable Project](https://lovable.dev/projects/b9f3e6f7-d255-4ca5-9c38-7ccafc078662) and start prompting.
 
-### Backend & Database:
-- **Supabase** - قاعدة البيانات والمصادقة
-- **PostgreSQL** - قاعدة البيانات الرئيسية
-- **Row Level Security (RLS)** - أمان البيانات
+Changes made via Lovable will be committed automatically to this repo.
 
-### DevOps & Deployment:
-- **Docker** - تحويل التطبيق إلى حاويات
-- **Docker Compose** - إدارة الحاويات
-- **Nginx** - خادم الويب
-- **Dokploy** - منصة النشر
+**Use your preferred IDE**
 
-## طريقة التشغيل أو التثبيت
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-### متطلبات النظام:
-- Node.js (الإصدار 18 أو أحدث)
-- npm أو yarn
-- Git
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-### التثبيت المحلي:
+Follow these steps:
 
-```bash
-# استنساخ المشروع
-git clone <repository-url>
-cd clinic-booking-app
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
 
-# تثبيت التبعيات
-npm install
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
 
-# تشغيل التطبيق في وضع التطوير
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-### التثبيت باستخدام Docker:
+**Edit a file directly in GitHub**
 
-```bash
-# بناء وتشغيل الحاويات
-docker-compose up -d
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-# أو بناء يدوي
-docker build -t clinic-booking-app .
-docker run -p 8080:8080 clinic-booking-app
-```
+**Use GitHub Codespaces**
 
-### متغيرات البيئة المطلوبة:
-```env
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-NODE_ENV=production
-```
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## الوظائف الأساسية
+## What technologies are used for this project?
 
-### 1. إدارة المواعيد الطبية
-- **حجز المواعيد**: نظام حجز تفاعلي بخطوات واضحة
-- **اختيار التخصص**: عرض جميع التخصصات المتاحة
-- **اختيار الطبيب**: قائمة الأطباء مع معلوماتهم التفصيلية
-- **اختيار التوقيت**: تقويم تفاعلي للمواعيد المتاحة
-- **تأكيد الحجز**: نظام تأكيد شامل مع إرسال التفاصيل
+This project is built with:
 
-### 2. الشات بوت الذكي
-- **مساعد تفاعلي**: إجابة فورية على الاستفسارات
-- **إرشاد الحجز**: مساعدة في عملية الحجز خطوة بخطوة
-- **معلومات العيادة**: مواعيد العمل، الموقع، التواصل
-- **واجهة محادثة**: تصميم عصري مع رسائل متحركة
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-### 3. الأدوات الصحية
-- **حاسبات صحية**: BMI، السعرات الحرارية، معدل الأيض
-- **اختبارات نفسية**: القلق، الاكتئاب، الثقة بالنفس
-- **أدوات متخصصة**: حاسبة الحمل، التبويض، صحة القلب
-- **تقييمات شاملة**: نمط الحياة، العادات الصحية
+## How can I deploy this project?
 
-### 4. إدارة المحتوى
-- **صفحة الأطباء**: عرض شامل لجميع الأطباء والتخصصات
-- **المدونة الطبية**: مقالات طبية تثقيفية
-- **معلومات التواصل**: تفاصيل العيادة والموقع
+### Using Docker (Recommended)
 
-## هيكل المجلدات
+This project includes Docker configuration for easy deployment:
 
-```
-src/
-├── components/              # المكونات الرئيسية
-│   ├── ui/                 # مكونات واجهة المستخدم الأساسية
-│   ├── shared/             # المكونات المشتركة
-│   ├── booking/            # مكونات نظام الحجز
-│   ├── health-tools/       # مكونات الأدوات الصحية
-│   ├── layout/             # مكونات التخطيط العام
-│   └── admin/              # مكونات الإدارة
-├── pages/                  # صفحات التطبيق
-│   ├── Index.tsx           # الصفحة الرئيسية
-│   ├── Booking.tsx         # صفحة الحجز
-│   ├── Doctors.tsx         # صفحة الأطباء
-│   ├── HealthTools.tsx     # صفحة الأدوات الصحية
-│   └── ...
-├── services/               # خدمات API
-│   ├── doctorService.ts    # خدمات الأطباء
-│   ├── bookingService.ts   # خدمات الحجز
-│   └── specialtyService.ts # خدمات التخصصات
-├── hooks/                  # Custom Hooks
-├── lib/                    # المكتبات المساعدة
-├── types/                  # تعريفات الأنواع
-├── data/                   # البيانات الثابتة
-└── integrations/           # تكاملات خارجية
-    └── supabase/           # تكامل Supabase
-```
+1. **Build and run with Docker Compose:**
+   ```sh
+   docker-compose up -d
+   ```
 
-## معلومات إضافية عن API
+2. **Or build and run manually:**
+   ```sh
+   # Build the Docker image
+   docker build -t clinic-booking-app .
 
-### قاعدة البيانات (Supabase)
-النظام يستخدم Supabase كخدمة backend شاملة تشمل:
+   # Run the container
+   docker run -p 80:80 clinic-booking-app
+   ```
 
-#### الجداول الرئيسية:
-- **specialties**: التخصصات الطبية
-- **doctors**: معلومات الأطباء
-- **doctor_schedules**: جداول مواعيد الأطباء
-- **appointments**: المواعيد المحجوزة
-- **blog_posts**: مقالات المدونة
+3. **Access the application:**
+   Open your browser and navigate to `http://localhost`
 
-#### APIs المستخدمة:
-- **REST API**: للعمليات الأساسية (CRUD)
-- **Real-time Subscriptions**: للتحديثات الفورية
-- **Row Level Security**: لأمان البيانات
+### Deploying with Dokploy
 
-#### Authentication:
-- دعم المصادقة الآمنة
-- إدارة الجلسات
-- حماية البيانات الحساسة
+This project is configured to work with Dokploy:
 
-### External APIs:
-- **Google Maps**: لعرض موقع العيادة
-- **WhatsApp API**: للتواصل المباشر
-- **Email Services**: لإرسال تأكيدات الحجز
+1. **Push your repository to a Git provider supported by Dokploy** (GitHub, GitLab, etc.)
 
-## مطور المشروع أو معلومات التواصل
+2. **Connect your repository in Dokploy** and use the following settings:
+   - **Platform**: Docker (Containerized)
+   - **Build Command**: Not needed (handled by Dockerfile)
+   - **Port**: 80
 
-### عيادات تعافي التخصصية
-📍 **العنوان**: ميدان الحصري، أبراج برعي بلازا، برج رقم ٢  
-بجوار محل شعبان للملابس، الدور الثالث  
-6 أكتوبر، القاهرة
+3. **Environment Variables (if needed)**:
+   If your app requires environment variables, add them in the Dokploy dashboard under the project settings.
 
-📞 **الهاتف**: 38377766  
-📱 **الموبايل**: 01119007403  
-💬 **الواتساب**: 01119007403  
-📧 **البريد الإلكتروني**: info@taafi-clinics.com
+4. **Deploy**:
+   Once configured, Dokploy will automatically build and deploy your application using the Docker configuration.
 
-### مواعيد العمل
-📅 السبت - الخميس: 10 صباحاً - 10 مساءً  
-🚫 الجمعة: مغلق  
-🚨 للطوارئ: 01119007403
+5. **Custom Domain**:
+   If you want to use a custom domain, configure it in the Dokploy dashboard and update your DNS settings as instructed.
 
-### الدعم التقني
-لأي استفسارات تقنية أو مشاكل في النظام، يرجى التواصل معنا عبر البريد الإلكتروني أو الهاتف المذكور أعلاه.
+### Environment Variables
 
----
+If your app needs environment variables, you can:
+- Add them to the `docker-compose.yml` file
+- Pass them when running the Docker container: 
+  ```sh
+  docker run -p 80:80 -e VITE_SUPABASE_URL=your_url -e VITE_SUPABASE_ANON_KEY=your_key clinic-booking-app
+  ```
+- Configure them in Dokploy's environment variable section
 
-**تم تطوير هذا النظام باستخدام أحدث التقنيات لضمان تجربة مستخدم مميزة وآمنة.**
+### Traditional Deployment
+
+You can also deploy without Docker:
+
+1. **Build the project:**
+   ```sh
+   npm run build
+   ```
+
+2. **Deploy the files:**
+   - Upload the contents of the `dist` folder to your web server
+   - Or use Lovable's built-in deployment: open [Lovable](https://lovable.dev/projects/b9f3e6f7-d255-4ca5-9c38-7ccafc078662) and click on Share -> Publish.
+
+## Can I connect a custom domain to my Lovable project?
+
+Yes, you can!
+
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,7 +15,6 @@ import {
   Zap,
   Sun
 } from 'lucide-react';
-import { trackUserInteraction } from '@/utils/analytics';
 
 const featuredTools = [
   {
@@ -62,27 +62,6 @@ const featuredTools = [
 ];
 
 const HealthToolsSection = () => {
-  const handleToolClick = (toolId: string, toolName: string) => {
-    // Track health tool button clicks from homepage
-    trackUserInteraction.click(
-      'Health Tool Button',
-      'homepage',
-      toolId,
-      `homepage-featured-${toolName}`
-    );
-    
-    // TODO: Open specific tool
-    console.log(`Opening tool: ${toolId}`);
-  };
-
-  const handleViewAllToolsClick = () => {
-    // Track "View All Tools" button click
-    trackUserInteraction.ctaClick(
-      'View All Health Tools',
-      'homepage-health-tools-section'
-    );
-  };
-
   return (
     <section className="py-16 md:py-24 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <div className="container mx-auto px-4">
@@ -123,7 +102,10 @@ const HealthToolsSection = () => {
                   </p>
                   <Button 
                     className="w-full bg-brand hover:bg-brand-dark text-white rounded-xl py-3 font-medium transition-all duration-300 group-hover:shadow-lg"
-                    onClick={() => handleToolClick(tool.id, tool.title)}
+                    onClick={() => {
+                      // TODO: Open specific tool
+                      console.log(`Opening tool: ${tool.id}`);
+                    }}
                   >
                     ابدأ الآن
                   </Button>
@@ -135,7 +117,7 @@ const HealthToolsSection = () => {
 
         {/* View All Tools Button */}
         <div className="text-center">
-          <Link to="/health-tools" onClick={handleViewAllToolsClick}>
+          <Link to="/health-tools">
             <Button 
               size="lg" 
               className="bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white px-8 py-4 rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 group"

@@ -31,8 +31,6 @@ import {
   User
 } from 'lucide-react';
 
-import { analytics, trackUserInteraction } from '@/utils/analytics';
-
 interface HealthTool {
   id: string;
   title: string;
@@ -40,15 +38,6 @@ interface HealthTool {
   icon: React.ComponentType<any>;
   category: 'calculation' | 'assessment' | 'mental' | 'pregnancy' | 'guidance';
   keywords?: string[];
-}
-
-interface SearchHealthTool {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  keywords?: string[];
-  icon: React.ComponentType<any>;
 }
 
 interface HealthCategory {
@@ -398,29 +387,14 @@ const healthCategories: HealthCategory[] = [
 const HealthTools = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [activeToolId, setActiveToolId] = useState<string | null>(null);
-  const [filteredTools, setFilteredTools] = useState<SearchHealthTool[]>(
-    healthTools.map(tool => ({
-      id: tool.id,
-      title: tool.title,
-      description: tool.description,
-      category: tool.category,
-      keywords: tool.keywords,
-      icon: tool.icon
-    }))
-  );
+  const [filteredTools, setFilteredTools] = useState(healthTools);
 
   // Check for URL parameter to auto-open tool
   React.useEffect(() => {
-    console.log('🔍 HealthTools: Checking URL parameters');
     const urlParams = new URLSearchParams(window.location.search);
     const toolParam = urlParams.get('tool');
-    console.log('🎯 Found tool parameter:', toolParam);
-    
     if (toolParam && healthTools.find(t => t.id === toolParam)) {
-      console.log('✅ Valid tool found, opening:', toolParam);
       setActiveToolId(toolParam);
-    } else if (toolParam) {
-      console.warn('⚠️ Invalid tool ID in URL:', toolParam);
     }
   }, []);
 
@@ -432,63 +406,20 @@ const HealthTools = () => {
     ? filteredTools.filter(tool => tool.category === selectedCategory)
     : filteredTools;
 
-  const handleFilteredToolsChange = (tools: SearchHealthTool[]) => {
-    setFilteredTools(tools);
-  };
-
   const openTool = (toolId: string) => {
-    console.log('🚀 HealthTools: Opening tool:', toolId);
     setActiveToolId(toolId);
   };
 
   const closeTool = () => {
-    console.log('❌ HealthTools: Closing tool');
     setActiveToolId(null);
+    // Remove tool parameter from URL
+    const url = new URL(window.location.href);
+    url.searchParams.delete('tool');
+    window.history.replaceState({}, '', url);
   };
 
   const goBackToCategories = () => {
     setSelectedCategory(null);
-  };
-
-  // Convert healthTools to SearchHealthTool format for search component
-  const searchTools: SearchHealthTool[] = React.useMemo(() => {
-    const baseTools = selectedCategory 
-      ? healthTools.filter(t => t.category === selectedCategory)
-      : healthTools;
-    
-    return baseTools.map(tool => ({
-      id: tool.id,
-      title: tool.title,
-      description: tool.description,
-      category: tool.category,
-      keywords: tool.keywords,
-      icon: tool.icon
-    }));
-  }, [selectedCategory]);
-
-  const handleCategorySelect = (categoryId: string) => {
-    // Track category selection
-    trackUserInteraction.click(
-      'Health Tools Category',
-      'health-tools',
-      categoryId,
-      'main-category-selection'
-    );
-    
-    setSelectedCategory(categoryId);
-  };
-
-  const handleToolOpen = (toolId: string, toolName: string) => {
-    // Track tool opening from tools page
-    trackUserInteraction.click(
-      'Health Tool Button',
-      'health-tools',
-      toolId,
-      `tools-page-${toolName}`
-    );
-    
-    console.log('🚀 HealthTools: Opening tool:', toolId);
-    setActiveToolId(toolId);
   };
 
   return (
@@ -546,8 +477,8 @@ const HealthTools = () => {
       <section className="py-6 bg-white/50">
         <div className="container mx-auto px-4">
           <HealthToolsSearch
-            tools={searchTools}
-            onFilteredToolsChange={handleFilteredToolsChange}
+            tools={selectedCategory ? healthTools.filter(t => t.category === selectedCategory) : healthTools}
+            onFilteredToolsChange={setFilteredTools}
             selectedCategory={selectedCategory}
             onCategoryChange={setSelectedCategory}
           />
@@ -565,7 +496,7 @@ const HealthTools = () => {
                   <Card 
                     key={category.id} 
                     className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden border-0 shadow-md rounded-2xl bg-white/95 backdrop-blur-sm relative cursor-pointer"
-                    onClick={() => handleCategorySelect(category.id)}
+                    onClick={() => setSelectedCategory(category.id)}
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-brand/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <CardHeader className="pb-4 pt-6 relative z-10">
@@ -628,7 +559,7 @@ const HealthTools = () => {
                       </p>
                       <Button 
                         className="w-full bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white rounded-xl py-2.5 font-bold transition-all duration-300 group-hover:shadow-lg transform group-hover:scale-105 text-sm shadow-md"
-                        onClick={() => handleToolOpen(tool.id, tool.title)}
+                        onClick={() => openTool(tool.id)}
                       >
                         <Zap className="ml-2 h-4 w-4" />
                         ابدأ الآن
