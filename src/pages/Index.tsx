@@ -24,15 +24,12 @@ const Index = () => {
       try {
         setLoading(true);
         
-        // First, get all specialties (not random) to ensure we have all data
-        const specialtiesData = await getSpecialties(); // Get ALL specialties
-        const doctorsData = await getDoctors(6, true); // Get 6 random doctors
+        const specialtiesData = await getSpecialties();
+        const doctorsData = await getDoctors(6, true);
         
-        // Fetch schedule data for each doctor and format properly using the same method as Doctors page
         const doctorsWithSpecialtyAndSchedule = await Promise.all(
           doctorsData.map(async (doctor) => {
             const schedule = await getDoctorSchedule(doctor.id);
-            // Use the same specialty finding logic as in Doctors.tsx
             const specialty = specialtiesData.find(s => s.id === doctor.specialty_id);
             
             return {
@@ -43,7 +40,6 @@ const Index = () => {
           })
         );
         
-        // Get 6 random specialties for display
         const randomSpecialties = await getSpecialties(6, true);
         
         setSpecialties(randomSpecialties);

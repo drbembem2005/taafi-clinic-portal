@@ -30,7 +30,7 @@ import {
   User
 } from 'lucide-react';
 
-import { analytics, trackUserInteraction } from '@/utils/analytics';
+import { trackUserInteraction } from '@/utils/analytics';
 
 interface HealthTool {
   id: string;
