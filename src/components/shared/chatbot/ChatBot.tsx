@@ -9,7 +9,7 @@ import QuickActions from './QuickActions';
 import { Message, ChatBotState } from './types';
 import { chatbotService } from './chatbotService';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAnalytics } from '@/hooks/use-analytics';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
