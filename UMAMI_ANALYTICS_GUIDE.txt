@@ -1,0 +1,333 @@
+
+# UMAMI ANALYTICS INTEGRATION GUIDE
+# عيادات تعافي التخصصية - دليل تكامل تحليلات Umami
+
+================================================================
+📊 OVERVIEW / نظرة عامة
+================================================================
+
+This document outlines all Umami analytics events implemented in the Taafi Clinics web application, 
+including event categories, tracking points, and configuration instructions.
+
+يوضح هذا المستند جميع أحداث تحليلات Umami المطبقة في تطبيق عيادات تعافي الويب،
+بما في ذلك فئات الأحداث ونقاط التتبع وتعليمات التكوين.
+
+================================================================
+🎯 EVENT CATEGORIES / فئات الأحداث
+================================================================
+
+1. HEALTH TOOLS (health_tools)
+2. BOOKING FLOW (booking)
+3. ENGAGEMENT (engagement)
+4. PERFORMANCE (performance)
+5. MOBILE INTERACTIONS (mobile)
+6. CHAT INTERACTIONS (chat)
+7. PAGE TRACKING (navigation)
+
+================================================================
+📈 DETAILED EVENT TRACKING / تتبع الأحداث التفصيلي
+================================================================
+
+1. HEALTH TOOLS EVENTS
+   =====================
+   
+   Event: health_tool_opened
+   Data: {
+     tool_id: string (e.g., "bmi-calculator", "diabetes-risk")
+     tool_name: string (e.g., "حاسبة كتلة الجسم", "اختبار خطر السكري")
+     category: "health_tools"
+     action: "opened"
+   }
+   
+   Event: health_tool_completed
+   Data: {
+     tool_id: string
+     tool_name: string
+     category: "health_tools"
+     action: "completed"
+     duration: number (milliseconds)
+     result_score?: number
+   }
+   
+   Event: health_tool_closed
+   Data: {
+     tool_id: string
+     tool_name: string
+     category: "health_tools"
+     action: "closed"
+     duration: number (milliseconds)
+   }
+   
+   Event: health_tool_result
+   Data: {
+     tool_id: string
+     tool_name: string
+     category: "health_tools"
+     action: "result_generated"
+     result_score?: number
+   }
+
+2. BOOKING FLOW EVENTS
+   ===================
+   
+   Event: booking_started
+   Data: {
+     category: "booking"
+     action: "started"
+   }
+   
+   Event: doctor_selected
+   Data: {
+     category: "booking"
+     action: "doctor_selected"
+     doctor_id: number
+     doctor_name: string
+     specialty_id?: number
+   }
+   
+   Event: specialty_selected
+   Data: {
+     category: "booking"
+     action: "specialty_selected"
+     specialty_id: number
+     specialty_name: string
+   }
+   
+   Event: booking_completed
+   Data: {
+     category: "booking"
+     action: "completed"
+     doctor_id?: number
+     specialty_id?: number
+     duration: number (milliseconds)
+   }
+
+3. ENGAGEMENT EVENTS
+   ==================
+   
+   Event: cta_clicked
+   Data: {
+     category: "engagement"
+     action: "cta_clicked"
+     element: string (e.g., "floating_whatsapp_button", "header_booking_button")
+     cta_type: "phone" | "whatsapp" | "booking" | "other"
+   }
+   
+   Event: section_viewed
+   Data: {
+     category: "engagement"
+     action: "section_viewed"
+     section: string (e.g., "health_tools_section", "navigation_home")
+   }
+
+4. CHAT INTERACTIONS
+   ==================
+   
+   Event: chat_interaction
+   Data: {
+     category: "engagement"
+     action: "opened" | "closed" | "message_sent" | "doctor_selected"
+     element: "chatbot"
+   }
+
+5. PAGE TRACKING
+   ===============
+   
+   Event: page_view
+   Data: {
+     page: string (e.g., "/", "/doctors", "/health-tools")
+     title?: string
+     timestamp: number
+   }
+   
+   Event: virtual_page_view
+   Data: {
+     virtual_page: string (e.g., "/chat", "/health-tool/bmi")
+     context?: string
+     timestamp: number
+   }
+
+6. PERFORMANCE TRACKING
+   ======================
+   
+   Event: performance_metric
+   Data: {
+     category: "performance"
+     action: "page_load_time" | "tool_load_time"
+     duration: number
+     page?: string
+   }
+   
+   Event: error_occurred
+   Data: {
+     category: "performance"
+     action: "error_occurred"
+     error_type: string
+     error_message?: string
+     page?: string
+   }
+
+7. MOBILE INTERACTIONS
+   =====================
+   
+   Event: mobile_interaction
+   Data: {
+     category: "mobile"
+     action: string (e.g., "whatsapp_click", "phone_click")
+     element: string (e.g., "floating_button")
+     screen_width: number
+   }
+
+================================================================
+🔧 UMAMI DASHBOARD CONFIGURATION / تكوين لوحة تحكم Umami
+================================================================
+
+1. CUSTOM EVENTS SETUP
+   ====================
+   
+   In your Umami dashboard, set up the following custom events:
+   
+   • health_tool_opened
+   • health_tool_completed
+   • health_tool_closed
+   • health_tool_result
+   • booking_started
+   • doctor_selected
+   • specialty_selected
+   • booking_completed
+   • cta_clicked
+   • section_viewed
+   • chat_interaction
+   • page_view
+   • virtual_page_view
+   • performance_metric
+   • error_occurred
+   • mobile_interaction
+
+2. CUSTOM PROPERTIES
+   ==================
+   
+   Configure these custom properties in Umami:
+   
+   • tool_id (string)
+   • tool_name (string)
+   • category (string)
+   • action (string)
+   • doctor_id (number)
+   • doctor_name (string)
+   • specialty_id (number)
+   • specialty_name (string)
+   • duration (number)
+   • result_score (number)
+   • element (string)
+   • cta_type (string)
+   • section (string)
+   • page (string)
+   • virtual_page (string)
+   • context (string)
+   • error_type (string)
+   • error_message (string)
+   • screen_width (number)
+
+3. GOALS & FUNNELS
+   ================
+   
+   Recommended goals to set up:
+   
+   • Health Tool Completion Rate
+   • Booking Conversion Rate
+   • Chat Engagement Rate
+   • CTA Click Rate
+   • Mobile vs Desktop Usage
+   
+   Funnel Analysis:
+   • Booking Funnel: started → doctor_selected → completed
+   • Health Tool Funnel: opened → result_generated → completed
+   • Engagement Funnel: page_view → section_viewed → cta_clicked
+
+================================================================
+📊 ANALYTICS INSIGHTS / رؤى التحليلات
+================================================================
+
+KEY METRICS TO MONITOR:
+========================
+
+1. Health Tools Performance:
+   - Most popular health tools
+   - Completion rates by tool
+   - Average time spent in tools
+   - Result score distributions
+
+2. Booking Conversion:
+   - Booking funnel drop-off points
+   - Most selected doctors/specialties
+   - Booking completion rate
+   - Time to complete booking
+
+3. User Engagement:
+   - Page view patterns
+   - Section engagement rates
+   - CTA effectiveness
+   - Chat interaction patterns
+
+4. Mobile Experience:
+   - Mobile vs desktop usage
+   - Mobile-specific interactions
+   - Performance on mobile devices
+
+5. Performance Monitoring:
+   - Page load times
+   - Error rates and types
+   - Tool performance metrics
+
+================================================================
+🛠️ TECHNICAL IMPLEMENTATION / التنفيذ التقني
+================================================================
+
+Files Modified for Analytics:
+==============================
+
+1. src/services/analyticsService.ts
+   - Main analytics service with all tracking methods
+   - Error handling and debug mode
+   - Type-safe event tracking
+
+2. src/hooks/useAnalytics.ts
+   - React hook for easy component integration
+   - Page view tracking with React Router
+   - Organized tracking methods by category
+
+3. Component Integrations:
+   - src/components/shared/HealthToolsSection.tsx
+   - src/components/health-tools/HealthToolsManager.tsx
+   - src/components/shared/FloatingActionButtons.tsx
+   - src/components/shared/chatbot/ChatBot.tsx
+   - src/components/layout/Header.tsx
+
+Script Integration:
+===================
+
+The Umami script is already integrated in index.html:
+<script defer src="https://umami.taafe-clinics.com/script.js" 
+        data-website-id="19d72bbb-2204-4820-b809-f0d40aee1823"></script>
+
+================================================================
+🔒 PRIVACY & COMPLIANCE / الخصوصية والامتثال
+================================================================
+
+- All tracking is anonymous and GDPR compliant
+- No personal information is collected
+- Users can opt-out through browser settings
+- Data is processed securely through Umami
+
+================================================================
+📞 SUPPORT / الدعم
+================================================================
+
+For technical support or questions about analytics implementation:
+Email: info@taafi-clinics.com
+Phone: +201119007403
+
+================================================================
+END OF DOCUMENT / نهاية المستند
+================================================================
