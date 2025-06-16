@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import HealthToolModal from './HealthToolModal';
 import BMICalculator from './BMICalculator';
 import CalorieCalculator from './CalorieCalculator';
@@ -123,6 +124,24 @@ interface HealthToolsManagerProps {
 }
 
 const HealthToolsManager = ({ activeToolId, onCloseTool }: HealthToolsManagerProps) => {
+  const { trackHealthTool, trackVirtualPage } = useAnalytics();
+
+  React.useEffect(() => {
+    if (activeToolId && toolComponents[activeToolId]) {
+      const toolTitle = toolTitles[activeToolId] || 'أداة صحية';
+      trackHealthTool.opened(activeToolId, toolTitle);
+      trackVirtualPage(`/health-tools/${activeToolId}`, 'health_tool_modal');
+    }
+  }, [activeToolId, trackHealthTool, trackVirtualPage]);
+
+  const handleCloseTool = () => {
+    if (activeToolId) {
+      const toolTitle = toolTitles[activeToolId] || 'أداة صحية';
+      trackHealthTool.closed(activeToolId, toolTitle);
+    }
+    onCloseTool();
+  };
+
   if (!activeToolId || !toolComponents[activeToolId]) {
     return null;
   }
@@ -133,7 +152,7 @@ const HealthToolsManager = ({ activeToolId, onCloseTool }: HealthToolsManagerPro
   return (
     <HealthToolModal
       isOpen={Boolean(activeToolId)}
-      onClose={onCloseTool}
+      onClose={handleCloseTool}
       title={toolTitle}
     >
       <ToolComponent />

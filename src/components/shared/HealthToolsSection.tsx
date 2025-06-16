@@ -15,6 +15,7 @@ import {
   Zap,
   Sun
 } from 'lucide-react';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 const featuredTools = [
   {
@@ -62,6 +63,24 @@ const featuredTools = [
 ];
 
 const HealthToolsSection = () => {
+  const { trackHealthTool, trackCTA, trackSection } = useAnalytics();
+
+  // Track section view when component mounts
+  React.useEffect(() => {
+    trackSection('health_tools_section');
+  }, [trackSection]);
+
+  const handleToolClick = (toolId: string, toolTitle: string) => {
+    trackHealthTool.opened(toolId, toolTitle);
+    trackCTA('health_tool_button', 'other');
+    // TODO: Open specific tool
+    console.log(`Opening tool: ${toolId}`);
+  };
+
+  const handleViewAllClick = () => {
+    trackCTA('view_all_health_tools', 'other');
+  };
+
   return (
     <section className="py-16 md:py-24 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <div className="container mx-auto px-4">
@@ -102,10 +121,7 @@ const HealthToolsSection = () => {
                   </p>
                   <Button 
                     className="w-full bg-brand hover:bg-brand-dark text-white rounded-xl py-3 font-medium transition-all duration-300 group-hover:shadow-lg"
-                    onClick={() => {
-                      // TODO: Open specific tool
-                      console.log(`Opening tool: ${tool.id}`);
-                    }}
+                    onClick={() => handleToolClick(tool.id, tool.title)}
                   >
                     ابدأ الآن
                   </Button>
@@ -117,7 +133,7 @@ const HealthToolsSection = () => {
 
         {/* View All Tools Button */}
         <div className="text-center">
-          <Link to="/health-tools">
+          <Link to="/health-tools" onClick={handleViewAllClick}>
             <Button 
               size="lg" 
               className="bg-gradient-to-r from-brand to-brand-light hover:from-brand-dark hover:to-brand text-white px-8 py-4 rounded-xl font-medium text-lg shadow-lg hover:shadow-xl transition-all duration-300 group"

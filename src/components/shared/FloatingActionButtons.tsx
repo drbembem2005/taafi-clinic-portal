@@ -2,15 +2,25 @@
 import { Phone, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 const FloatingActionButtons = () => {
   const isMobile = useIsMobile();
+  const { trackCTA, trackMobile } = useAnalytics();
 
   const openWhatsApp = () => {
+    trackCTA('floating_whatsapp_button', 'whatsapp');
+    if (isMobile) {
+      trackMobile('whatsapp_click', 'floating_button');
+    }
     window.open('https://wa.me/201119007403', '_blank');
   };
 
   const makePhoneCall = () => {
+    trackCTA('floating_phone_button', 'phone');
+    if (isMobile) {
+      trackMobile('phone_click', 'floating_button');
+    }
     window.location.href = 'tel:+201091003965';
   };
 

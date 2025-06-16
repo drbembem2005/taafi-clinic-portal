@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X } from 'lucide-react';
@@ -10,6 +9,7 @@ import QuickActions from './QuickActions';
 import { Message, ChatBotState } from './types';
 import { chatbotService } from './chatbotService';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAnalytics } from '@/hooks/use-analytics';
 
 const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,10 +18,14 @@ const ChatBot = () => {
   const [chatState, setChatState] = useState<ChatBotState>('welcome');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
+  const { trackChat, trackVirtualPage } = useAnalytics();
 
   // Initialize with welcome message and main menu
   useEffect(() => {
     if (isOpen && messages.length === 0) {
+      trackChat('opened');
+      trackVirtualPage('/chat', 'chatbot_opened');
+      
       const welcomeMessage: Message = {
         id: 1,
         text: 'مرحباً بك في عيادات تعافي التخصصية! 👋\nأنا مساعدك الذكي، سأساعدك في:\n• حجز المواعيد\n• معلومات عن الأطباء والتخصصات\n• الإجابة على استفساراتك الطبية\n\nكيف يمكنني مساعدتك اليوم؟',
@@ -44,7 +48,7 @@ const ChatBot = () => {
         setChatState('main-menu');
       }, 1000);
     }
-  }, [isOpen, messages.length]);
+  }, [isOpen, messages.length, trackChat, trackVirtualPage]);
 
   const addMessage = (message: Omit<Message, 'id' | 'timestamp'>) => {
     const newMessage: Message = {
@@ -59,6 +63,7 @@ const ChatBot = () => {
     // Add user message
     addMessage({ text, sender: 'user' });
     setIsLoading(true);
+    trackChat('message_sent');
 
     try {
       // Get response from chatbot service
@@ -78,6 +83,7 @@ const ChatBot = () => {
   };
 
   const handleClose = () => {
+    trackChat('closed');
     setIsOpen(false);
   };
 

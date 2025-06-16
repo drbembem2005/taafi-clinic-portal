@@ -3,9 +3,11 @@ import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { motion } from 'framer-motion';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { trackCTA, trackSection } = useAnalytics();
 
   const navItems = [
     { name: 'الرئيسية', path: '/' },
@@ -26,12 +28,25 @@ const Header = () => {
     }`;
   };
 
+  const handleBookingClick = () => {
+    trackCTA('header_booking_button', 'booking');
+    trackSection('header_booking');
+  };
+
+  const handleLogoClick = () => {
+    trackCTA('header_logo', 'other');
+  };
+
+  const handleNavClick = (navName: string, path: string) => {
+    trackSection(`navigation_${path.replace('/', '') || 'home'}`);
+  };
+
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <NavLink to="/" className="flex items-center">
+            <NavLink to="/" className="flex items-center" onClick={handleLogoClick}>
               <img
                 src="/lovable-uploads/93b2823f-8ba0-45e0-83bd-fd27bb5535d9.png"
                 alt="تعافي التخصصية"
@@ -82,11 +97,16 @@ const Header = () => {
                 to={item.path}
                 className={getNavClass}
                 end
+                onClick={() => handleNavClick(item.name, item.path)}
               >
                 {item.name}
               </NavLink>
             ))}
-            <Button variant="default" className="bg-brand hover:bg-brand-dark text-white px-5 py-2 rounded-md mr-4">
+            <Button 
+              variant="default" 
+              className="bg-brand hover:bg-brand-dark text-white px-5 py-2 rounded-md mr-4"
+              onClick={handleBookingClick}
+            >
               احجز الآن
             </Button>
           </nav>
@@ -108,12 +128,22 @@ const Header = () => {
                   to={item.path}
                   className={getNavClass}
                   end
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    handleNavClick(item.name, item.path);
+                    setIsOpen(false);
+                  }}
                 >
                   {item.name}
                 </NavLink>
               ))}
-              <Button variant="default" className="bg-brand hover:bg-brand-dark text-white w-full py-2 mt-4">
+              <Button 
+                variant="default" 
+                className="bg-brand hover:bg-brand-dark text-white w-full py-2 mt-4"
+                onClick={() => {
+                  handleBookingClick();
+                  setIsOpen(false);
+                }}
+              >
                 احجز الآن
               </Button>
             </div>
