@@ -28,7 +28,10 @@ import {
   Bone,
   AlertTriangle,
   Trophy,
-  User
+  User,
+  Shield,
+  Syringe,
+  Dna
 } from 'lucide-react';
 
 interface HealthTool {
@@ -347,6 +350,32 @@ const healthTools: HealthTool[] = [
     icon: Stethoscope,
     category: 'guidance',
     keywords: ['تخصص', 'specialty', 'أعراض', 'طبيب']
+  },
+
+  // NEW: Pediatric Health Tools
+  {
+    id: 'vaccination-schedule',
+    title: 'حاسبة مواعيد تطعيمات الأطفال',
+    description: 'جدول التطعيمات الإجبارية والاختيارية للأطفال حسب العمر في مصر',
+    icon: Syringe,
+    category: 'guidance',
+    keywords: ['تطعيمات', 'vaccination', 'أطفال', 'مناعة', 'لقاحات']
+  },
+  {
+    id: 'medication-dosage',
+    title: 'حاسبة الجرعة الآمنة للأطفال',
+    description: 'احسب الجرعة الآمنة من الأدوية للأطفال حسب الوزن والعمر',
+    icon: Shield,
+    category: 'guidance',
+    keywords: ['جرعة', 'دواء', 'أطفال', 'أمان', 'باراسيتامول']
+  },
+  {
+    id: 'blood-type-predictor',
+    title: 'حاسبة فصيلة الدم للأطفال',
+    description: 'تنبؤ علمي بفصائل الدم المحتملة للطفل بناءً على فصيلة الوالدين',
+    icon: Dna,
+    category: 'guidance',
+    keywords: ['فصيلة دم', 'blood type', 'وراثة', 'جينات', 'أطفال']
   }
 ];
 
