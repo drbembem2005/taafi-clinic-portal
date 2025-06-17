@@ -35,6 +35,9 @@ import MeditationTimer from './MeditationTimer';
 import ConfidenceTest from './ConfidenceTest';
 import WorkLifeBalance from './WorkLifeBalance';
 import PersonalityTest from './PersonalityTest';
+import VaccinationSchedule from './VaccinationSchedule';
+import MedicationDosage from './MedicationDosage';
+import BloodTypePredictor from './BloodTypePredictor';
 
 const toolComponents: { [key: string]: React.ComponentType } = {
   'bmi-calculator': BMICalculator,
@@ -69,12 +72,15 @@ const toolComponents: { [key: string]: React.ComponentType } = {
   'insulin-resistance-test': InsulinResistanceTest,
   'emotional-intelligence-test': EmotionalIntelligenceTest,
   
-  // أدوات الصحة النفسية الجديدة
   'stress-test': StressTest,
   'meditation-timer': MeditationTimer,
   'confidence-test': ConfidenceTest,
   'work-life-balance': WorkLifeBalance,
   'personality-test': PersonalityTest,
+
+  'vaccination-schedule': VaccinationSchedule,
+  'medication-dosage': MedicationDosage,
+  'blood-type-predictor': BloodTypePredictor,
 };
 
 const toolTitles: { [key: string]: string } = {
@@ -110,12 +116,15 @@ const toolTitles: { [key: string]: string } = {
   'insulin-resistance-test': 'تقييم مقاومة الأنسولين',
   'emotional-intelligence-test': 'اختبار الذكاء العاطفي',
   
-  // العناوين الجديدة
   'stress-test': 'اختبار الضغط النفسي والتوتر',
   'meditation-timer': 'مؤقت التأمل المرشد',
   'confidence-test': 'اختبار الثقة بالنفس',
   'work-life-balance': 'حاسبة التوازن بين العمل والحياة',
   'personality-test': 'اختبار أنماط الشخصية',
+
+  'vaccination-schedule': 'حاسبة مواعيد تطعيمات الأطفال',
+  'medication-dosage': 'حاسبة الجرعة الآمنة للأطفال',
+  'blood-type-predictor': 'حاسبة فصيلة الدم للأطفال',
 };
 
 interface HealthToolsManagerProps {
