@@ -1,4 +1,3 @@
-
 export interface HealthToolResult {
   score?: number;
   category: string;
@@ -141,6 +140,62 @@ export interface MedicalSpecialtyResult {
   reasoning: string;
   questionsForDoctor: string[];
   firstAid?: string[];
+}
+
+export interface VaccinationResult {
+  schedule: VaccinationEntry[];
+  nextDue: VaccinationEntry | null;
+  completedCount: number;
+  totalCount: number;
+  recommendations: string[];
+  warnings: string[];
+}
+
+export interface VaccinationEntry {
+  name: string;
+  arabicName: string;
+  ageMonths: number;
+  ageDisplay: string;
+  dueDate: Date;
+  description: string;
+  isOverdue: boolean;
+  isDue: boolean;
+  category: 'mandatory' | 'optional';
+}
+
+export interface MedicationDosageResult {
+  paracetamol: {
+    singleDose: number;
+    dailyDose: number;
+    maxDailyDose: number;
+    timesPerDay: number;
+    isWithinSafeLimit: boolean;
+  };
+  ibuprofen: {
+    singleDose: number;
+    dailyDose: number;
+    maxDailyDose: number;
+    timesPerDay: number;
+    isWithinSafeLimit: boolean;
+    ageRestriction: boolean;
+  };
+  warnings: string[];
+  recommendations: string[];
+  emergencyInfo: string[];
+}
+
+export interface BloodTypeResult {
+  possibleTypes: BloodTypePossibility[];
+  mostLikely: string;
+  explanation: string;
+  genetics: string;
+  recommendations: string[];
+}
+
+export interface BloodTypePossibility {
+  bloodType: string;
+  probability: number;
+  geneticCombination: string;
 }
 
 export interface FormData {

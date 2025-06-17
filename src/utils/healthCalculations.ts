@@ -15,6 +15,11 @@ import {
   HealthyHabitsResult,
   PregnancySymptomsResult,
   MedicalSpecialtyResult,
+  VaccinationResult,
+  VaccinationEntry,
+  MedicationDosageResult,
+  BloodTypeResult,
+  BloodTypePossibility
 } from '@/types/healthTools';
 
 export const calculateBMI = (
@@ -966,7 +971,7 @@ export const assessPregnancySymptoms = (symptoms: { [key: string]: string }, wee
   const nextSteps = [];
   
   if (status === 'urgent') {
-    recommendations.push('اتصلي بطبيبك فوراً أو توجهي للطوارئ');
+    recommendations.push('اتصلي بطبيبك فوراً أو توجه للطوارئ');
     nextSteps.push('لا تنتظري - اطلبي المساعدة الطبية الآن');
   } else if (status === 'monitor') {
     recommendations.push('احجزي موعداً مع طبيبك خلال يوم أو يومين');
@@ -1069,3 +1074,242 @@ export const assessMedicalSpecialty = (formData: { [key: string]: string }): Med
     questionsForDoctor
   };
 };
+
+export const calculateVaccinationSchedule = (birthDate: Date): VaccinationResult => {
+  const today = new Date();
+  const schedule: VaccinationEntry[] = [];
+  let nextDue: VaccinationEntry | null = null;
+  
+  EGYPTIAN_VACCINATION_SCHEDULE.forEach(vaccine => {
+    const dueDate = new Date(birthDate);
+    dueDate.setMonth(dueDate.getMonth() + vaccine.ageMonths);
+    
+    const ageDisplay = vaccine.ageMonths === 0 ? 'عند الولادة' : 
+                      vaccine.ageMonths < 12 ? `${vaccine.ageMonths} شهر` : 
+                      `${Math.floor(vaccine.ageMonths / 12)} سنة`;
+    
+    const daysDiff = Math.floor((today.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
+    const isOverdue = daysDiff > 30; // Consider overdue if more than 30 days late
+    const isDue = daysDiff >= -7 && daysDiff <= 30; // Due within a week or up to 30 days late
+    
+    const entry: VaccinationEntry = {
+      name: vaccine.name,
+      arabicName: vaccine.arabicName,
+      ageMonths: vaccine.ageMonths,
+      ageDisplay,
+      dueDate,
+      description: vaccine.description,
+      isOverdue,
+      isDue,
+      category: vaccine.category
+    };
+    
+    schedule.push(entry);
+    
+    // Find next due vaccination
+    if (!nextDue && (isDue || dueDate > today)) {
+      nextDue = entry;
+    }
+  });
+  
+  // Sort by age months
+  schedule.sort((a, b) => a.ageMonths - b.ageMonths);
+  
+  const completedCount = schedule.filter(v => !v.isDue && !v.isOverdue && v.dueDate <= today).length;
+  const overdueCount = schedule.filter(v => v.isOverdue).length;
+  
+  const recommendations: string[] = [
+    'تأكدي من الاحتفاظ بسجل التطعيمات',
+    'استشيري طبيب الأطفال قبل موعد كل تطعيم',
+    'راقبي الطفل لمدة 24 ساعة بعد التطعيم',
+    'التطعيمات الاختيارية مهمة أيضاً لحماية أفضل'
+  ];
+  
+  const warnings: string[] = [];
+  if (overdueCount > 0) {
+    warnings.push(`يوجد ${overdueCount} تطعيم متأخر - راجعي طبيب الأطفال فوراً`);
+  }
+  if (nextDue && nextDue.isDue) {
+    warnings.push(`موعد تطعيم ${nextDue.arabicName} مستحق الآن`);
+  }
+  
+  return {
+    schedule,
+    nextDue,
+    completedCount,
+    totalCount: EGYPTIAN_VACCINATION_SCHEDULE.length,
+    recommendations,
+    warnings
+  };
+};
+
+export const calculateSafeDosage = (
+  weight: number, 
+  ageMonths: number, 
+  medication: 'paracetamol' | 'ibuprofen'
+): MedicationDosageResult => {
+  const ageYears = ageMonths / 12;
+  
+  // Paracetamol calculations (10-15 mg/kg per dose, max 60 mg/kg/day)
+  const paracetamolSingle = Math.round(weight * 12.5); // Average 12.5 mg/kg
+  const paracetamolDaily = Math.round(weight * 50); // 50 mg/kg/day (safe limit)
+  const paracetamolMax = Math.round(weight * 60); // Maximum daily
+  const paracetamolTimes = 4; // Every 6 hours
+  
+  // Ibuprofen calculations (5-10 mg/kg per dose, max 30 mg/kg/day)
+  // Not recommended under 6 months
+  const ibuprofenSingle = ageMonths >= 6 ? Math.round(weight * 7.5) : 0; // Average 7.5 mg/kg
+  const ibuprofenDaily = ageMonths >= 6 ? Math.round(weight * 25) : 0; // 25 mg/kg/day
+  const ibuprofenMax = ageMonths >= 6 ? Math.round(weight * 30) : 0; // Maximum daily
+  const ibuprofenTimes = ageMonths >= 6 ? 3 : 0; // Every 8 hours
+  
+  const warnings: string[] = [];
+  const recommendations: string[] = [
+    'استخدمي الجرعة حسب الوزن وليس العمر',
+    'لا تتجاوزي الجرعة القصوى اليومية',
+    'استشيري الطبيب إذا استمرت الأعراض أكثر من 3 أيام',
+    'احتفظي بسجل مواعيد وجرعات الدواء'
+  ];
+  
+  const emergencyInfo: string[] = [
+    'في حالة تناول جرعة زائدة: اتصلي بالطوارئ فوراً',
+    'علامات التسمم: قيء، ألم بطن شديد، صعوبة تنفس',
+    'رقم مركز السموم: 0223684828'
+  ];
+  
+  if (ageMonths < 3) {
+    warnings.push('لا يُنصح بإعطاء الأدوية للأطفال أقل من 3 شهور بدون استشارة طبية');
+  }
+  
+  if (ageMonths < 6) {
+    warnings.push('الإيبوبروفين غير مناسب للأطفال أقل من 6 شهور');
+  }
+  
+  if (weight < 4) {
+    warnings.push('الوزن منخفض جداً - يجب استشارة طبيب الأطفال');
+  }
+  
+  return {
+    paracetamol: {
+      singleDose: paracetamolSingle,
+      dailyDose: paracetamolDaily,
+      maxDailyDose: paracetamolMax,
+      timesPerDay: paracetamolTimes,
+      isWithinSafeLimit: paracetamolDaily <= paracetamolMax
+    },
+    ibuprofen: {
+      singleDose: ibuprofenSingle,
+      dailyDose: ibuprofenDaily,
+      maxDailyDose: ibuprofenMax,
+      timesPerDay: ibuprofenTimes,
+      isWithinSafeLimit: ibuprofenDaily <= ibuprofenMax,
+      ageRestriction: ageMonths < 6
+    },
+    warnings,
+    recommendations,
+    emergencyInfo
+  };
+};
+
+export const predictBloodType = (motherType: string, fatherType: string): BloodTypeResult => {
+  // Define alleles for each blood type
+  const getAlleles = (bloodType: string): string[] => {
+    switch (bloodType) {
+      case 'A+': return ['A+', 'A+'];
+      case 'A-': return ['A-', 'A-'];
+      case 'B+': return ['B+', 'B+'];
+      case 'B-': return ['B-', 'B-'];
+      case 'AB+': return ['A+', 'B+'];
+      case 'AB-': return ['A-', 'B-'];
+      case 'O+': return ['O+', 'O+'];
+      case 'O-': return ['O-', 'O-'];
+      default: return ['O+', 'O+'];
+    }
+  };
+  
+  const motherAlleles = getAlleles(motherType);
+  const fatherAlleles = getAlleles(fatherType);
+  
+  const combinations: { [key: string]: number } = {};
+  
+  // Calculate all possible combinations
+  motherAlleles.forEach(mAllele => {
+    fatherAlleles.forEach(fAllele => {
+      const combo = [mAllele, fAllele].sort().join('');
+      combinations[combo] = (combinations[combo] || 0) + 1;
+    });
+  });
+  
+  // Convert combinations to blood types
+  const getBloodTypeFromAlleles = (alleles: string): string => {
+    if (alleles.includes('A') && alleles.includes('B')) return alleles.includes('+') ? 'AB+' : 'AB-';
+    if (alleles.includes('A')) return alleles.includes('+') ? 'A+' : 'A-';
+    if (alleles.includes('B')) return alleles.includes('+') ? 'B+' : 'B-';
+    return alleles.includes('+') ? 'O+' : 'O-';
+  };
+  
+  const possibilities: BloodTypePossibility[] = [];
+  const total = Object.values(combinations).reduce((sum, count) => sum + count, 0);
+  
+  Object.entries(combinations).forEach(([combo, count]) => {
+    const bloodType = getBloodTypeFromAlleles(combo);
+    const probability = Math.round((count / total) * 100);
+    
+    const existing = possibilities.find(p => p.bloodType === bloodType);
+    if (existing) {
+      existing.probability += probability;
+    } else {
+      possibilities.push({
+        bloodType,
+        probability,
+        geneticCombination: combo
+      });
+    }
+  });
+  
+  possibilities.sort((a, b) => b.probability - a.probability);
+  
+  const mostLikely = possibilities[0]?.bloodType || 'غير محدد';
+  
+  const explanation = `بناءً على قوانين الوراثة، عند تزاوج شخص بفصيلة ${motherType} مع شخص بفصيلة ${fatherType}، يمكن أن ينتج الأطفال بالفصائل المذكورة بالاحتماليات المبينة.`;
+  
+  const genetics = 'فصيلة الدم تتحدد بواسطة الجينات التي يحملها كل من الوالدين. كل شخص يحمل جينين لفصيلة الدم، ويورث جين واحد لكل طفل.';
+  
+  const recommendations = [
+    'هذا التنبؤ للتوعية العلمية فقط',
+    'فصيلة الدم الفعلية تُحدد بالتحليل المعملي',
+    'يُنصح بمعرفة فصيلة دم الطفل مبكراً للطوارئ',
+    'احتفظي بسجل فصائل دم العائلة'
+  ];
+  
+  return {
+    possibleTypes: possibilities,
+    mostLikely,
+    explanation,
+    genetics,
+    recommendations
+  };
+};
+
+export const EGYPTIAN_VACCINATION_SCHEDULE = [
+  { name: 'BCG', arabicName: 'لقاح السل', ageMonths: 0, description: 'يحمي من مرض السل', category: 'mandatory' as const },
+  { name: 'Hepatitis B (Birth)', arabicName: 'التهاب الكبد ب (الولادة)', ageMonths: 0, description: 'الجرعة الأولى من لقاح التهاب الكبد الوبائي ب', category: 'mandatory' as const },
+  { name: 'OPV 1', arabicName: 'شلل الأطفال الأولى', ageMonths: 2, description: 'الجرعة الأولى من لقاح شلل الأطفال', category: 'mandatory' as const },
+  { name: 'DTP-HepB-Hib 1', arabicName: 'الخماسي الأولى', ageMonths: 2, description: 'اللقاح الخماسي (الدفتريا والتيتانوس والسعال الديكي والتهاب الكبد ب والإنفلونزا)', category: 'mandatory' as const },
+  { name: 'OPV 2', arabicName: 'شلل الأطفال الثانية', ageMonths: 4, description: 'الجرعة الثانية من لقاح شلل الأطفال', category: 'mandatory' as const },
+  { name: 'DTP-HepB-Hib 2', arabicName: 'الخماسي الثانية', ageMonths: 4, description: 'الجرعة الثانية من اللقاح الخماسي', category: 'mandatory' as const },
+  { name: 'OPV 3', arabicName: 'شلل الأطفال الثالثة', ageMonths: 6, description: 'الجرعة الثالثة من لقاح شلل الأطفال', category: 'mandatory' as const },
+  { name: 'DTP-HepB-Hib 3', arabicName: 'الخماسي الثالثة', ageMonths: 6, description: 'الجرعة الثالثة من اللقاح الخماسي', category: 'mandatory' as const },
+  { name: 'MMR 1', arabicName: 'الحصبة والحصبة الألمانية والنكاف الأولى', ageMonths: 12, description: 'لقاح الحصبة والحصبة الألمانية والنكاف', category: 'mandatory' as const },
+  { name: 'OPV Booster', arabicName: 'شلل الأطفال المنشطة', ageMonths: 18, description: 'الجرعة المنشطة من لقاح شلل الأطفال', category: 'mandatory' as const },
+  { name: 'DTP Booster', arabicName: 'الثلاثي المنشطة', ageMonths: 18, description: 'الجرعة المنشطة من اللقاح الثلاثي', category: 'mandatory' as const },
+  { name: 'MMR 2', arabicName: 'الحصبة والحصبة الألمانية والنكاف الثانية', ageMonths: 18, description: 'الجرعة الثانية من لقاح الحصبة والحصبة الألمانية والنكاف', category: 'mandatory' as const },
+  { name: 'DT Booster', arabicName: 'الثنائي المنشطة', ageMonths: 72, description: 'اللقاح الثنائي المنشط في سن المدرسة', category: 'mandatory' as const },
+  // Optional vaccines
+  { name: 'Rotavirus 1', arabicName: 'فيروس الروتا الأولى', ageMonths: 2, description: 'يحمي من الإسهال الشديد', category: 'optional' as const },
+  { name: 'Rotavirus 2', arabicName: 'فيروس الروتا الثانية', ageMonths: 4, description: 'الجرعة الثانية من لقاح فيروس الروتا', category: 'optional' as const },
+  { name: 'Pneumococcal 1', arabicName: 'المكورات الرئوية الأولى', ageMonths: 2, description: 'يحمي من عدوى المكورات الرئوية', category: 'optional' as const },
+  { name: 'Pneumococcal 2', arabicName: 'المكورات الرئوية الثانية', ageMonths: 4, description: 'الجرعة الثانية من لقاح المكورات الرئوية', category: 'optional' as const },
+  { name: 'Pneumococcal 3', arabicName: 'المكورات الرئوية الثالثة', ageMonths: 6, description: 'الجرعة الثالثة من لقاح المكورات الرئوية', category: 'optional' as const },
+  { name: 'Pneumococcal Booster', arabicName: 'المكورات الرئوية المنشطة', ageMonths: 12, description: 'الجرعة المنشطة من لقاح المكورات الرئوية', category: 'optional' as const },
+];
