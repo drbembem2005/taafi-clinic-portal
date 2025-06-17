@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Calculator, Shield, Clock, Phone } from 'lucide-react';
+import { AlertTriangle, Calculator, Shield, Phone } from 'lucide-react';
 import { calculateSafeDosage } from '@/utils/healthCalculations';
 import { MedicationDosageResult } from '@/types/healthTools';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -198,7 +198,7 @@ const MedicationDosage = () => {
                       </li>
                     ))}
                   </ul>
-                </Card>
+                </CardContent>
               </Card>
 
               {/* Emergency Information */}
