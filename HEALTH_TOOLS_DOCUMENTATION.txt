@@ -1,0 +1,749 @@
+
+# HEALTH TOOLS DOCUMENTATION
+# عيادات تعافي التخصصية - دليل الأدوات الصحية الشامل
+
+================================================================
+📋 OVERVIEW / نظرة عامة
+================================================================
+
+This document provides comprehensive documentation for all health tools available in the Taafi Clinics web application,
+including detailed algorithms, calculation methods, scoring systems, and implementation details.
+
+يوضح هذا المستند التوثيق الشامل لجميع الأدوات الصحية المتوفرة في تطبيق عيادات تعافي الويب،
+بما في ذلك الخوارزميات التفصيلية وطرق الحساب وأنظمة التقييم وتفاصيل التنفيذ.
+
+================================================================
+🏥 HEALTH TOOLS CATALOG / كتالوج الأدوات الصحية
+================================================================
+
+1. BMI CALCULATOR (حاسبة مؤشر كتلة الجسم)
+2. CALORIE CALCULATOR (حاسبة السعرات الحرارية)
+3. WATER INTAKE CALCULATOR (حاسبة احتياج الماء)
+4. HEART RATE CALCULATOR (حاسبة معدل النبض المستهدف)
+5. PREGNANCY CALCULATOR (حاسبة الحمل)
+6. OVULATION CALCULATOR (حاسبة التبويض)
+7. ANXIETY ASSESSMENT (تقييم القلق)
+8. DENTAL HEALTH CHECKER (فاحص صحة الأسنان)
+9. DENTAL VISIT URGENCY (تقييم الحاجة لطبيب الأسنان)
+10. BREATHING EXERCISES (تمارين التنفس)
+11. WAIST-TO-HEIGHT RATIO (نسبة الخصر للطول)
+12. STEPS TO CALORIES (تحويل الخطوات للسعرات)
+13. BLOOD PRESSURE RISK (تقييم خطر ضغط الدم)
+14. HEALTHY HABITS SCORE (تقييم العادات الصحية)
+15. PREGNANCY SYMPTOMS CHECKER (فاحص أعراض الحمل)
+16. MEDICAL SPECIALTY GUIDE (مرشد التخصصات الطبية)
+17. HEART DISEASE RISK (تقييم خطر أمراض القلب)
+18. INSULIN RESISTANCE TEST (تقييم مقاومة الأنسولين)
+19. OSTEOPOROSIS RISK (تقييم خطر هشاشة العظام)
+20. METABOLISM CALCULATOR (حاسبة الأيض والحرق)
+21. MALE FERTILITY CALCULATOR (حاسبة الخصوبة للرجال)
+22. MEDITATION TIMER (مؤقت التأمل المرشد)
+
+================================================================
+🔢 DETAILED ALGORITHMS / الخوارزميات التفصيلية
+================================================================
+
+1. BMI CALCULATOR
+================
+
+Algorithm:
+----------
+BMI = weight(kg) / height(m)²
+
+Categories:
+- Underweight: BMI < 18.5
+- Normal: 18.5 ≤ BMI < 25
+- Overweight: 25 ≤ BMI < 30
+- Obese Class I: 30 ≤ BMI < 35
+- Obese Class II: 35 ≤ BMI < 40
+- Obese Class III: BMI ≥ 40
+
+Ideal Weight Calculation:
+- Min = 18.5 × height²
+- Max = 24.9 × height²
+
+Implementation: src/utils/healthCalculations.ts
+Function: calculateBMI()
+
+2. CALORIE CALCULATOR
+====================
+
+Algorithm:
+----------
+BMR Calculation (Mifflin-St Jeor Equation):
+- Male: BMR = (10 × weight) + (6.25 × height) - (5 × age) + 5
+- Female: BMR = (10 × weight) + (6.25 × height) - (5 × age) - 161
+
+TDEE Calculation:
+- Sedentary: BMR × 1.2
+- Light Activity: BMR × 1.375
+- Moderate Activity: BMR × 1.55
+- Very Active: BMR × 1.725
+- Super Active: BMR × 1.9
+
+Macronutrient Distribution:
+- Protein: 25-30% of calories
+- Carbohydrates: 45-65% of calories
+- Fats: 20-35% of calories
+
+Implementation: src/utils/healthCalculations.ts
+Function: calculateCalories()
+
+3. WATER INTAKE CALCULATOR
+=========================
+
+Algorithm:
+----------
+Base Water Need:
+- Basic: 35ml × weight(kg)
+- Active: 40ml × weight(kg)
+- Very Active: 45ml × weight(kg)
+
+Adjustments:
+- Hot climate: +500-750ml
+- Cold climate: -200ml
+- Pregnancy: +300ml
+- Breastfeeding: +700ml
+- Illness/fever: +500ml per degree above 37°C
+
+Implementation: src/utils/healthCalculations.ts
+Function: calculateWaterIntake()
+
+4. HEART RATE CALCULATOR
+=======================
+
+Algorithm:
+----------
+Maximum Heart Rate:
+- Basic: 220 - age
+- Karvonen Method: ((220 - age) - resting HR) × intensity + resting HR
+
+Target Zones:
+- Fat Burn Zone: 50-70% of max HR
+- Cardio Zone: 70-85% of max HR
+- Peak Zone: 85-95% of max HR
+
+Fitness Level Adjustments:
+- Beginner: Lower target zones by 5-10%
+- Advanced: Higher target zones by 5-10%
+- Athlete: Custom zones based on performance
+
+Implementation: src/utils/healthCalculations.ts
+Function: calculateHeartRate()
+
+5. PREGNANCY CALCULATOR
+======================
+
+Algorithm:
+----------
+Gestational Age Calculation:
+- Based on Last Menstrual Period (LMP)
+- Due Date = LMP + 280 days
+- Current Week = (Today - LMP) / 7
+
+Trimester Classification:
+- First Trimester: Weeks 1-12
+- Second Trimester: Weeks 13-26
+- Third Trimester: Weeks 27-40
+
+Milestone Calculation:
+- Based on gestational week
+- Fetal development markers
+- Important appointment dates
+
+Implementation: src/utils/healthCalculations.ts
+Function: calculatePregnancy()
+
+6. OVULATION CALCULATOR
+======================
+
+Algorithm:
+----------
+Ovulation Date Calculation:
+- Regular Cycle: Next period - 14 days
+- Irregular Cycle: Average cycle length - 14 days
+
+Fertility Window:
+- Ovulation day ± 5 days
+- Peak fertility: Ovulation day ± 2 days
+
+Cycle Prediction:
+- Next period = Last period + cycle length
+- Based on average of last 3 cycles
+
+Implementation: src/utils/healthCalculations.ts
+Function: calculateOvulation()
+
+7. ANXIETY ASSESSMENT
+====================
+
+Algorithm:
+----------
+GAD-7 Based Scoring System:
+- 21 questions with 0-3 point scale
+- Total score range: 0-63
+
+Score Interpretation:
+- 0-7: Minimal anxiety
+- 8-15: Mild anxiety
+- 16-31: Moderate anxiety
+- 32-63: Severe anxiety
+
+Risk Factors:
+- Sleep disturbances: +5 points
+- Social isolation: +3 points
+- Work stress: +4 points
+- Health issues: +6 points
+
+Implementation: src/utils/healthCalculations.ts
+Function: assessAnxiety()
+
+8. DENTAL HEALTH CHECKER
+========================
+
+Algorithm:
+----------
+Risk Assessment Matrix:
+- Symptoms severity (0-10 scale)
+- Frequency of occurrence
+- Duration of symptoms
+- Associated symptoms
+
+Risk Categories:
+- Low: Score 0-25
+- Moderate: Score 26-50
+- High: Score 51-75
+- Very High: Score 76-100
+
+Warning Signs Detection:
+- Severe pain: Immediate attention
+- Swelling: Urgent care
+- Bleeding: Professional evaluation
+
+Implementation: src/utils/healthCalculations.ts
+Function: assessDentalHealth()
+
+9. DENTAL VISIT URGENCY
+=======================
+
+Algorithm:
+----------
+Urgency Classification:
+- Emergency: Severe pain, swelling, trauma
+- Urgent: Persistent pain, loose teeth
+- Soon: Sensitivity, minor pain
+- Routine: Preventive care, cleaning
+
+Scoring System:
+- Pain level (1-10): Weight × 4
+- Duration: Weight × 2
+- Associated symptoms: Weight × 3
+- Previous dental history: Weight × 1
+
+Implementation: src/utils/healthCalculations.ts
+Function: assessDentalVisit()
+
+10. BREATHING EXERCISES
+======================
+
+Techniques Available:
+--------------------
+1. 4-7-8 Breathing:
+   - Inhale for 4 counts
+   - Hold for 7 counts
+   - Exhale for 8 counts
+
+2. Box Breathing:
+   - Inhale for 4 counts
+   - Hold for 4 counts
+   - Exhale for 4 counts
+   - Hold for 4 counts
+
+3. Deep Diaphragmatic:
+   - Slow, deep belly breathing
+   - 6 breaths per minute
+
+4. Alternate Nostril:
+   - Traditional yogic technique
+   - Balances nervous system
+
+Implementation: src/components/health-tools/BreathingExercises.tsx
+
+11. WAIST-TO-HEIGHT RATIO
+========================
+
+Algorithm:
+----------
+WHtR = Waist Circumference (cm) / Height (cm)
+
+Risk Categories:
+- Excellent: WHtR < 0.40
+- Good: 0.40 ≤ WHtR < 0.50
+- Average: 0.50 ≤ WHtR < 0.60
+- High Risk: WHtR ≥ 0.60
+
+Health Risk Assessment:
+- Cardiovascular disease risk
+- Diabetes risk
+- Metabolic syndrome risk
+
+Implementation: src/utils/healthCalculations.ts
+Function: calculateWaistRatio()
+
+12. STEPS TO CALORIES
+====================
+
+Algorithm:
+----------
+Basic Calculation:
+- Calories per step = 0.04 × weight(kg)
+- Total calories = steps × calories per step
+
+Distance Calculation:
+- Average step length = height × 0.43
+- Distance = steps × step length
+
+Activity Level Adjustments:
+- Walking: Base rate
+- Brisk walking: Base × 1.3
+- Jogging: Base × 2.0
+- Running: Base × 2.5
+
+Implementation: src/utils/healthCalculations.ts
+Function: calculateStepsCalories()
+
+13. BLOOD PRESSURE RISK
+=======================
+
+Algorithm:
+----------
+Risk Factor Scoring:
+- Age: Weight based on age groups
+- Family history: +15 points
+- Smoking: +20 points
+- Obesity: +15 points
+- Sedentary lifestyle: +10 points
+- High sodium intake: +8 points
+- Stress: +12 points
+- Diabetes: +25 points
+
+Risk Categories:
+- Low: 0-30 points
+- Moderate: 31-60 points
+- High: 61-90 points
+- Very High: 91+ points
+
+Implementation: src/utils/healthCalculations.ts
+Function: assessBloodPressureRisk()
+
+14. HEALTHY HABITS SCORE
+========================
+
+Algorithm:
+----------
+Five Main Categories (20 points each):
+1. Nutrition (0-20 points)
+2. Exercise (0-20 points)
+3. Sleep (0-20 points)
+4. Stress Management (0-20 points)
+5. Social Connection (0-20 points)
+
+Scoring Breakdown:
+- Excellent habits: 18-20 points
+- Good habits: 14-17 points
+- Average habits: 10-13 points
+- Poor habits: 0-9 points
+
+Overall Score:
+- Excellent: 85-100 points
+- Good: 70-84 points
+- Average: 55-69 points
+- Needs Improvement: <55 points
+
+Implementation: src/utils/healthCalculations.ts
+Function: assessHealthyHabits()
+
+15. PREGNANCY SYMPTOMS CHECKER
+=============================
+
+Algorithm:
+----------
+Symptom Classification:
+- Normal: Common pregnancy symptoms
+- Monitor: Symptoms requiring attention
+- Urgent: Symptoms requiring immediate care
+
+Risk Assessment Matrix:
+- Symptom severity (1-10)
+- Gestational week relevance
+- Associated symptoms
+- Previous pregnancy history
+
+Warning Signs:
+- Severe bleeding
+- Severe abdominal pain
+- Persistent vomiting
+- Severe headaches
+- Vision changes
+
+Implementation: src/utils/healthCalculations.ts
+Function: assessPregnancySymptoms()
+
+16. MEDICAL SPECIALTY GUIDE
+===========================
+
+Algorithm:
+----------
+Decision Tree Based System:
+1. Primary symptom analysis
+2. Body system identification
+3. Severity assessment
+4. Duration evaluation
+5. Associated symptoms
+
+Specialty Mapping:
+- Symptom patterns → Medical specialty
+- Urgency level determination
+- Question generation for doctor visit
+
+Emergency Detection:
+- Chest pain → Emergency/Cardiology
+- Severe headache → Emergency/Neurology
+- Difficulty breathing → Emergency/Pulmonology
+
+Implementation: src/utils/healthCalculations.ts
+Function: assessMedicalSpecialty()
+
+17. HEART DISEASE RISK
+=====================
+
+Algorithm:
+----------
+Framingham Risk Score Based:
+- Age factor
+- Gender factor
+- Total cholesterol
+- HDL cholesterol
+- Smoking status
+- Systolic blood pressure
+
+Additional Risk Factors:
+- Family history: +2 points
+- Diabetes: +3 points
+- Physical inactivity: +2 points
+- Obesity: +2 points
+- Stress: +2 points
+
+10-Year Risk Calculation:
+- Low: <10%
+- Moderate: 10-20%
+- High: >20%
+
+Implementation: src/components/health-tools/HeartDiseaseRisk.tsx
+
+18. INSULIN RESISTANCE TEST
+==========================
+
+Algorithm:
+----------
+HOMA-IR Estimation:
+- Based on clinical risk factors
+- BMI contribution
+- Waist circumference
+- Family history
+- Lifestyle factors
+
+Risk Scoring:
+- Age: Progressive increase after 35
+- BMI: Exponential increase >25
+- Waist circumference: Gender-specific thresholds
+- Activity level: Inverse relationship
+- Diet quality: Processed food penalty
+
+Risk Categories:
+- Low: 0-4 points
+- Moderate: 5-8 points
+- High: 9-12 points
+- Very High: 13+ points
+
+Implementation: src/components/health-tools/InsulinResistanceTest.tsx
+
+19. OSTEOPOROSIS RISK
+====================
+
+Algorithm:
+----------
+FRAX-Based Assessment:
+- Age factor (exponential after 50)
+- Gender (female higher risk)
+- BMI (inverse relationship)
+- Previous fractures
+- Family history
+- Smoking status
+- Alcohol consumption
+- Corticosteroid use
+
+Bone Density Estimation:
+- T-score equivalent estimation
+- Fracture risk calculation
+- Intervention threshold determination
+
+Risk Categories:
+- Low: <10% 10-year fracture risk
+- Moderate: 10-20%
+- High: 20-30%
+- Very High: >30%
+
+Implementation: src/components/health-tools/OsteoporosisRisk.tsx
+
+20. METABOLISM CALCULATOR
+========================
+
+Algorithm:
+----------
+Resting Metabolic Rate (RMR):
+- Mifflin-St Jeor equation (primary)
+- Harris-Benedict equation (backup)
+- Katch-McArdle (if body fat known)
+
+Metabolic Rate Assessment:
+- Age-adjusted standards
+- Gender-specific norms
+- Activity level adjustments
+
+Metabolic Health Scoring:
+- RMR vs predicted
+- Body composition factors
+- Thyroid function indicators
+
+Categories:
+- Fast metabolism: >110% predicted
+- Normal-fast: 95-110%
+- Normal: 85-95%
+- Slow: <85%
+
+Implementation: src/components/health-tools/MetabolismCalculator.tsx
+
+21. MALE FERTILITY CALCULATOR
+============================
+
+Algorithm:
+----------
+Fertility Index Calculation:
+- Age factor (optimal 25-35)
+- BMI impact (optimal 20-25)
+- Lifestyle factors
+- Environmental exposures
+- Medical history
+
+Scoring System:
+- Base score: 100 points
+- Age adjustments: ±30 points
+- BMI adjustments: ±25 points
+- Smoking: -30 points
+- Exercise: +15 points
+- Stress: -15 points
+- Heat exposure: -20 points
+
+Fertility Categories:
+- Excellent: 80-100 points
+- Good: 60-79 points
+- Average: 40-59 points
+- Below Average: 20-39 points
+- Poor: <20 points
+
+Implementation: src/components/health-tools/MaleFertilityCalculator.tsx
+
+22. MEDITATION TIMER
+===================
+
+Features:
+---------
+- Multiple session durations (5-30 minutes)
+- Different meditation themes:
+  * Focus & Attention
+  * Relaxation & Calm
+  * Sleep Preparation
+  * Energy Restoration
+
+Timer Functionality:
+- Progressive countdown
+- Visual progress indicator
+- Audio cues (configurable)
+- Session completion tracking
+
+Guided Instructions:
+- Theme-specific guidance
+- Breathing pattern instructions
+- Mindfulness techniques
+- Post-session recommendations
+
+Implementation: src/components/health-tools/MeditationTimer.tsx
+
+================================================================
+📊 SCORING SYSTEMS & VALIDATION / أنظمة التقييم والتحقق
+================================================================
+
+GENERAL VALIDATION RULES:
+=========================
+
+1. Input Validation:
+   - Age: 1-120 years
+   - Weight: 20-300 kg
+   - Height: 100-250 cm
+   - Blood pressure: 60-300 mmHg
+
+2. Error Handling:
+   - Invalid inputs: Show user-friendly messages
+   - Out-of-range values: Provide guidance
+   - Missing required fields: Highlight and prompt
+
+3. Result Accuracy:
+   - Use medically validated formulas
+   - Provide confidence intervals where applicable
+   - Include disclaimers for medical advice
+
+4. Cultural Considerations:
+   - BMI adjustments for different ethnicities
+   - Dietary recommendations for local cuisine
+   - Cultural sensitivity in health messaging
+
+================================================================
+🔧 TECHNICAL IMPLEMENTATION / التنفيذ التقني
+================================================================
+
+ARCHITECTURE:
+============
+
+1. Core Calculation Engine:
+   - Location: src/utils/healthCalculations.ts
+   - Pure functions for calculations
+   - TypeScript interfaces for data structures
+   - Comprehensive error handling
+
+2. Component Structure:
+   - Individual tool components in src/components/health-tools/
+   - Shared UI components from shadcn/ui
+   - Consistent styling with Tailwind CSS
+   - Responsive design for mobile/desktop
+
+3. Data Flow:
+   - Form inputs → Validation → Calculation → Results display
+   - State management with React hooks
+   - Real-time calculations where appropriate
+
+4. Analytics Integration:
+   - Umami event tracking for tool usage
+   - Performance monitoring
+   - User engagement metrics
+
+FILE STRUCTURE:
+==============
+
+/src
+├── components/
+│   └── health-tools/
+│       ├── BMICalculator.tsx
+│       ├── CalorieCalculator.tsx
+│       ├── WaterCalculator.tsx
+│       ├── HeartRateCalculator.tsx
+│       ├── PregnancyCalculator.tsx
+│       ├── OvulationCalculator.tsx
+│       ├── AnxietyAssessment.tsx
+│       ├── DentalHealthChecker.tsx
+│       ├── DentalVisitUrgency.tsx
+│       ├── BreathingExercises.tsx
+│       ├── WaistRatioCalculator.tsx
+│       ├── StepsCaloriesCalculator.tsx
+│       ├── BloodPressureRisk.tsx
+│       ├── HealthyHabitsScore.tsx
+│       ├── PregnancySymptomsChecker.tsx
+│       ├── MedicalSpecialtyGuide.tsx
+│       ├── HeartDiseaseRisk.tsx
+│       ├── InsulinResistanceTest.tsx
+│       ├── OsteoporosisRisk.tsx
+│       ├── MetabolismCalculator.tsx
+│       ├── MaleFertilityCalculator.tsx
+│       └── MeditationTimer.tsx
+├── utils/
+│   └── healthCalculations.ts
+├── types/
+│   └── healthTools.ts
+└── hooks/
+    └── useAnalytics.ts
+
+================================================================
+📝 MEDICAL DISCLAIMERS / إخلاء المسؤولية الطبية
+================================================================
+
+IMPORTANT DISCLAIMERS:
+=====================
+
+1. Educational Purpose Only:
+   - All tools are for educational and informational purposes
+   - Not a substitute for professional medical advice
+   - Results should not be used for self-diagnosis
+
+2. Professional Consultation:
+   - Always consult healthcare providers for medical decisions
+   - Individual health needs may vary significantly
+   - Tools provide general guidance only
+
+3. Accuracy Limitations:
+   - Calculations based on general population data
+   - Individual variations not fully accounted for
+   - External factors may affect accuracy
+
+4. Emergency Situations:
+   - Seek immediate medical attention for emergencies
+   - Do not rely on tools for urgent health decisions
+   - Contact emergency services when appropriate
+
+================================================================
+🔄 MAINTENANCE & UPDATES / الصيانة والتحديثات
+================================================================
+
+REGULAR MAINTENANCE:
+===================
+
+1. Algorithm Updates:
+   - Review medical literature quarterly
+   - Update calculation methods as needed
+   - Validate against current medical standards
+
+2. User Experience:
+   - Monitor user feedback and analytics
+   - Improve tool accuracy and usability
+   - Add new features based on user needs
+
+3. Technical Maintenance:
+   - Regular code reviews and refactoring
+   - Performance optimization
+   - Security updates and patches
+
+4. Content Updates:
+   - Update medical recommendations
+   - Refresh educational content
+   - Translate content for multiple languages
+
+================================================================
+📞 SUPPORT & RESOURCES / الدعم والموارد
+================================================================
+
+For technical support or medical questions:
+Email: info@taafi-clinics.com
+Phone: +201119007403
+
+Medical References:
+- World Health Organization (WHO) guidelines
+- American Heart Association recommendations
+- International medical research publications
+- Local health ministry guidelines
+
+================================================================
+END OF DOCUMENTATION / نهاية التوثيق
+================================================================
+
+Last Updated: 2025-01-17
+Version: 1.0
+Author: Taafi Clinics Development Team
