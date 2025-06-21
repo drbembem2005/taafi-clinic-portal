@@ -1,11 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getDoctors, getDoctorsBySpecialtyId, Doctor, getDoctorSchedule } from '@/services/doctorService';
 import { getSpecialties, Specialty } from '@/services/specialtyService';
 import DoctorCard from '@/components/shared/DoctorCard';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -163,38 +161,50 @@ const Doctors = () => {
   console.log(`Filtered doctors for day ${selectedDay}:`, filteredDoctors);
 
   const FilterContent = () => (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="specialty" className="text-gray-700">تصفية حسب التخصص</Label>
-        <Select value={selectedSpecialty} onValueChange={handleSpecialtyChange}>
-          <SelectTrigger className="border-gray-300">
-            <SelectValue placeholder="جميع التخصصات" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">جميع التخصصات</SelectItem>
-            {specialties.map((specialty) => (
-              <SelectItem key={specialty.id} value={specialty.name}>
-                {specialty.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+    <div className="space-y-8">
+      <div className="space-y-4">
+        <Label className="text-lg font-semibold text-gray-800">تصفية حسب التخصص</Label>
+        <div className="space-y-2">
+          <div 
+            className={`flex items-center justify-between p-4 border-b border-gray-200 cursor-pointer ${selectedSpecialty === "all" ? 'bg-blue-50' : ''}`}
+            onClick={() => handleSpecialtyChange("all")}
+          >
+            <span className="text-gray-700">جميع التخصصات</span>
+            <div className={`w-5 h-5 rounded-full border-2 ${selectedSpecialty === "all" ? 'border-blue-500 bg-blue-500' : 'border-gray-300'} flex items-center justify-center`}>
+              {selectedSpecialty === "all" && <div className="w-2 h-2 bg-white rounded-full"></div>}
+            </div>
+          </div>
+          {specialties.map((specialty) => (
+            <div 
+              key={specialty.id}
+              className={`flex items-center justify-between p-4 border-b border-gray-200 cursor-pointer ${selectedSpecialty === specialty.name ? 'bg-blue-50' : ''}`}
+              onClick={() => handleSpecialtyChange(specialty.name)}
+            >
+              <span className="text-gray-700">{specialty.name}</span>
+              <div className={`w-5 h-5 rounded-full border-2 ${selectedSpecialty === specialty.name ? 'border-blue-500 bg-blue-500' : 'border-gray-300'} flex items-center justify-center`}>
+                {selectedSpecialty === specialty.name && <div className="w-2 h-2 bg-white rounded-full"></div>}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="day" className="text-gray-700">تصفية حسب اليوم</Label>
-        <Select value={selectedDay} onValueChange={handleDayChange}>
-          <SelectTrigger className="border-gray-300">
-            <SelectValue placeholder="جميع الأيام" />
-          </SelectTrigger>
-          <SelectContent>
-            {daysOfWeek.map((day) => (
-              <SelectItem key={day.value} value={day.value}>
-                {day.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="space-y-4">
+        <Label className="text-lg font-semibold text-gray-800">تصفية حسب اليوم</Label>
+        <div className="space-y-2">
+          {daysOfWeek.map((day) => (
+            <div 
+              key={day.value}
+              className={`flex items-center justify-between p-4 border-b border-gray-200 cursor-pointer ${selectedDay === day.value ? 'bg-blue-50' : ''}`}
+              onClick={() => handleDayChange(day.value)}
+            >
+              <span className="text-gray-700">{day.label}</span>
+              <div className={`w-5 h-5 rounded-full border-2 ${selectedDay === day.value ? 'border-blue-500 bg-blue-500' : 'border-gray-300'} flex items-center justify-center`}>
+                {selectedDay === day.value && <div className="w-2 h-2 bg-white rounded-full"></div>}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -231,17 +241,17 @@ const Doctors = () => {
                   <Calendar className="w-4 h-4" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="h-[400px]">
+              <SheetContent side="bottom" className="h-[70vh] bg-gray-800 text-white">
                 <SheetHeader>
-                  <SheetTitle>تصفية الأطباء</SheetTitle>
+                  <SheetTitle className="text-white text-center">تصفية الأطباء</SheetTitle>
                 </SheetHeader>
-                <div className="mt-6">
+                <div className="mt-6 overflow-y-auto h-full pb-20">
                   <FilterContent />
                 </div>
-                <div className="mt-6">
+                <div className="absolute bottom-4 left-4 right-4">
                   <Button 
                     onClick={() => setIsFilterOpen(false)} 
-                    className="w-full bg-brand hover:bg-brand-dark"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     تطبيق التصفية
                   </Button>
@@ -250,10 +260,39 @@ const Doctors = () => {
             </Sheet>
           </div>
         ) : (
-          // Desktop Filter
+          // Desktop Filter - keeping existing Select components
           <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-6 border">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FilterContent />
+              <div className="space-y-2">
+                <Label htmlFor="specialty" className="text-gray-700">تصفية حسب التخصص</Label>
+                <select 
+                  value={selectedSpecialty} 
+                  onChange={(e) => handleSpecialtyChange(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="all">جميع التخصصات</option>
+                  {specialties.map((specialty) => (
+                    <option key={specialty.id} value={specialty.name}>
+                      {specialty.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="day" className="text-gray-700">تصفية حسب اليوم</Label>
+                <select 
+                  value={selectedDay} 
+                  onChange={(e) => handleDayChange(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  {daysOfWeek.map((day) => (
+                    <option key={day.value} value={day.value}>
+                      {day.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
         )}
