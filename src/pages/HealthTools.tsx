@@ -29,7 +29,6 @@ import {
   AlertTriangle,
   Trophy,
   User,
-  Shield,
   Syringe,
   Dna
 } from 'lucide-react';
@@ -360,14 +359,6 @@ const healthTools: HealthTool[] = [
     icon: Syringe,
     category: 'guidance',
     keywords: ['تطعيمات', 'vaccination', 'أطفال', 'مناعة', 'لقاحات']
-  },
-  {
-    id: 'medication-dosage',
-    title: 'حاسبة الجرعة الآمنة للأطفال',
-    description: 'احسب الجرعة الآمنة من الأدوية للأطفال حسب الوزن والعمر',
-    icon: Shield,
-    category: 'guidance',
-    keywords: ['جرعة', 'دواء', 'أطفال', 'أمان', 'باراسيتامول']
   },
   {
     id: 'blood-type-predictor',
