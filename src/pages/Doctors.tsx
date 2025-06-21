@@ -114,11 +114,27 @@ const Doctors = () => {
   }, [selectedSpecialty, specialties]);
 
   const handleSpecialtyChange = (value: string) => {
+    console.log("Specialty changed to:", value);
     setSelectedSpecialty(value);
   };
 
   const handleDayChange = (value: string) => {
+    console.log("Day changed to:", value);
     setSelectedDay(value);
+  };
+
+  // Map day names to schedule keys
+  const mapDayToScheduleKey = (dayValue: string): string => {
+    const dayMapping = {
+      "saturday": "Sat",
+      "sunday": "Sun", 
+      "monday": "Mon",
+      "tuesday": "Tue",
+      "wednesday": "Wed",
+      "thursday": "Thu",
+      "friday": "Fri"
+    };
+    return dayMapping[dayValue as keyof typeof dayMapping] || dayValue;
   };
 
   // Format doctors with their specialties for display
@@ -136,8 +152,15 @@ const Doctors = () => {
     ? formattedDoctors 
     : formattedDoctors.filter(doctor => {
         const schedule = doctor.schedule;
-        return schedule && schedule[selectedDay] && schedule[selectedDay].length > 0;
+        const scheduleKey = mapDayToScheduleKey(selectedDay);
+        console.log(`Filtering doctor ${doctor.name} for day ${selectedDay} (key: ${scheduleKey})`);
+        console.log(`Doctor schedule:`, schedule);
+        const hasScheduleForDay = schedule && schedule[scheduleKey] && schedule[scheduleKey].length > 0;
+        console.log(`Has schedule for day: ${hasScheduleForDay}`);
+        return hasScheduleForDay;
       });
+
+  console.log(`Filtered doctors for day ${selectedDay}:`, filteredDoctors);
 
   const FilterContent = () => (
     <div className="space-y-6">
