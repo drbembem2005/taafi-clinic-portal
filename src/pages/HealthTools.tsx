@@ -150,6 +150,22 @@ const healthTools: HealthTool[] = [
     category: 'calculation',
     keywords: ['عضلات', 'muscle', 'كتلة', 'قوة']
   },
+  {
+    id: 'vaccination-schedule',
+    title: 'حاسبة مواعيد تطعيمات الأطفال',
+    description: 'جدول التطعيمات الإجبارية والاختيارية للأطفال حسب العمر في مصر',
+    icon: Syringe,
+    category: 'calculation',
+    keywords: ['تطعيمات', 'vaccination', 'أطفال', 'مناعة', 'لقاحات']
+  },
+  {
+    id: 'blood-type-predictor',
+    title: 'حاسبة فصيلة الدم للأطفال',
+    description: 'تنبؤ علمي بفصائل الدم المحتملة للطفل بناءً على فصيلة الوالدين',
+    icon: Dna,
+    category: 'calculation',
+    keywords: ['فصيلة دم', 'blood type', 'وراثة', 'جينات', 'أطفال']
+  },
 
   // Health Risk Assessments
   {
@@ -349,24 +365,6 @@ const healthTools: HealthTool[] = [
     icon: Stethoscope,
     category: 'guidance',
     keywords: ['تخصص', 'specialty', 'أعراض', 'طبيب']
-  },
-
-  // NEW: Pediatric Health Tools
-  {
-    id: 'vaccination-schedule',
-    title: 'حاسبة مواعيد تطعيمات الأطفال',
-    description: 'جدول التطعيمات الإجبارية والاختيارية للأطفال حسب العمر في مصر',
-    icon: Syringe,
-    category: 'guidance',
-    keywords: ['تطعيمات', 'vaccination', 'أطفال', 'مناعة', 'لقاحات']
-  },
-  {
-    id: 'blood-type-predictor',
-    title: 'حاسبة فصيلة الدم للأطفال',
-    description: 'تنبؤ علمي بفصائل الدم المحتملة للطفل بناءً على فصيلة الوالدين',
-    icon: Dna,
-    category: 'guidance',
-    keywords: ['فصيلة دم', 'blood type', 'وراثة', 'جينات', 'أطفال']
   }
 ];
 
