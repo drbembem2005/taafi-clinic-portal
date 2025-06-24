@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getDoctors, getDoctorsBySpecialtyId, Doctor, getDoctorSchedule } from '@/services/doctorService';
@@ -26,8 +25,7 @@ const Doctors = () => {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [page, setPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
+  const [displayedCount, setDisplayedCount] = useState(5);
 
   const DOCTORS_PER_PAGE = 5;
 
@@ -69,7 +67,7 @@ const Doctors = () => {
     fetchSpecialties();
   }, []);
 
-  // Fetch all doctors and initialize with random 5
+  // Fetch all doctors
   useEffect(() => {
     const fetchAllDoctors = async () => {
       setLoading(true);
@@ -84,23 +82,25 @@ const Doctors = () => {
             console.log(`Fetched doctors by specialty (${specialty.name}):`, fetchedDoctors);
           }
         } else {
-          // For initial load, get 5 random doctors first
-          if (page === 0) {
-            fetchedDoctors = await getDoctors(DOCTORS_PER_PAGE, true);
-            console.log("Fetched initial random doctors:", fetchedDoctors);
-          } else {
-            // For subsequent loads, get all doctors
-            fetchedDoctors = await getDoctors();
-            console.log("Fetched all doctors:", fetchedDoctors);
-          }
+          // Get 5 random doctors first, then all doctors
+          const randomDoctors = await getDoctors(5, true);
+          const allDoctorsData = await getDoctors();
+          
+          // Combine random doctors first, then add remaining doctors
+          const remainingDoctors = allDoctorsData.filter(
+            doctor => !randomDoctors.some(randomDoc => randomDoc.id === doctor.id)
+          );
+          
+          fetchedDoctors = [...randomDoctors, ...remainingDoctors];
+          console.log("Fetched doctors (random first):", fetchedDoctors);
         }
         
         setAllDoctors(fetchedDoctors);
+        setDisplayedCount(5);
         
-        // Set initial doctors (first batch)
-        const initialDoctors = fetchedDoctors.slice(0, DOCTORS_PER_PAGE);
+        // Set initial doctors (first 5)
+        const initialDoctors = fetchedDoctors.slice(0, 5);
         setDoctors(initialDoctors);
-        setHasMore(fetchedDoctors.length > DOCTORS_PER_PAGE);
         
         // Fetch schedules for initial doctors only
         const schedules: Record<number, Record<string, string[]>> = {};
@@ -126,7 +126,6 @@ const Doctors = () => {
     };
 
     if (specialties.length > 0) {
-      setPage(0);
       setDoctors([]);
       setAllDoctors([]);
       setDoctorSchedules({});
@@ -136,33 +135,27 @@ const Doctors = () => {
 
   // Load more doctors function
   const loadMoreDoctors = useCallback(async () => {
-    if (loadingMore || !hasMore) return;
+    if (loadingMore || displayedCount >= allDoctors.length) return;
 
     setLoadingMore(true);
     try {
-      const nextPage = page + 1;
-      const startIndex = nextPage * DOCTORS_PER_PAGE;
-      const endIndex = startIndex + DOCTORS_PER_PAGE;
+      const nextBatch = allDoctors.slice(displayedCount, displayedCount + DOCTORS_PER_PAGE);
       
-      const nextDoctors = allDoctors.slice(startIndex, endIndex);
-      
-      if (nextDoctors.length === 0) {
-        setHasMore(false);
+      if (nextBatch.length === 0) {
         setLoadingMore(false);
         return;
       }
 
       // Fetch schedules for new doctors
       const newSchedules: Record<number, Record<string, string[]>> = {};
-      for (const doctor of nextDoctors) {
+      for (const doctor of nextBatch) {
         const doctorSchedule = await getDoctorSchedule(doctor.id);
         newSchedules[doctor.id] = doctorSchedule;
       }
 
-      setDoctors(prev => [...prev, ...nextDoctors]);
+      setDoctors(prev => [...prev, ...nextBatch]);
       setDoctorSchedules(prev => ({ ...prev, ...newSchedules }));
-      setPage(nextPage);
-      setHasMore(endIndex < allDoctors.length);
+      setDisplayedCount(prev => prev + DOCTORS_PER_PAGE);
       
     } catch (error) {
       console.error("Error loading more doctors:", error);
@@ -174,7 +167,7 @@ const Doctors = () => {
     } finally {
       setLoadingMore(false);
     }
-  }, [page, allDoctors, loadingMore, hasMore]);
+  }, [displayedCount, allDoctors, loadingMore]);
 
   // Infinite scroll effect
   useEffect(() => {
@@ -301,6 +294,8 @@ const Doctors = () => {
     setSelectedSpecialty("all");
     setSelectedDay("all");
   };
+
+  const hasMoreToLoad = displayedCount < allDoctors.length;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -477,7 +472,7 @@ const Doctors = () => {
           <div className="text-center mb-4">
             <p className="text-gray-600 text-lg">
               عرض <span className="font-bold text-brand">{filteredDoctors.length}</span> من {allDoctors.length} طبيب
-              {hasMore && !hasActiveFilters && (
+              {hasMoreToLoad && !hasActiveFilters && (
                 <span className="text-sm text-gray-500 block mt-1">
                   (يتم تحميل المزيد تلقائياً عند التمرير)
                 </span>
@@ -506,7 +501,7 @@ const Doctors = () => {
           )}
           
           {/* Load more button (fallback for infinite scroll) */}
-          {hasMore && !loadingMore && !hasActiveFilters && (
+          {hasMoreToLoad && !loadingMore && !hasActiveFilters && (
             <div className="flex justify-center py-8">
               <Button 
                 onClick={loadMoreDoctors}
