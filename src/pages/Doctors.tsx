@@ -4,6 +4,7 @@ import { getDoctors, getDoctorsBySpecialtyId, Doctor, getDoctorSchedule } from '
 import { getSpecialties, Specialty } from '@/services/specialtyService';
 import DoctorCard from '@/components/shared/DoctorCard';
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -162,49 +163,44 @@ const Doctors = () => {
 
   const FilterContent = () => (
     <div className="space-y-8">
-      <div className="space-y-4">
-        <Label className="text-lg font-semibold text-gray-800">تصفية حسب التخصص</Label>
-        <div className="space-y-2">
-          <div 
-            className={`flex items-center justify-between p-4 border-b border-gray-200 cursor-pointer ${selectedSpecialty === "all" ? 'bg-blue-50' : ''}`}
-            onClick={() => handleSpecialtyChange("all")}
-          >
-            <span className="text-gray-700">جميع التخصصات</span>
-            <div className={`w-5 h-5 rounded-full border-2 ${selectedSpecialty === "all" ? 'border-blue-500 bg-blue-500' : 'border-gray-300'} flex items-center justify-center`}>
-              {selectedSpecialty === "all" && <div className="w-2 h-2 bg-white rounded-full"></div>}
-            </div>
+      <div className="space-y-6">
+        <Label className="text-xl font-bold text-brand flex items-center gap-2">
+          <Filter className="w-5 h-5" />
+          تصفية حسب التخصص
+        </Label>
+        <RadioGroup value={selectedSpecialty} onValueChange={handleSpecialtyChange} className="space-y-3">
+          <div className="flex items-center space-x-3 p-4 rounded-lg border border-gray-200 hover:border-brand/30 hover:bg-blue-50/50 transition-all cursor-pointer">
+            <RadioGroupItem value="all" id="specialty-all" className="border-brand text-brand" />
+            <Label htmlFor="specialty-all" className="text-gray-800 font-medium cursor-pointer flex-1">
+              جميع التخصصات
+            </Label>
           </div>
           {specialties.map((specialty) => (
-            <div 
-              key={specialty.id}
-              className={`flex items-center justify-between p-4 border-b border-gray-200 cursor-pointer ${selectedSpecialty === specialty.name ? 'bg-blue-50' : ''}`}
-              onClick={() => handleSpecialtyChange(specialty.name)}
-            >
-              <span className="text-gray-700">{specialty.name}</span>
-              <div className={`w-5 h-5 rounded-full border-2 ${selectedSpecialty === specialty.name ? 'border-blue-500 bg-blue-500' : 'border-gray-300'} flex items-center justify-center`}>
-                {selectedSpecialty === specialty.name && <div className="w-2 h-2 bg-white rounded-full"></div>}
-              </div>
+            <div key={specialty.id} className="flex items-center space-x-3 p-4 rounded-lg border border-gray-200 hover:border-brand/30 hover:bg-blue-50/50 transition-all cursor-pointer">
+              <RadioGroupItem value={specialty.name} id={`specialty-${specialty.id}`} className="border-brand text-brand" />
+              <Label htmlFor={`specialty-${specialty.id}`} className="text-gray-800 font-medium cursor-pointer flex-1">
+                {specialty.name}
+              </Label>
             </div>
           ))}
-        </div>
+        </RadioGroup>
       </div>
 
-      <div className="space-y-4">
-        <Label className="text-lg font-semibold text-gray-800">تصفية حسب اليوم</Label>
-        <div className="space-y-2">
+      <div className="space-y-6">
+        <Label className="text-xl font-bold text-brand flex items-center gap-2">
+          <Calendar className="w-5 h-5" />
+          تصفية حسب اليوم
+        </Label>
+        <RadioGroup value={selectedDay} onValueChange={handleDayChange} className="space-y-3">
           {daysOfWeek.map((day) => (
-            <div 
-              key={day.value}
-              className={`flex items-center justify-between p-4 border-b border-gray-200 cursor-pointer ${selectedDay === day.value ? 'bg-blue-50' : ''}`}
-              onClick={() => handleDayChange(day.value)}
-            >
-              <span className="text-gray-700">{day.label}</span>
-              <div className={`w-5 h-5 rounded-full border-2 ${selectedDay === day.value ? 'border-blue-500 bg-blue-500' : 'border-gray-300'} flex items-center justify-center`}>
-                {selectedDay === day.value && <div className="w-2 h-2 bg-white rounded-full"></div>}
-              </div>
+            <div key={day.value} className="flex items-center space-x-3 p-4 rounded-lg border border-gray-200 hover:border-brand/30 hover:bg-blue-50/50 transition-all cursor-pointer">
+              <RadioGroupItem value={day.value} id={`day-${day.value}`} className="border-brand text-brand" />
+              <Label htmlFor={`day-${day.value}`} className="text-gray-800 font-medium cursor-pointer flex-1">
+                {day.label}
+              </Label>
             </div>
           ))}
-        </div>
+        </RadioGroup>
       </div>
     </div>
   );
@@ -235,23 +231,23 @@ const Doctors = () => {
           <div className="flex justify-center">
             <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
               <SheetTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2 bg-white shadow-sm border border-gray-300">
-                  <Filter className="w-4 h-4" />
+                <Button variant="outline" className="flex items-center gap-2 bg-white shadow-lg border-2 border-brand/20 hover:border-brand hover:bg-brand/5 text-brand font-semibold px-6 py-3 rounded-xl transition-all duration-200">
+                  <Filter className="w-5 h-5" />
                   تصفية النتائج
-                  <Calendar className="w-4 h-4" />
+                  <Calendar className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="bottom" className="h-[70vh] bg-gray-800 text-white">
-                <SheetHeader>
-                  <SheetTitle className="text-white text-center">تصفية الأطباء</SheetTitle>
+              <SheetContent side="bottom" className="h-[80vh] bg-white border-t-4 border-brand">
+                <SheetHeader className="border-b border-gray-100 pb-4 mb-6">
+                  <SheetTitle className="text-brand text-2xl font-bold text-center">تصفية الأطباء</SheetTitle>
                 </SheetHeader>
-                <div className="mt-6 overflow-y-auto h-full pb-20">
+                <div className="overflow-y-auto h-full pb-24">
                   <FilterContent />
                 </div>
                 <div className="absolute bottom-4 left-4 right-4">
                   <Button 
                     onClick={() => setIsFilterOpen(false)} 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    className="w-full bg-brand hover:bg-brand-dark text-white font-semibold py-4 rounded-xl shadow-lg transition-all duration-200"
                   >
                     تطبيق التصفية
                   </Button>
@@ -260,15 +256,18 @@ const Doctors = () => {
             </Sheet>
           </div>
         ) : (
-          // Desktop Filter - keeping existing Select components
-          <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-6 border">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="specialty" className="text-gray-700">تصفية حسب التخصص</Label>
+          // Desktop Filter - enhanced styling
+          <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-100 hover:border-brand/20 transition-all duration-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <Label htmlFor="specialty" className="text-lg font-bold text-brand flex items-center gap-2">
+                  <Filter className="w-5 h-5" />
+                  تصفية حسب التخصص
+                </Label>
                 <select 
                   value={selectedSpecialty} 
                   onChange={(e) => handleSpecialtyChange(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-brand focus:border-brand bg-white font-medium text-gray-700 hover:border-brand/50 transition-all duration-200"
                 >
                   <option value="all">جميع التخصصات</option>
                   {specialties.map((specialty) => (
@@ -279,12 +278,15 @@ const Doctors = () => {
                 </select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="day" className="text-gray-700">تصفية حسب اليوم</Label>
+              <div className="space-y-4">
+                <Label htmlFor="day" className="text-lg font-bold text-brand flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  تصفية حسب اليوم
+                </Label>
                 <select 
                   value={selectedDay} 
                   onChange={(e) => handleDayChange(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-brand focus:border-brand bg-white font-medium text-gray-700 hover:border-brand/50 transition-all duration-200"
                 >
                   {daysOfWeek.map((day) => (
                     <option key={day.value} value={day.value}>
@@ -318,8 +320,8 @@ const Doctors = () => {
           className="space-y-6"
         >
           <div className="text-center mb-4">
-            <p className="text-gray-600">
-              عرض {filteredDoctors.length} من {formattedDoctors.length} طبيب
+            <p className="text-gray-600 text-lg">
+              عرض <span className="font-bold text-brand">{filteredDoctors.length}</span> من {formattedDoctors.length} طبيب
             </p>
           </div>
           {filteredDoctors.map((doctor, index) => (
