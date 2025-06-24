@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getDoctors, getDoctorsBySpecialtyId, Doctor, getDoctorSchedule } from '@/services/doctorService';
 import { getSpecialties, Specialty } from '@/services/specialtyService';
@@ -10,19 +11,25 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
-import { Filter, Calendar, X, Tag } from 'lucide-react';
+import { Filter, Calendar, X, Tag, Loader2 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const Doctors = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [allDoctors, setAllDoctors] = useState<Doctor[]>([]);
   const [doctorSchedules, setDoctorSchedules] = useState<Record<number, Record<string, string[]>>>({});
   const [specialties, setSpecialties] = useState<Specialty[]>([]);
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>("all");
   const [selectedDay, setSelectedDay] = useState<string>("all");
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+
+  const DOCTORS_PER_PAGE = 5;
 
   const daysOfWeek = [
     { value: "all", label: "جميع الأيام" },
@@ -62,38 +69,49 @@ const Doctors = () => {
     fetchSpecialties();
   }, []);
 
-  // Fetch doctors based on selected specialty
+  // Fetch all doctors and initialize with random 5
   useEffect(() => {
-    const fetchDoctors = async () => {
+    const fetchAllDoctors = async () => {
       setLoading(true);
       
       try {
         let fetchedDoctors: Doctor[] = [];
         
         if (selectedSpecialty && selectedSpecialty !== "all") {
-          // Find specialty ID by name
           const specialty = specialties.find(s => s.name === selectedSpecialty);
           if (specialty) {
             fetchedDoctors = await getDoctorsBySpecialtyId(specialty.id);
             console.log(`Fetched doctors by specialty (${specialty.name}):`, fetchedDoctors);
           }
         } else {
-          fetchedDoctors = await getDoctors();
-          console.log("Fetched all doctors:", fetchedDoctors);
+          // For initial load, get 5 random doctors first
+          if (page === 0) {
+            fetchedDoctors = await getDoctors(DOCTORS_PER_PAGE, true);
+            console.log("Fetched initial random doctors:", fetchedDoctors);
+          } else {
+            // For subsequent loads, get all doctors
+            fetchedDoctors = await getDoctors();
+            console.log("Fetched all doctors:", fetchedDoctors);
+          }
         }
         
-        setDoctors(fetchedDoctors);
+        setAllDoctors(fetchedDoctors);
         
-        // Fetch schedules for all doctors
+        // Set initial doctors (first batch)
+        const initialDoctors = fetchedDoctors.slice(0, DOCTORS_PER_PAGE);
+        setDoctors(initialDoctors);
+        setHasMore(fetchedDoctors.length > DOCTORS_PER_PAGE);
+        
+        // Fetch schedules for initial doctors only
         const schedules: Record<number, Record<string, string[]>> = {};
-        for (const doctor of fetchedDoctors) {
+        for (const doctor of initialDoctors) {
           console.log(`Fetching schedule for doctor: ${doctor.name} (ID: ${doctor.id})`);
           const doctorSchedule = await getDoctorSchedule(doctor.id);
           console.log(`Schedule for doctor ${doctor.name}:`, doctorSchedule);
           schedules[doctor.id] = doctorSchedule;
         }
         setDoctorSchedules(schedules);
-        console.log("All doctor schedules:", schedules);
+        console.log("Initial doctor schedules:", schedules);
         
       } catch (error) {
         console.error("Error fetching doctors:", error);
@@ -108,9 +126,70 @@ const Doctors = () => {
     };
 
     if (specialties.length > 0) {
-      fetchDoctors();
+      setPage(0);
+      setDoctors([]);
+      setAllDoctors([]);
+      setDoctorSchedules({});
+      fetchAllDoctors();
     }
   }, [selectedSpecialty, specialties]);
+
+  // Load more doctors function
+  const loadMoreDoctors = useCallback(async () => {
+    if (loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const startIndex = nextPage * DOCTORS_PER_PAGE;
+      const endIndex = startIndex + DOCTORS_PER_PAGE;
+      
+      const nextDoctors = allDoctors.slice(startIndex, endIndex);
+      
+      if (nextDoctors.length === 0) {
+        setHasMore(false);
+        setLoadingMore(false);
+        return;
+      }
+
+      // Fetch schedules for new doctors
+      const newSchedules: Record<number, Record<string, string[]>> = {};
+      for (const doctor of nextDoctors) {
+        const doctorSchedule = await getDoctorSchedule(doctor.id);
+        newSchedules[doctor.id] = doctorSchedule;
+      }
+
+      setDoctors(prev => [...prev, ...nextDoctors]);
+      setDoctorSchedules(prev => ({ ...prev, ...newSchedules }));
+      setPage(nextPage);
+      setHasMore(endIndex < allDoctors.length);
+      
+    } catch (error) {
+      console.error("Error loading more doctors:", error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء تحميل المزيد من الأطباء",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [page, allDoctors, loadingMore, hasMore]);
+
+  // Infinite scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop + 1000 >= 
+        document.documentElement.scrollHeight
+      ) {
+        loadMoreDoctors();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loadMoreDoctors]);
 
   const handleSpecialtyChange = (value: string) => {
     console.log("Specialty changed to:", value);
@@ -378,7 +457,7 @@ const Doctors = () => {
       
       {loading ? (
         <div className="space-y-6">
-          {[...Array(3)].map((_, index) => (
+          {[...Array(5)].map((_, index) => (
             <Skeleton key={index} className="h-48 w-full rounded-lg" />
           ))}
         </div>
@@ -397,7 +476,12 @@ const Doctors = () => {
         >
           <div className="text-center mb-4">
             <p className="text-gray-600 text-lg">
-              عرض <span className="font-bold text-brand">{filteredDoctors.length}</span> من {formattedDoctors.length} طبيب
+              عرض <span className="font-bold text-brand">{filteredDoctors.length}</span> من {allDoctors.length} طبيب
+              {hasMore && !hasActiveFilters && (
+                <span className="text-sm text-gray-500 block mt-1">
+                  (يتم تحميل المزيد تلقائياً عند التمرير)
+                </span>
+              )}
             </p>
           </div>
           {filteredDoctors.map((doctor, index) => (
@@ -412,6 +496,27 @@ const Doctors = () => {
               <DoctorCard doctor={doctor} />
             </motion.div>
           ))}
+          
+          {/* Loading more indicator */}
+          {loadingMore && (
+            <div className="flex justify-center items-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-brand mr-2" />
+              <span className="text-brand font-medium">جاري تحميل المزيد من الأطباء...</span>
+            </div>
+          )}
+          
+          {/* Load more button (fallback for infinite scroll) */}
+          {hasMore && !loadingMore && !hasActiveFilters && (
+            <div className="flex justify-center py-8">
+              <Button 
+                onClick={loadMoreDoctors}
+                variant="outline"
+                className="bg-white border-2 border-brand text-brand hover:bg-brand hover:text-white transition-all duration-200"
+              >
+                تحميل المزيد من الأطباء
+              </Button>
+            </div>
+          )}
         </motion.div>
       ) : (
         <motion.div 
