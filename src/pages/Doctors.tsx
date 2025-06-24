@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
-import { Filter, Calendar } from 'lucide-react';
+import { Filter, Calendar, X, Tag } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const Doctors = () => {
@@ -205,6 +205,24 @@ const Doctors = () => {
     </div>
   );
 
+  // Get display text for selected filters
+  const getSelectedSpecialtyText = () => {
+    if (selectedSpecialty === "all") return "جميع التخصصات";
+    return selectedSpecialty;
+  };
+
+  const getSelectedDayText = () => {
+    const day = daysOfWeek.find(d => d.value === selectedDay);
+    return day ? day.label : "جميع الأيام";
+  };
+
+  const hasActiveFilters = selectedSpecialty !== "all" || selectedDay !== "all";
+
+  const clearFilters = () => {
+    setSelectedSpecialty("all");
+    setSelectedDay("all");
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <motion.div 
@@ -299,6 +317,64 @@ const Doctors = () => {
           </div>
         )}
       </motion.div>
+      
+      {/* Selected Filters Display */}
+      {hasActiveFilters && (
+        <motion.div 
+          className="mb-6"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Tag className="w-4 h-4 text-brand" />
+                <span className="text-sm font-semibold text-brand">الفلاتر المحددة:</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearFilters}
+                className="text-gray-500 hover:text-brand hover:bg-blue-100 text-xs px-2 py-1 h-auto"
+              >
+                مسح الكل
+                <X className="w-3 h-3 mr-1" />
+              </Button>
+            </div>
+            
+            <div className="flex flex-wrap gap-2">
+              {selectedSpecialty !== "all" && (
+                <div className="inline-flex items-center gap-1 bg-white border border-blue-300 rounded-lg px-3 py-1.5 text-sm">
+                  <Filter className="w-3 h-3 text-brand" />
+                  <span className="text-gray-700 font-medium">التخصص:</span>
+                  <span className="text-brand font-semibold">{getSelectedSpecialtyText()}</span>
+                  <button
+                    onClick={() => setSelectedSpecialty("all")}
+                    className="mr-1 text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+              
+              {selectedDay !== "all" && (
+                <div className="inline-flex items-center gap-1 bg-white border border-blue-300 rounded-lg px-3 py-1.5 text-sm">
+                  <Calendar className="w-3 h-3 text-brand" />
+                  <span className="text-gray-700 font-medium">اليوم:</span>
+                  <span className="text-brand font-semibold">{getSelectedDayText()}</span>
+                  <button
+                    onClick={() => setSelectedDay("all")}
+                    className="mr-1 text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      )}
       
       {loading ? (
         <div className="space-y-6">
